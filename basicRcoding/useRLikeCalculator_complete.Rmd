@@ -1,0 +1,250 @@
+---
+title: 'Using R like a calculator'
+author: "Adam Dede"
+date: "2024-03-19"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+
+
+
+```
+
+# Using R like a calculator
+```{r doing basic math operations}
+
+#addition
+1 + 1
+
+#subtraction
+5-2
+
+#multiplication
+3*5
+
+#division
+7/2
+
+#modulo
+7%%2
+
+
+```
+
+# Use R to write out algebraic formulas and solve
+
+
+```{r algebra example}
+#basic algebra
+#can you solve 15 = x*3 ? 
+x = # try out an answer
+
+#test your answer
+x*3
+
+
+```
+
+# Exponents are a bit more complex but easy to use in R
+
+```{r exponents}
+#exponents
+3^2
+
+#law of exponents
+3^2 * 3^4
+
+3^(2+4)
+
+#negative exponents mean reciprocal 
+3^-1
+
+1/3
+
+
+
+```
+
+# R can allow you to do many computations at once
+
+```{r vectorization}
+#using the power of R to solve 
+#many problems at once! Vectorization
+x = c(4,7,2,9) #this is a vector
+
+x + 1
+
+x^2
+
+x%%2
+
+
+```
+
+# some mathematical calculations are impossible
+
+```{r finite, infinite, nan}
+#sometimes, a mathematical operation doesn't
+#work as expected and produces strange results
+c(-1, 0, 1) / 0
+#These special values can cause issues in your
+#analysis. You can check for them
+x = c(-1,0,1) / 0
+is.finite(x)
+is.infinite(x)
+is.nan(x)
+is.na(x)
+#these functions give you True and False output
+#to help you understand where special values
+#happen in your data, more on this later!
+
+
+```
+
+## Working with natural exponents has a special builtin function: exp
+
+```{r natural exponents and logs}
+
+#NOTE TO SELF: WILL NEED A SLIDE OR TWO TO EXPLAIN WHAT EXPONENTIATION AND LOGORITHMS ARE
+
+#exponentiation or raising the natural number e to the x
+#make a sequence of x values to test with
+x = seq(from = 0,to = 10, by = .1)
+#alternative syntax: 
+x = seq(0,10,.1)
+
+#raise e to the x
+y = exp(-1*x)
+
+#what is this value e? 
+exp(1)
+
+```
+
+## Sneak preview of using data.frames and plotting
+```{r add scatter plot rend}
+
+ #combine into a single data frame
+dat = data.frame('x' = x,'e.x' = y)
+
+#plot values of e raised to the x
+dat %>%
+  ggplot() +
+  geom_point(mapping = aes(x = x, y = e.x), 
+             size = 3) + 
+  ylab('e^x')
+
+
+
+```
+
+## taking the log of something is the inverse of exponentiation
+
+```{r log v exponentiation}
+
+#1 = log(x, base = exp(1)) 
+#what is x? 
+
+exp(1)
+log(2.71, base = exp(1))
+
+#base = exp(1) is default
+log(2.71)
+
+#even more concretely, we can be sure that these operations are inverses: 
+log(exp(10))
+exp(log(10))
+
+
+```
+
+## Let's build intuition for log values using a plot
+
+```{r log x plot}
+
+dat$logx = log(x)
+dat %>%
+  ggplot() +
+  geom_point(mapping = aes(x = x, y = logx), 
+             size = 3) +
+  geom_vline(xintercept = .1)  +
+  geom_vline(xintercept = .2)  +
+  geom_hline(yintercept = log(.1))  +
+  geom_hline(yintercept = log(.2))  
+
+
+```
+
+## Can log(x) and exp(x) values be negative? 
+
+```{r log and exp negatives}
+log(-1)
+#is there ever a negative result to the exp() function? 
+
+
+```
+## bonus mini project using logs and real data
+
+```{r COVID data and log scaling}
+#we've just seen examples dealing with logs and exponents using base e
+#let's look at it with base 10 and with some real data
+
+#question: when during the pandemic was the US experiencing an increasing rate
+#of covid spread? 
+#data obtained from: https://covid.ourworldindata.org/data/owid-covid-data.csv
+#data downloaded on: 17/11/2021
+
+covidDat <- read.csv('G:\\My Drive\\Teaching\\stats\\RCourse\\mathPrereqs\\owid-covid-data.csv')
+
+#let's just look at the US
+covDatUSA <- covidDat %>% filter(iso_code == 'USA' ) 
+
+#make a plot
+covDatUSA %>%
+  ggplot() +
+  geom_point(mapping = aes(x = as.Date(date), y = total_cases), 
+             size = 3) + 
+  scale_x_date()
+
+#what happens if we plot it on a logarithmic y axis? 
+covDatUSA %>%
+  ggplot() +
+  geom_point(mapping = aes(x = as.Date(date), y = log(total_cases, base=10)), 
+             size = 3) + 
+  scale_x_date()
+ 
+#reminder for thinking about log scale: 
+log(1000000, base = 10)
+log(1e6, base=10)
+
+#what is 7 on a log base 10 scale? 
+
+
+#can you generate a similar set of plots for the running death count? 
+#can you generate a similar set of plots for another country? Take a look in 
+#the covidDat variable to find the iso_code you need for your target country
+
+```
+## Can log(x) and exp(x) values be negative? 
+
+```{r log and exp negatives}
+log(-1)
+#is there ever a negative result to the exp() function? 
+
+
+```
+

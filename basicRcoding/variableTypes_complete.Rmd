@@ -1,0 +1,71 @@
+---
+title: 'Using R like a calculator'
+author: "Adam Dede"
+date: "2024-03-19"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+
+
+
+```
+
+# four modes of data 
+```{r modes}
+
+#numeric (can be doubles or integers)
+w = c(11,12,13,14,15)
+#character 
+x = 'u'
+#boolean / logical
+y = c(T,F,T)
+#complex
+z = c(3+2i, 5+1i, -1+0i)
+#you can check what mode your data are
+mode(z)
+mode(y)
+mode(x)
+mode(w)
+
+
+```
+
+# you can also screen a variable for a particular mode
+
+
+```{r targeted screening}
+
+is.numeric(z)
+is.complex(y)
+is.character(x)
+is.logical(y)
+class(x)
+
+```
+
+# there are also special error modes, do you remember them? 
+
+```{r error modes}
+#special values -Inf, Inf, NA, and NaN?
+n = c(-1,0,1) / 0
+#type your code here to check for special 
+#values in n :)
+
+
+```
+
+
