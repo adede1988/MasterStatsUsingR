@@ -1,5 +1,5 @@
 ---
-title: 'Using R like a calculator'
+title: 'Variable Types'
 author: "Adam Dede"
 date: "2024-03-19"
 output:
@@ -68,4 +68,22 @@ n = c(-1,0,1) / 0
 
 ```
 
+## coersion of different variable types
+```{r coersion}
+x = 'u'
+#you can also explicitly force data into a
+#certain mode. 
+as.logical(x) #0-> FALSE anything else -> TRUE
+as.character(x)
+as.complex(x)
+as.numeric(x)
+test = as.numeric(x)
+is.na(test)
+is.nan(test)
+is.na(0/0)
+is.nan(0/0)
+#what's the difference between NA and NaN? 
 
+
+
+```

@@ -103,10 +103,11 @@ dat %>%
 ```{r log and exp negatives}
 log(-1)
 #is there ever a negative result to the exp() function? 
-
+exp(-1)
+-2^2
 
 ```
-## bonus mini project using logs and real data
+## mini project using logs and real data
 
 ```{r COVID data and log scaling}
 #we've just seen examples dealing with logs and exponents using base e
@@ -118,24 +119,34 @@ log(-1)
 #data downloaded on: 17/11/2021
 
 covidDat <- read.csv('G:\\My Drive\\Teaching\\stats\\RCourse\\mathPrereqs\\owid-covid-data.csv')
-
-#let's just look at the US
-covDatUSA <- covidDat %>% filter(iso_code == 'USA' ) 
+covUSA <- covidDat %>% filter(iso_code == 'USA')
 
 #make a plot
-covDatUSA %>%
-  ggplot() +
-  geom_point(mapping = aes(x = as.Date(date), y = total_cases), 
-             size = 3) + 
-  scale_x_date()
+plot(as.Date(covUSA$date), covUSA$total_cases)
+
 
 #what happens if we plot it on a logarithmic y axis? 
-covDatUSA %>%
-  ggplot() +
-  geom_point(mapping = aes(x = as.Date(date), y = log(total_cases, base=10)), 
-             size = 3) + 
-  scale_x_date()
+plot(as.Date(covUSA$date), log(covUSA$total_cases, base = 10))
+
  
+#why in the regular scale does it look like it's changing more towards the end, 
+#but in the log scale it looks like it's changing more towards the beginning? 
+#remember standard number scale is about the absolute number of cases
+#the log scale tells us more about the multiplicative scale or the order of magnitude
+#what this tells us is that the multiplicative growth rate in covid cases was much larger early in the pandemic
+#let's assess this by asking, what is the multiplicative relationship between
+#one day's covid case count and the day before's? 
+#use vectorization math like we did before, but now, we want to ask, what's the relationship between each day and the day before?
+covUSA$growthRate = NA
+L = length(covUSA$growthRate)
+covUSA$growthRate[2:L] = covUSA$total_cases[2:L] / covUSA$total_cases[1:L-1]
+
+
+plot(as.Date(covUSA$date), covUSA$growthRate)
+
+
+
+
 #reminder for thinking about log scale: 
 log(1000000, base = 10)
 log(1e6, base=10)

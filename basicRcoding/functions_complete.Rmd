@@ -115,3 +115,37 @@ is.na(x)
 
 ```
 
+## example with an image as a matrix
+```{r image as a matrix}
+
+library(pixmap)
+setwd("G:\\My Drive\\Teaching\\stats\\RCourse\\data")
+cas = read.pnm('casablanca.pgm')
+mode(cas)
+str(cas)
+image(t(apply(cas@grey, 2, rev)), col = gray.colors(20))
+hist(cas@grey)
+plot(cas)
+dim(cas@grey)
+#let's blow out a corner to find where is 1,1
+cas@grey[1:50, 1:50] <- 1
+plot(cas)
+locator()
+#It looks like the x direction (the columns)
+#lines up with the matrix, but the y direction
+#(the rows) are flipped! 
+cas@grey[90: 115, 
+         330:370] <- 1
+plot(cas)
+#can you blow out the other two corners? 
+cas@grey[1:50, dim(cas@grey)[2]-50:dim(cas@grey)[2]] <- 1 
+  
+plot(cas)
+#your code here :)
+
+#what about using the locator to find 
+#Humphrey Boghart's face and then blowing
+#it out? 
+
+#your code here :)
+```

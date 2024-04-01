@@ -1,0 +1,113 @@
+---
+title: 'Vectors'
+author: "Adam Dede"
+date: "2024-03-19"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+
+
+
+```
+
+## vector indexing
+
+```{r vector indexing}
+w = c(11,12,13,14,15)
+
+w[1]
+w[3]
+w[2:5]
+w[c(1,4)]
+w[c(T,T,F,T,F)]
+w[w>12]
+
+#you can also specifically avoid certain indices
+w[-2]
+w[-4]
+
+```
+## inserting new values into a vector
+```{r vector insertion}
+
+#in addition to various ways of indexing into vectors, we can get the length of a vector
+
+length(w)
+
+mode(w)
+w <- c(w[1], F, w[2:length(w)])
+mode(w)
+
+#you can experiment with mixing other modes!
+#what does a combination of characters and 
+#numerics result in? 
+
+
+```
+
+## adding to the start or end of a vector
+```{r start and end}
+
+x <- 1
+length(x)
+x[length(x)+1] <- 99
+#can you think of how to add to the beginning?
+x<-1
+
+x = c(99, x)
+
+
+```
+
+## recycling to populate a vector
+```{r recycling}
+
+#recycling in vectorized operations 
+x <- c(1,2,3)
+y <- c(4,5,6,7)
+z <- x+y
+#you can specify an empty vector
+x <- vector('numeric', 10)
+#and fill it with recycling! 
+x[1:10] = c(1,2)
+
+
+```
+## using the colon operator
+```{r colons}
+
+#making use of the : operator
+5:11
+11:5
+#watch out for operator precedence!
+n = 10
+5:n-1
+5:(n-1)
+
+
+```
+## some other useful ways to make vectors
+```{r generate vecs}
+#more quick ways to make useful vectors:
+seq(from = 1, to = 10, by = 2)
+seq(1, 10, 2)
+rep(c(1,12), 3)
+#can you combine use of seq and rep to make:
+#3 6 9 3 6 9 3 6 9 3 6 9
+
+#your code here! :)
+```

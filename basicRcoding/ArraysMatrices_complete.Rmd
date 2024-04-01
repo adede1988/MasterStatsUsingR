@@ -1,0 +1,192 @@
+---
+title: 'Arrays and Matrices'
+author: "Adam Dede"
+date: "2024-03-19"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+
+
+
+```
+
+## creating and indexing in matrices works like vectors but with two dimensions
+
+```{r make a matrix}
+x = matrix(c(1,2,3,4), nrow=2, ncol=2)
+#describe in words how the items 1,2,3,4
+#got placed into the 2 rows and 2 columns:
+
+#note that the print out gives us clues 
+#about indexing
+x
+x[1,]
+x[,1]
+
+#you can also create an empty matrix
+#and fill it later
+y = matrix(nrow = 2, ncol = 2)
+y
+y[1,2] = 1
+
+```
+## switching to row major orientation
+```{r populating matrices along rows}
+
+#you can switch from column major order
+#to row major order:
+z = matrix(c(1,2,3,4,5,6), nrow = 2, byrow = T)
+
+
+```
+
+## you can do math operations on whole matrices like on vectors with some extras
+```{r matrix math}
+
+#basic linear algebra opperations are easy:
+x %*% z #matrix multiplication
+x + x  #addition
+x*3 #scalar multiplication
+
+
+```
+
+## more indexing tricks 
+```{r more matrix indexing tricks}
+
+#the same indexing tricks used on vectors
+#work on matrices
+z[,2:3]
+z[,-2]
+
+
+```
+## using the dim function on matrices
+```{r dim}
+
+#the dim function is useful for finding the 
+#shape of a matrix
+dim(z)
+z[dim(z)[1],] #the last row
+z[,dim(z)[2]] #the last column
+
+
+```
+## matrices are vectors with row and column attributes
+```{r matrix vector relationship}
+#R thinks of matrices as vectors
+#that just have row and column attributes
+attributes(z)
+length(z)
+z[4]
+#you can also flatten a matrix into a vector
+z = c(z)
+z[4]
+
+```
+## matrix indexing understanding check
+```{r index challenge}
+
+#given this matrix: 
+m <- matrix(c(1,2,3,4,5,6,7,8,9,10), nrow = 2)
+#how would I get out the values 3,4,5,6?
+
+#what about 6,8,10? 
+
+#how would indexing change if you had made your matrix with row major indexing?
+m <- matrix(c(1,2,3,4,5,6,7,8,9,10), nrow = 2, byrow = T)
+
+```
+## matrix indexing understanding check
+```{r index challenge}
+
+#given this matrix: 
+m <- matrix(c(1,2,3,4,5,6,7,8,9,10), nrow = 2)
+#how would I get out the values 3,4,5,6?
+
+#what about 6,8,10? 
+
+#how would indexing change if you had made your matrix with row major indexing?
+m <- matrix(c(1,2,3,4,5,6,7,8,9,10), nrow = 2, byrow = T)
+
+```
+## adding rows and columns to matrices
+```{r rows and columns}
+
+#you can add whole rows or columns:
+cbind(m, c(100,100))
+rbind(m, c(1,2,3,4,5))
+
+#combining types makes for coercion 
+cbind(m, c('hello', 'there'))
+cbind(m, c(T, F))
+```
+## recycling in matrices
+```{r recycling}
+#recycling happens in matrices like vectors
+matrix(c(1,2), nrow = 3, ncol =2)
+
+#can you leverage recycling to make a matrix
+#with nrow= 5 and ncol=5 where each column
+#is 1,2,3,4,5? 
+
+#your code here :)
+
+#can you combine recycling and byrow to make
+#a matrix with nrow=5 and ncol=2 where each
+#row is 1,2? 
+
+#your code here :)
+```
+##dimensions can get dropped and break your code
+```{r dimension dropping}
+#being careful about dropping dimensions
+r = m[1,]
+str(r)
+str(m)
+attributes(r)
+attributes(m)
+#you may need r to stay as a 1 X 5 MATRIX
+r = m[1,,drop = F]
+str(r)
+attributes(r)
+```
+
+## arrays (matrices with more than 2 dimensions)
+```{r arrays}
+#lastly, just a quick note on arrays! 
+a = array(c(1:18), dim = c(2,3,3))
+
+#can you describe in words how the data
+#were placed into the array? 
+
+#arrays work similarly to matrices
+#can you figure out the index to get out
+#the following sets: 
+
+#10, 12
+
+#your code here :)
+
+#13, 15, 14, 16
+
+#your code here :)
+
+#6, 12, 18
+
+#your code here :)
+```
