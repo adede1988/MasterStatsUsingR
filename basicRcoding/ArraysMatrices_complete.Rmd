@@ -57,7 +57,7 @@ z = matrix(c(1,2,3,4,5,6), nrow = 2, byrow = T)
 ## you can do math operations on whole matrices like on vectors with some extras
 ```{r matrix math}
 
-#basic linear algebra opperations are easy:
+#basic linear algebra operations are easy:
 x %*% z #matrix multiplication
 x + x  #addition
 x*3 #scalar multiplication

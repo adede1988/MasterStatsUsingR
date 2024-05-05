@@ -1,0 +1,97 @@
+---
+title: 'Arrays and Matrices'
+author: "Adam Dede"
+date: "2024-03-19"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+
+
+
+```
+
+## creating and indexing in matrices works like vectors but with two dimensions
+
+```{r make a matrix}
+
+
+```
+## switching to row major orientation
+```{r populating matrices along rows}
+
+
+
+
+```
+
+## you can do math operations on whole matrices like on vectors with some extras
+```{r matrix math}
+
+
+
+
+```
+
+## more indexing tricks 
+```{r more matrix indexing tricks}
+
+
+
+
+```
+## using the dim function on matrices
+```{r dim}
+
+
+
+
+```
+## matrices are vectors with row and column attributes
+```{r matrix vector relationship}
+
+
+```
+## matrix indexing understanding check
+```{r index challenge}
+
+
+
+```
+## matrix indexing understanding check
+```{r index challenge}
+
+
+
+```
+## adding rows and columns to matrices
+```{r rows and columns}
+
+
+```
+## recycling in matrices
+```{r recycling}
+
+```
+##dimensions can get dropped and break your code
+```{r dimension dropping}
+
+```
+
+## arrays (matrices with more than 2 dimensions)
+```{r arrays}
+
+```
