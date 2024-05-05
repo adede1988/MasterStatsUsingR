@@ -1,5 +1,5 @@
 ---
-title: 'Using R like a calculator'
+title: 'logs and exponents'
 author: "Adam Dede"
 date: "2024-03-19"
 output:
@@ -27,8 +27,6 @@ library(tidyverse)
 ## Working with natural exponents has a special builtin function: exp
 
 ```{r natural exponents and logs}
-
-#NOTE TO SELF: WILL NEED A SLIDE OR TWO TO EXPLAIN WHAT EXPONENTIATION AND LOGORITHMS ARE
 
 #exponentiation or raising the natural number e to the x
 #make a sequence of x values to test with
