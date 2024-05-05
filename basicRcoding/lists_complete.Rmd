@@ -24,65 +24,95 @@ library(tidyverse)
 
 ```
 
-## creating and indexing in matrices works like vectors but with two dimensions
+## lists let you combine different data modes
 
-```{r make a matrix}
-x = matrix(c(1,2,3,4), nrow=2, ncol=2)
-#describe in words how the items 1,2,3,4
-#got placed into the 2 rows and 2 columns:
+```{r make a list}
 
-#note that the print out gives us clues 
-#about indexing
+#often, we want to combine data modes
+x <- list(name='adam', age = 33, colGrad = T)
+mode(x)
+attributes(x)
+str(x)
+names(x)
+
+```
+## lists don't have to have names
+```{r nameless list}
+
+xNameless <- list('adam', 33, T)
+
+#as with vectors, we can guess how to index
+#by looking at a variable carefully
+xNameless
+xNameless[[1]]
 x
-x[1,]
-x[,1]
+x$name
 
-#you can also create an empty matrix
-#and fill it later
-y = matrix(nrow = 2, ncol = 2)
-y
-y[1,2] = 1
-
-```
-## switching to row major orientation
-```{r populating matrices along rows}
-
-#you can switch from column major order
-#to row major order:
-z = matrix(c(1,2,3,4,5,6), nrow = 2, byrow = T)
+#named and unnamed list style indexing combined:
+x[['name']]
 
 
 ```
 
-## you can do math operations on whole matrices like on vectors with some extras
-```{r matrix math}
+## we can also add names to an unnamed list
+```{r adding names}
 
-#basic linear algebra opperations are easy:
-x %*% z #matrix multiplication
-x + x  #addition
-x*3 #scalar multiplication
+names(x)
+
+xNameless
+names(xNameless) <- c("name", "age", "colGrad")
+xNameless
+
+unname(xNameless)
+
+```
+
+## what's with the double square brackets? 
+```{r double versus single brackets}
+
+#a fourth and fifth way to index into lists: 
+x['name']
+x[1]
+
+#what's the mode of double versus single bracketed indexing? 
+mode(x[['name']])
+mode(x['name'])
+
+#Why do you think this doesn't work: 
+x[[1:2]]
+#but this does: 
+x[1:2]
+
+#lists are really just vectors that allow 
+#anything to be at each index in mode 'list'
+
+#double bracketing converts a single index
+#back to its atomic mode and returns it.
+#Single bracketing returns a new vector 
+#that's still in mode 'list'
 
 
 ```
-
-## more indexing tricks 
-```{r more matrix indexing tricks}
-
-#the same indexing tricks used on vectors
-#work on matrices
-z[,2:3]
-z[,-2]
-
-
-```
-## using the dim function on matrices
+## adding to an already created list
 ```{r dim}
 
-#the dim function is useful for finding the 
-#shape of a matrix
-dim(z)
-z[dim(z)[1],] #the last row
-z[,dim(z)[2]] #the last column
+#adding to already created lists
+x
+x$height <- 175
+x
+x[5:7] <- c(T,F,T)
+x
+#deleting from a list
+x[4] <- NULL
+x
+#how did the indices of items after 4 change?
+
+#don't confuse NULL with NA or NAN
+x[5] <- NA
+x
+
+#check the length of a list
+length(x)
 
 
 ```
@@ -98,95 +128,45 @@ z = c(z)
 z[4]
 
 ```
-## matrix indexing understanding check
-```{r index challenge}
+## converting to a vector, but watch out for coercion! 
+```{r unlist}
 
-#given this matrix: 
-m <- matrix(c(1,2,3,4,5,6,7,8,9,10), nrow = 2)
-#how would I get out the values 3,4,5,6?
-
-#what about 6,8,10? 
-
-#how would indexing change if you had made your matrix with row major indexing?
-m <- matrix(c(1,2,3,4,5,6,7,8,9,10), nrow = 2, byrow = T)
+unlist(x) -> y
+y
 
 ```
-## matrix indexing understanding check
-```{r index challenge}
+## lists of lists are kind of like what matrices are to vectors
+```{r lists of lists}
+x <- list(name='adam', age = 33, colGrad = T)
+y <- list(name='sara', age = 35, colGrad = T)
+z <- list(name='bob' , age = 21, colGrad = F)
 
-#given this matrix: 
-m <- matrix(c(1,2,3,4,5,6,7,8,9,10), nrow = 2)
-#how would I get out the values 3,4,5,6?
-
-#what about 6,8,10? 
-
-#how would indexing change if you had made your matrix with row major indexing?
-m <- matrix(c(1,2,3,4,5,6,7,8,9,10), nrow = 2, byrow = T)
+allDat <- list(x,y,z)
+#use names to set the names of items in top list
+names(allDat) <- c('a', 'b', 'c')
 
 ```
-## adding rows and columns to matrices
-```{r rows and columns}
+## indexing challenge! 
+```{r list of lists indexing}
 
-#you can add whole rows or columns:
-cbind(m, c(100,100))
-rbind(m, c(1,2,3,4,5))
+#can you write as many ways as possible
+#to find bob's age? Hint: find at least 8
 
-#combining types makes for coercion 
-cbind(m, c('hello', 'there'))
-cbind(m, c(T, F))
-```
-## recycling in matrices
-```{r recycling}
-#recycling happens in matrices like vectors
-matrix(c(1,2), nrow = 3, ncol =2)
+allDat[[3]]$age
 
-#can you leverage recycling to make a matrix
-#with nrow= 5 and ncol=5 where each column
-#is 1,2,3,4,5? 
 
-#your code here :)
-
-#can you combine recycling and byrow to make
-#a matrix with nrow=5 and ncol=2 where each
-#row is 1,2? 
-
-#your code here :)
-```
-##dimensions can get dropped and break your code
-```{r dimension dropping}
-#being careful about dropping dimensions
-r = m[1,]
-str(r)
-str(m)
-attributes(r)
-attributes(m)
-#you may need r to stay as a 1 X 5 MATRIX
-r = m[1,,drop = F]
-str(r)
-attributes(r)
-```
-
-## arrays (matrices with more than 2 dimensions)
-```{r arrays}
-#lastly, just a quick note on arrays! 
-a = array(c(1:18), dim = c(2,3,3))
-
-#can you describe in words how the data
-#were placed into the array? 
-
-#arrays work similarly to matrices
-#can you figure out the index to get out
-#the following sets: 
-
-#10, 12
-
-#your code here :)
-
-#13, 15, 14, 16
-
-#your code here :)
-
-#6, 12, 18
-
-#your code here :)
+allDat[[3]][[2]]
+allDat[[3]]$age
+allDat[3]$age
+allDat[3][[1]]$age
+allDat[[3]]['age']
+allDat[[3]][2]
+allDat[['c']][[2]]
+allDat[['c']]$age
+allDat['c']$age
+allDat['c'][[1]]$age
+allDat[[3]]['age']
+allDat[[3]][2]
+allDat['c']$c$age
+allDat$c$age
 ```
