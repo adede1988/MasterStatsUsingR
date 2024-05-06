@@ -1,0 +1,78 @@
+---
+title: 'lists'
+author: "Adam Dede"
+date: "2024-03-19"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+
+
+
+```
+
+## lists let you combine different data modes
+
+```{r make a list}
+
+
+
+```
+## lists don't have to have names
+```{r nameless list}
+
+
+
+
+```
+
+## we can also add names to an unnamed list
+```{r adding names}
+
+
+
+```
+
+## what's with the double square brackets? 
+```{r double versus single brackets}
+
+
+
+```
+## adding to an already created list
+```{r dim}
+
+
+
+
+```
+
+## converting to a vector, but watch out for coercion! 
+```{r unlist}
+
+
+
+```
+## lists of lists are kind of like what matrices are to vectors
+```{r lists of lists}
+
+
+```
+## indexing challenge! 
+```{r list of lists indexing}
+
+
+```
