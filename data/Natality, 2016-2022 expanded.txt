@@ -1,0 +1,74 @@
+"Notes"	"State of Residence"	"State of Residence Code"	Births
+	"Alabama"	"01"	58054
+	"Alaska"	"02"	9367
+	"Arizona"	"04"	77916
+	"Arkansas"	"05"	35965
+	"California"	"06"	420608
+	"Colorado"	"08"	62949
+	"Connecticut"	"09"	35670
+	"Delaware"	"10"	10482
+	"District of Columbia"	"11"	8660
+	"Florida"	"12"	216260
+	"Georgia"	"13"	124073
+	"Hawaii"	"15"	15620
+	"Idaho"	"16"	22427
+	"Illinois"	"17"	132189
+	"Indiana"	"18"	79946
+	"Iowa"	"19"	36835
+	"Kansas"	"20"	34705
+	"Kentucky"	"21"	52214
+	"Louisiana"	"22"	57437
+	"Maine"	"23"	12006
+	"Maryland"	"24"	68285
+	"Massachusetts"	"25"	69137
+	"Michigan"	"26"	104980
+	"Minnesota"	"27"	64425
+	"Mississippi"	"28"	35156
+	"Missouri"	"29"	69453
+	"Montana"	"30"	11231
+	"Nebraska"	"31"	24609
+	"Nevada"	"32"	33686
+	"New Hampshire"	"33"	12625
+	"New Jersey"	"34"	101497
+	"New Mexico"	"35"	21391
+	"New York"	"36"	210742
+	"North Carolina"	"37"	120466
+	"North Dakota"	"38"	10112
+	"Ohio"	"39"	129791
+	"Oklahoma"	"40"	48410
+	"Oregon"	"41"	40914
+	"Pennsylvania"	"42"	132622
+	"Rhode Island"	"44"	10464
+	"South Carolina"	"45"	57185
+	"South Dakota"	"46"	11369
+	"Tennessee"	"47"	81717
+	"Texas"	"48"	373594
+	"Utah"	"49"	46712
+	"Vermont"	"50"	5384
+	"Virginia"	"51"	95825
+	"Washington"	"53"	83911
+	"West Virginia"	"54"	17198
+	"Wisconsin"	"55"	61781
+	"Wyoming"	"56"	6237
+"Total"			3664292
+"---"
+"Dataset: Natality, 2016-2022 expanded"
+"Query Parameters:"
+"Year: 2021"
+"Group By: State of Residence"
+"Show Totals: True"
+"Show Zero Values: False"
+"Show Suppressed: False"
+"Calculate Rates Per: 1,000"
+"---"
+"Help: See http://wonder.cdc.gov/wonder/help/Natality-expanded.html for more information."
+"---"
+"Query Date: May 7, 2024 10:57:12 AM"
+"---"
+"Suggested Citation: Centers for Disease Control and Prevention, National Center for Health Statistics. National Vital Statistics"
+"System, Natality on CDC WONDER Online Database. Data are from the Natality Records 2016-2022, as compiled from data provided by"
+"the 57 vital statistics jurisdictions through the Vital Statistics Cooperative Program. Accessed at"
+"http://wonder.cdc.gov/natality-expanded-current.html on May 7, 2024 10:57:12 AM"
+"---"
+Caveats:
+"1. Each birth record represents one liveborn infant."
