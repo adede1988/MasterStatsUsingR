@@ -1,0 +1,85 @@
+---
+title: 'lists and the double square bracket'
+author: "Adam Dede"
+date: "2024-03-19"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+
+
+
+```
+## the double square bracket explained
+
+```{r double bracket}
+x <- list(name='adam', age = 35, colGrad = T)
+
+
+#a fourth and fifth way to index into lists: 
+x['name']
+x[1]
+
+#what's the mode of double versus single bracketed indexing? 
+mode(x[['name']])
+mode(x['name'])
+
+#Why do you think this doesn't work: 
+x[[1:2]]
+#but this does: 
+x[1:2]
+
+#lists are really just vectors that allow 
+#anything to be at each index in mode 'list'
+
+#double bracketing converts a single index
+#back to its atomic mode and returns it.
+#Single bracketing returns a new vector 
+#that's still in mode 'list'
+
+
+```
+## single brackets are key when moving data around in and out of the list
+
+```{r single bracket use}
+
+#adding to already created lists
+x
+x$height <- 175
+x
+x[5:7] <- c(T,F,T)
+x
+#deleting from a list
+x[4] <- NULL
+x
+#how did the indices of items after 4 change?
+
+#don't confuse NULL with NA or NAN
+x[5] <- NA
+x
+
+#check the length of a list
+length(x)
+
+
+```
+## just remember that single brackets are no good when you want to compute 
+```{r single bracket computation fail}
+x[2]*2
+x[[2]]*2
+
+```
+

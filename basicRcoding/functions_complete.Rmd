@@ -1,5 +1,5 @@
 ---
-title: 'Using R like a calculator'
+title: 'for loops'
 author: "Adam Dede"
 date: "2024-03-19"
 output:
@@ -24,128 +24,133 @@ library(tidyverse)
 
 ```
 
-# Using R like a calculator
-```{r doing basic math operations}
+## let's say you want to do a calculation for multiple inputs
 
-#addition
-1 + 1
+```{r changing inputs}
 
-#subtraction
-5-2
+x = c(1,1,2,4,1,2,3,2,1,1,1,2,34,4,1)
+y = c(2,3,1,1,2,4,5,1,1,1,2,3,1,1,1,1,2,3,1,1,4,2,1,1,1)
+#what are the indices of two 1s in a row? 
 
-#multiplication
-3*5
+runs <- NULL
+for(ii in 1:(length(x)-1)){
+  if(all(x[ii:(ii+1)] == 1)){
+    runs <- c(runs, ii)
+  }
+}
 
-#division
-7/2
 
-#modulo
-7%%2
+runsy <- NULL
+for(ii in 1:(length(y)-1)){
+  if(all(y[ii:(ii+1)] == 1)){
+    runsy <- c(runsy, ii)
+  }
+}
+
+
+```
+## repeating code is slow, hard to read, and error prone, use a function! 
+```{r writing a function}
+
+helloWorld <- function(){
+  print("hello world!")
+}
+
+
+findRuns <- function(x){
+  runs <- NULL
+  for(ii in 1:(length(x)-1)){
+    if(all(x[ii:(ii+1)] == 1)){
+      runs <- c(runs, ii)
+    }
+  }
+  return(runs)
+}
+
+findRuns(x)
+findRuns(y)
 
 
 ```
 
-# Use R to write out algebraic formulas and solve
+## make your functions flexible! 
+```{r soft coding}
 
+#let's say we want to find indices of runs of arbitrary length k
+#so far, we've worked with k = 2
 
-```{r algebra example}
-#basic algebra
-#can you solve 15 = x*3 ? 
-x = # try out an answer
-
-#test your answer
-x*3
-
-
-```
-
-# Exponents are a bit more complex but easy to use in R
-
-```{r exponents}
-#exponents
-3^2
-
-#law of exponents
-3^2 * 3^4
-
-3^(2+4)
-
-#negative exponents mean reciprocal 
-3^-1
-
-1/3
-
-
+findRuns <- function(x, k = 2){
+  runs <- NULL
+  for(ii in 1:(length(x)-(k-1))){
+    if(all(x[ii:(ii+(k-1))] == 1)){
+      runs <- c(runs, ii)
+    }
+  }
+  return(runs)
+}
+findRuns(x,3)
+findRuns(y,3)
 
 ```
 
-# R can allow you to do many computations at once
+## can you write a function to simulate covid cases? 
+```{r breaking out of the loop}
 
-```{r vectorization}
-#using the power of R to solve 
-#many problems at once! Vectorization
-x = c(4,7,2,9) #this is a vector
+covidDat <- read.csv('C:\\Users\\Adam\\Documents\\GitHub\\
+                     MasterStatsUsingR\data\\owid-covid-data.csv')
+covUSA <- covidDat %>% filter(iso_code == 'USA')
 
-x + 1
+covUSA$growthRate = NA
+L = length(covUSA$growthRate)
+covUSA$growthRate[2:L] = covUSA$total_cases[2:L] / covUSA$total_cases[1:L-1]
 
-x^2
+plot(as.Date(covUSA$date), covUSA$growthRate)
 
-x%%2
+#let's make a function that simulates total cases across days
+#the function will take as input the following: 
+#growth = multiplicative growth rate: casesToday * r = cases tomorrow
+#time = number of time steps to run the simulation 
+#startVal = how many cases are observed on day 1
 
-
-```
-
-# some mathematical calculations are impossible
-
-```{r finite, infinite, nan}
-#sometimes, a mathematical operation doesn't
-#work as expected and produces strange results
-c(-1, 0, 1) / 0
-#These special values can cause issues in your
-#analysis. You can check for them
-x = c(-1,0,1) / 0
-is.finite(x)
-is.infinite(x)
-is.nan(x)
-is.na(x)
-#these functions give you True and False output
-#to help you understand where special values
-#happen in your data, more on this later!
-
-
-```
-
-## example with an image as a matrix
-```{r image as a matrix}
-
-library(pixmap)
-setwd("G:\\My Drive\\Teaching\\stats\\RCourse\\data")
-cas = read.pnm('casablanca.pgm')
-mode(cas)
-str(cas)
-image(t(apply(cas@grey, 2, rev)), col = gray.colors(20))
-hist(cas@grey)
-plot(cas)
-dim(cas@grey)
-#let's blow out a corner to find where is 1,1
-cas@grey[1:50, 1:50] <- 1
-plot(cas)
-locator()
-#It looks like the x direction (the columns)
-#lines up with the matrix, but the y direction
-#(the rows) are flipped! 
-cas@grey[90: 115, 
-         330:370] <- 1
-plot(cas)
-#can you blow out the other two corners? 
-cas@grey[1:50, dim(cas@grey)[2]-50:dim(cas@grey)[2]] <- 1 
+caseSim <- function(growth, time=365, startVal = 1){
+  output = rep(NA, time)
+  output[1] = startVal
+  for(ii in 2:time){
+    output[ii] = output[ii-1]*growth
+  }
+  return(output)
   
-plot(cas)
-#your code here :)
+}
 
-#what about using the locator to find 
-#Humphrey Boghart's face and then blowing
-#it out? 
+plot(as.Date(covUSA$date), covUSA$total_cases)
+plot(as.Date(covUSA$date), caseSim(1.027, length(covUSA$growthRate)))
 
-#your code here :)
+plot(as.Date(covUSA$date), log(covUSA$total_cases, base = 10))
+plot(as.Date(covUSA$date), log(caseSim(1.027, length(covUSA$growthRate)), base = 10) )
+
+#can you change the way this function is written 
+#so that the growth rate can be either a single number or variable over time? 
+
+caseSim2 <- function(growth, time=365, startVal = 1){
+  if(length(growth)==1){
+    growth = rep(growth, time)
+  }
+  output = rep(NA, time)
+  output[1] = startVal
+  for(ii in 2:time){
+    output[ii] = output[ii-1]*growth[ii]
+  }
+  return(output)
+  
+}
+
+plot(as.Date(covUSA$date), 
+     caseSim2(covUSA$growthRate, 
+              length(covUSA$growthRate), 
+              covUSA$total_cases[1]))
+
+plot(as.Date(covUSA$date), covUSA$total_cases)
+
+
+
 ```

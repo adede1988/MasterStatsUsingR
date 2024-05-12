@@ -35,25 +35,17 @@ x = seq(from = 0,to = 10, by = .1)
 x = seq(0,10,.1)
 
 #raise e to the x
-y = exp(-1*x)
+y = exp(x)
 
-#what is this value e? 
-exp(1)
+
 
 ```
 
-## Sneak preview of using data.frames and plotting
+## Quick plot to help build intuition 
 ```{r add scatter plot rend}
 
  #combine into a single data frame
-dat = data.frame('x' = x,'e.x' = y)
-
-#plot values of e raised to the x
-dat %>%
-  ggplot() +
-  geom_point(mapping = aes(x = x, y = e.x), 
-             size = 3) + 
-  ylab('e^x')
+plot(x, y)
 
 
 
@@ -73,9 +65,9 @@ log(2.71, base = exp(1))
 log(2.71)
 
 #even more concretely, we can be sure that these operations are inverses: 
-log(exp(10))
+log(exp(1))
 exp(log(10))
-
+log(exp(10))
 
 ```
 
@@ -83,15 +75,7 @@ exp(log(10))
 
 ```{r log x plot}
 
-dat$logx = log(x)
-dat %>%
-  ggplot() +
-  geom_point(mapping = aes(x = x, y = logx), 
-             size = 3) +
-  geom_vline(xintercept = .1)  +
-  geom_vline(xintercept = .2)  +
-  geom_hline(yintercept = log(.1))  +
-  geom_hline(yintercept = log(.2))  
+plot(x, log(x))
 
 
 ```
@@ -102,7 +86,7 @@ dat %>%
 log(-1)
 #is there ever a negative result to the exp() function? 
 exp(-1)
--2^2
+
 
 ```
 ## mini project using logs and real data
@@ -116,7 +100,8 @@ exp(-1)
 #data obtained from: https://covid.ourworldindata.org/data/owid-covid-data.csv
 #data downloaded on: 17/11/2021
 
-covidDat <- read.csv('G:\\My Drive\\Teaching\\stats\\RCourse\\mathPrereqs\\owid-covid-data.csv')
+covidDat <- read.csv('C:\\Users\\Adam\\Documents\\GitHub\\
+                     MasterStatsUsingR\data\\owid-covid-data.csv')
 covUSA <- covidDat %>% filter(iso_code == 'USA')
 
 #make a plot
@@ -157,12 +142,5 @@ log(1e6, base=10)
 #the covidDat variable to find the iso_code you need for your target country
 
 ```
-## Can log(x) and exp(x) values be negative? 
 
-```{r log and exp negatives}
-log(-1)
-#is there ever a negative result to the exp() function? 
-
-
-```
 
