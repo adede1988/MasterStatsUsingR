@@ -24,14 +24,19 @@ library(tidyverse)
 
 ```
 
-## creating and indexing in matrices works like vectors but with two dimensions
+## data for reactive channels
 
-```{r make a matrix}
+```{r dataframe}
+
+brainDat = data.frame('region'  = c('acc', 'dlPFC', 'hip', 'mtl', 'pPFC'), 
+                      'total'   = c(44, 247, 40, 79, 35), 
+                      'reactive'= c(21, 133, 21, 54, 30))
+
 
 
 ```
-## switching to row major orientation
-```{r populating matrices along rows}
+## Visualize the data 
+```{r bar graphs of data}
 
 
 
