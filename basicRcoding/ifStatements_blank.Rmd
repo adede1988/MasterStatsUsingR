@@ -1,0 +1,81 @@
+---
+title: 'if statements'
+author: "Adam Dede"
+date: "2024-05-5"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+
+
+
+```
+
+## if statements offer flexible control of computation based on a condition
+
+```{r if intro}
+
+
+```
+## key logical operators in R
+```{r logic ops}
+
+
+
+
+
+```
+## What to do if your condition is FALSE? 
+```{r else statements}
+
+
+
+
+
+
+
+
+```
+## R sometimes has strange logical outputs! 
+```{r NAs are weird}
+
+
+
+
+```
+
+## we can also test for data mode 
+```{r more condition possibilities}
+
+
+
+```
+
+## multiple conditions can be tested at once with & | operators
+```{r combining conditions in one statement}
+
+
+
+
+```
+
+## if statements can be applied to whole vectors
+```{r vectorized if}
+
+            
+
+
+```

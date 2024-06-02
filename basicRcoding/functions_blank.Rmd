@@ -1,0 +1,56 @@
+---
+title: 'functions'
+author: "Adam Dede"
+date: "2024-05-12"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+
+
+
+```
+
+## let's say you want to do a calculation for multiple inputs
+
+```{r changing inputs}
+
+
+
+```
+## repeating code is slow, hard to read, and error prone, use a function! 
+```{r writing a function}
+
+
+
+
+```
+
+## make your functions flexible! 
+```{r soft coding}
+
+
+
+```
+
+## can you write a function to simulate covid cases? 
+```{r breaking out of the loop}
+
+
+
+
+
+```

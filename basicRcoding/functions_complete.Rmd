@@ -1,7 +1,7 @@
 ---
-title: 'for loops'
+title: 'functions'
 author: "Adam Dede"
-date: "2024-03-19"
+date: "2024-05-12"
 output:
   html_document:
     toc: yes
@@ -27,7 +27,6 @@ library(tidyverse)
 ## let's say you want to do a calculation for multiple inputs
 
 ```{r changing inputs}
-
 x = c(1,1,2,4,1,2,3,2,1,1,1,2,34,4,1)
 y = c(2,3,1,1,2,4,5,1,1,1,2,3,1,1,1,1,2,3,1,1,4,2,1,1,1)
 #what are the indices of two 1s in a row? 
@@ -40,10 +39,10 @@ for(ii in 1:(length(x)-1)){
 }
 
 
-runsy <- NULL
+runs2 <- NULL
 for(ii in 1:(length(y)-1)){
   if(all(y[ii:(ii+1)] == 1)){
-    runsy <- c(runsy, ii)
+    runs2 <- c(runs2, ii)
   }
 }
 
@@ -51,11 +50,9 @@ for(ii in 1:(length(y)-1)){
 ```
 ## repeating code is slow, hard to read, and error prone, use a function! 
 ```{r writing a function}
-
 helloWorld <- function(){
-  print("hello world!")
+  print('hello world!')
 }
-
 
 findRuns <- function(x){
   runs <- NULL
@@ -75,10 +72,7 @@ findRuns(y)
 
 ## make your functions flexible! 
 ```{r soft coding}
-
-#let's say we want to find indices of runs of arbitrary length k
-#so far, we've worked with k = 2
-
+#length k = 2 
 findRuns <- function(x, k = 2){
   runs <- NULL
   for(ii in 1:(length(x)-(k-1))){
@@ -88,16 +82,16 @@ findRuns <- function(x, k = 2){
   }
   return(runs)
 }
-findRuns(x,3)
-findRuns(y,3)
+
+findRuns(x, 3)
+findRuns(y, 3)
+
 
 ```
 
 ## can you write a function to simulate covid cases? 
 ```{r breaking out of the loop}
-
-covidDat <- read.csv('C:\\Users\\Adam\\Documents\\GitHub\\
-                     MasterStatsUsingR\data\\owid-covid-data.csv')
+covidDat <- read.csv('C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\data\\owid-covid-data.csv')
 covUSA <- covidDat %>% filter(iso_code == 'USA')
 
 covUSA$growthRate = NA
@@ -106,13 +100,14 @@ covUSA$growthRate[2:L] = covUSA$total_cases[2:L] / covUSA$total_cases[1:L-1]
 
 plot(as.Date(covUSA$date), covUSA$growthRate)
 
+
 #let's make a function that simulates total cases across days
 #the function will take as input the following: 
-#growth = multiplicative growth rate: casesToday * r = cases tomorrow
+#growth = multiplicative growth rate: casesToday * growth = cases tomorrow
 #time = number of time steps to run the simulation 
 #startVal = how many cases are observed on day 1
 
-caseSim <- function(growth, time=365, startVal = 1){
+caseSim <- function(growth, time = 365, startVal = 1){
   output = rep(NA, time)
   output[1] = startVal
   for(ii in 2:time){
@@ -123,18 +118,10 @@ caseSim <- function(growth, time=365, startVal = 1){
 }
 
 plot(as.Date(covUSA$date), covUSA$total_cases)
-plot(as.Date(covUSA$date), caseSim(1.027, length(covUSA$growthRate)))
+plot(as.Date(covUSA$date), caseSim(1.027, length(covUSA$date), 1))
 
-plot(as.Date(covUSA$date), log(covUSA$total_cases, base = 10))
-plot(as.Date(covUSA$date), log(caseSim(1.027, length(covUSA$growthRate)), base = 10) )
 
-#can you change the way this function is written 
-#so that the growth rate can be either a single number or variable over time? 
-
-caseSim2 <- function(growth, time=365, startVal = 1){
-  if(length(growth)==1){
-    growth = rep(growth, time)
-  }
+caseSimVar <- function(growth, time = 365, startVal = 1){
   output = rep(NA, time)
   output[1] = startVal
   for(ii in 2:time){
@@ -144,13 +131,15 @@ caseSim2 <- function(growth, time=365, startVal = 1){
   
 }
 
-plot(as.Date(covUSA$date), 
-     caseSim2(covUSA$growthRate, 
-              length(covUSA$growthRate), 
-              covUSA$total_cases[1]))
-
 plot(as.Date(covUSA$date), covUSA$total_cases)
+plot(as.Date(covUSA$date), caseSimVar(covUSA$growthRate, 
+                                      length(covUSA$date), 1))
 
+randOrderGrowth = sample(covUSA$growthRate, length(covUSA$growthRate), 
+                         replace = F)
+randOrderGrowth[is.na(randOrderGrowth)] <- 1.0
+plot(as.Date(covUSA$date), caseSimVar(randOrderGrowth, 
+                                      length(covUSA$date), 1))
 
 
 ```

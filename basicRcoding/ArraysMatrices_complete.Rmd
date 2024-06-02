@@ -27,106 +27,88 @@ library(tidyverse)
 ## creating and indexing in matrices works like vectors but with two dimensions
 
 ```{r make a matrix}
-x = matrix(c(1,2,3,4), nrow=2, ncol=2)
-#describe in words how the items 1,2,3,4
-#got placed into the 2 rows and 2 columns:
+x = matrix(c(1,2,3,4), nrow = 2, ncol = 2)
 
-#note that the print out gives us clues 
-#about indexing
-x
 x[1,]
 x[,1]
 
-#you can also create an empty matrix
-#and fill it later
 y = matrix(nrow = 2, ncol = 2)
-y
-y[1,2] = 1
+ y[1,2] = 1
 
 ```
 ## switching to row major orientation
 ```{r populating matrices along rows}
-
-#you can switch from column major order
-#to row major order:
 z = matrix(c(1,2,3,4,5,6), nrow = 2, byrow = T)
+z 
 
 
 ```
 
 ## you can do math operations on whole matrices like on vectors with some extras
 ```{r matrix math}
+x + x
 
-#basic linear algebra operations are easy:
-x %*% z #matrix multiplication
-x + x  #addition
-x*3 #scalar multiplication
+x*3
+
+x %*% z
+
 
 
 ```
 
 ## matrices are vectors with row and column attributes
 ```{r matrix vector relationship}
-#R thinks of matrices as vectors
-#that just have row and column attributes
 attributes(z)
 length(z)
+
 z[4]
-#you can also flatten a matrix into a vector
+
 z = c(z)
+attributes(z)
+z
 z[4]
+
 
 ```
 
 ## adding rows and columns to matrices
 ```{r rows and columns}
+cbind(x, c(100, 100))
+rbind(x, c(100, 100))
 
-#you can add whole rows or columns:
-cbind(m, c(100,100))
-rbind(m, c(1,2,3,4,5))
+cbind(x, c('hello', 'there'))
+rbind(x, c(T, F))
 
-#combining types makes for coercion 
-cbind(m, c('hello', 'there'))
-cbind(m, c(T, F))
+
+
 ```
 ## recycling in matrices
 ```{r recycling}
-#recycling happens in matrices like vectors
-matrix(c(1,2), nrow = 3, ncol =2)
+matrix(c(1,2), nrow = 3, ncol = 2)
+matrix(c(1,2), nrow = 3, ncol = 2, byrow = T)
 
-#can you leverage recycling to make a matrix
-#with nrow= 5 and ncol=5 where each column
-#is 1,2,3,4,5? 
+#can you use recycling to make a matrix with nrow = 5, ncol = 5
+#each col is 1,2,3,4,5? 
 
-#your code here :)
+# your code here 
 
-#can you combine recycling and byrow to make
-#a matrix with nrow=5 and ncol=2 where each
-#row is 1,2? 
 
-#your code here :)
 ```
 ##dimensions can get dropped and break your code
 ```{r dimension dropping}
-#being careful about dropping dimensions
-r = m[1,]
+r = x[1,]
 str(r)
-str(m)
-attributes(r)
-attributes(m)
-#you may need r to stay as a 1 X 5 MATRIX
-r = m[1,,drop = F]
-str(r)
-attributes(r)
+str(x)
+
+r = x[1,,drop = F]
+
+
+
 ```
 
 ## arrays (matrices with more than 2 dimensions)
 ```{r arrays}
-#lastly, just a quick note on arrays! 
 a = array(c(1:18), dim = c(2,3,3))
-
-#can you describe in words how the data
-#were placed into the array? 
 
 
 ```

@@ -1,5 +1,5 @@
 ---
-title: 'Arrays and Matrices'
+title: 'Lists'
 author: "Adam Dede"
 date: "2024-03-19"
 output:
@@ -27,9 +27,7 @@ library(tidyverse)
 ## lists let you combine different data modes
 
 ```{r make a list}
-
-#often, we want to combine data modes
-x <- list(name='adam', age = 35, colGrad = T)
+x <- list(name = 'adam', age = 35, colGrad = T)
 mode(x)
 attributes(x)
 str(x)
@@ -38,58 +36,48 @@ names(x)
 ```
 ## lists don't have to have names
 ```{r nameless list}
-
 xNameless <- list('adam', 35, T)
-
-#as with vectors, we can guess how to index
-#by looking at a variable carefully
-xNameless
 xNameless[[1]]
-x
 x$name
 
-#named and unnamed list style indexing combined:
 x[['name']]
+
+varName = 'name'
+
+x[[varName]]
+
 
 
 ```
 
 ## we can also add names to an unnamed list
 ```{r adding names}
-
-names(x)
-
 xNameless
-names(xNameless) <- c("name", "age", "colGrad")
+names(xNameless) <- c('name', 'age', 'colGrad')
 xNameless
 
 unname(xNameless)
+
 
 ```
 
 ## converting to a vector, but watch out for coercion! 
 
 ```{r unlist}
+unlist(x)
 
-unlist(x) -> y
-y
 
 ```
 ## lists of lists are kind of like what matrices are to vectors
 ```{r lists of lists}
-x <- list(name='adam', age = 35, colGrad = T)
-y <- list(name='sara', age = 38, colGrad = T)
-z <- list(name='bob' , age = 21, colGrad = F)
+x <- list(name = 'adam', age = 35, colGrad = T)
+y <- list(name = 'sara', age = 30, colGrad = T)
+z <- list(name = 'bob', age = 22, colGrad = F)
+allDat <- list(x, y, z)
 
-allDat <- list(x,y,z)
-#use names to set the names of items in top list
-names(allDat) <- c('a', 'b', 'c')
-
-allDat$c$age
-allDat[['c']]$age
-allDat[['c']][['age']]
-allDat[[3]][['age']]
+allDat[[3]]$age
 allDat[[3]][[2]]
+allDat[[3]][['age']]
 
 ```
 

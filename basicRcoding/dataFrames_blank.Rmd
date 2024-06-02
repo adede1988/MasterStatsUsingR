@@ -1,0 +1,69 @@
+---
+title: 'data.frames'
+author: "Adam Dede"
+date: "2024-03-19"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+
+
+
+```
+
+## data frames are a specialized list of lists
+
+```{r make a data.frame}
+
+
+
+```
+## indexing works more similarly to a matrix than a list
+```{r data.frame indexing}
+
+
+
+
+```
+## this allows rbind and cbind functions to work like they did for matrices!
+```{r add rows or columns to a data.frame}
+
+
+
+
+```
+
+## list-like indexing is still available though! 
+```{r list style indexing}
+
+
+
+```
+
+
+## data frames are the most common way of storing data in R
+```{r reading in a csv}
+
+
+
+```
+## tibbles are a type of data frame used in the tidyverse
+
+```{r tibbles}
+
+
+
+```

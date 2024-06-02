@@ -1,0 +1,73 @@
+---
+title: 'for loops'
+author: "Adam Dede"
+date: "2024-05-12"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+
+
+
+```
+
+## Doing a calculation for every observation in a set of data
+
+```{r repeating a calculation}
+
+
+
+```
+## repeating code is slow, hard to read, and error prone, use a loop! 
+```{r the for loop}
+
+
+
+
+```
+
+## R lets you make this even simpler by avoiding indexing
+```{r direct iteration}
+
+
+
+
+```
+
+## what if we don't always want to loop every value? 
+```{r breaking out of the loop}
+
+ 
+
+
+```
+## find runs of 1s with length equal to 2
+```{r runs of 1s}
+
+
+
+
+
+```
+## simplify with the all function
+```{r all any}
+
+
+
+
+
+
+```

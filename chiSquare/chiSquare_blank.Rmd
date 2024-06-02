@@ -1,5 +1,5 @@
 ---
-title: 'Arrays and Matrices'
+title: 'Chi Square, brain data!'
 author: "Adam Dede"
 date: "2024-03-19"
 output:

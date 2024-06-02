@@ -1,7 +1,7 @@
 ---
 title: 'for loops'
 author: "Adam Dede"
-date: "2024-03-19"
+date: "2024-05-12"
 output:
   html_document:
     toc: yes
@@ -27,30 +27,29 @@ library(tidyverse)
 ## Doing a calculation for every observation in a set of data
 
 ```{r repeating a calculation}
-
-x = c(1,2,3,5) # how many odd values? 
+x = c(1,2,3,5)
 
 oddCount = 0
 
-if (x[1] %% 2 == 1) oddCount <- oddCount+1
+if(x[1] %% 2 == 1) oddCount <- oddCount + 1 
 
-if (x[2] %% 2 == 1) oddCount <- oddCount+1
+if(x[2] %% 2 == 1) oddCount <- oddCount + 1 
 
-if (x[3] %% 2 == 1) oddCount <- oddCount+1
+if(x[3] %% 2 == 1) oddCount <- oddCount + 1 
 
-if (x[4] %% 2 == 1) oddCount <- oddCount+1
+if(x[4] %% 2 == 1) oddCount <- oddCount + 1 
 
 oddCount
 
 ```
 ## repeating code is slow, hard to read, and error prone, use a loop! 
 ```{r the for loop}
-
 oddCount = 0
 
 for(ii in 1:length(x)){
-  if(x[ii] %% 2 == 1) oddCount <- oddCount+1
+  if(x[ii] %% 2 == 1) oddCount <- oddCount + 1 
 }
+
 oddCount
 
 
@@ -60,9 +59,8 @@ oddCount
 ```{r direct iteration}
 
 oddCount = 0
-
 for(n in x){
-  if(n %% 2 == 1) oddCount <- oddCount+1
+  if(n %% 2 == 1) oddCount <- oddCount + 1 
 }
 oddCount
 
@@ -71,11 +69,10 @@ oddCount
 
 ## what if we don't always want to loop every value? 
 ```{r breaking out of the loop}
-
 x = c(3,6,1,6,1)
 #can we use a for loop to find the first 1
 for(n in x){
-  if(n == 1) print('here')
+  if(n ==1) print('here')
 }
 
 ii = 1
@@ -87,59 +84,52 @@ for(n in x){
 for(ii in 1:length(x)){
   if(x[ii] == 1) print(ii)
 }
-
+ 
 for(ii in 1:length(x)){
-  if(x[ii] == 1) break 
+  if(x[ii] == 1) break
 }
 print(ii)
-
-#loop on index value if indices are a key output. 
-#loop on values directly if calculation on values is key output. 
-
 
 ```
 ## find runs of 1s with length equal to 2
 ```{r runs of 1s}
-
 x = c(1,1,2,4,1,2,3,2,1,1,1,2,34,4,1)
-#what are the indices of two 1s in a row? 
-
+#what are the indices of two 1s in a row
 runs <- NULL
 for(ii in 1:(length(x)-1)){
-  if(x[(ii+1)] == 1 & x[ii] == 1){
+  if(x[ii] == 1 & x[ii+1] == 1){
     runs <- c(runs, ii)
   }
 }
+runs
 
 
 
 ```
 ## simplify with the all function
 ```{r all any}
-
 x = c(1,1,2,4,1,2,3,2,1,1,1,2,34,4,1)
 #what are the indices of two 1s in a row? 
-
 runs <- NULL
 for(ii in 1:(length(x)-1)){
   if(all(x[ii:(ii+1)] == 1)){
     runs <- c(runs, ii)
   }
 }
+runs
 
-#the any function is the complement of the all function 
 
-any(c(1,2)==1) 
+any(c(1,2)==1)
 
-#can you write a for loop that finds indices where consecutive values are 
-#1 and 2 OR 2 and 1? 
-
+#can you write a for loop that finds indices where consecutive values
+#are 1 and 2 OR 2 and 1? 
 runs <- NULL
 for(ii in 1:(length(x)-1)){
   if(any(x[ii:(ii+1)] == 1) & any(x[ii:(ii+1)] == 2)){
     runs <- c(runs, ii)
   }
 }
+runs
 
 
 

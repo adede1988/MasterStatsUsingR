@@ -26,17 +26,7 @@ library(tidyverse)
 ## the double square bracket explained
 
 ```{r double bracket}
-x <- list(name='adam', age = 35, colGrad = T)
-x['name']
-x[1]
 
-x[[1]]
-
-mode(x[[1]])
-mode(x[1])
-
-x[[1:2]]
-x[1:2]
 
 
 ```
@@ -44,20 +34,12 @@ x[1:2]
 
 ```{r single bracket use}
 
-x[4] = 175
-names(x)[4] <- 'height'
 
-x[5:7] = c(T,F,T)
-
-x[5:7] <- NULL
-length(x)
 
 
 ```
 ## just remember that single brackets are no good when you want to compute 
 ```{r single bracket computation fail}
-x[2]*2
-x[[2]]*2
 
 
 ```

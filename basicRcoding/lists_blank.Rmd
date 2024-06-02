@@ -1,5 +1,5 @@
 ---
-title: 'lists'
+title: 'Lists'
 author: "Adam Dede"
 date: "2024-03-19"
 output:
@@ -46,21 +46,8 @@ library(tidyverse)
 
 ```
 
-## what's with the double square brackets? 
-```{r double versus single brackets}
-
-
-
-```
-## adding to an already created list
-```{r dim}
-
-
-
-
-```
-
 ## converting to a vector, but watch out for coercion! 
+
 ```{r unlist}
 
 
@@ -71,8 +58,4 @@ library(tidyverse)
 
 
 ```
-## indexing challenge! 
-```{r list of lists indexing}
 
-
-```
