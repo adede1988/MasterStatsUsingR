@@ -1,0 +1,87 @@
+---
+title: 'Chi Square, brain data!'
+author: "Adam Dede"
+date: "2024-06-01"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+courseThemePath = 
+  "C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\courseTheme.R"
+source(courseThemePath)
+
+```
+
+## data for reactive electrodes
+
+```{r dataframe}
+
+brainDat = data.frame('region'  = c('ACC', 'dlPFC', 'Hip', 'PHG', 'pPFC'), 
+                      'total'   = c(44, 247, 40, 79, 35), 
+                      'reactive'= c(21, 133, 21, 54, 30))
+
+
+
+```
+## Visualize: do we have varied numbers of total and reactive electrodes across regions? 
+```{r bar graphs of data}
+brainDat %>% ggplot(aes(color = region, fill = region, 
+                        x = region, y = total)) +
+  geom_bar(stat = 'identity') + brightCol + brightFil + myTheme
+
+
+brainDat %>% ggplot(aes(color = region, fill = region, 
+                        x = region, y = reactive)) +
+  geom_bar(stat = 'identity') + brightCol + brightFil + myTheme
+
+
+```
+
+## Test goodness of fit: do we have a varied number of total electrodes? 
+```{r calcualte goodness of fit by hand}
+#chi squared formula: 
+#summation of: (observed - expected)^2 / expected
+totChans = sum(brainDat$total)
+numReg = length(brainDat$region)
+#we expect the total number of electrodes is evenly distributed between regions
+brainDat$expectedTot = totChans / numReg
+
+brainDat$chiSquared = (brainDat$total - brainDat$expectedTot)^2 /
+                      brainDat$expectedTot
+testStat = sum(brainDat$chiSquared)
+degreesOfFreedom = numReg -1 
+
+critVal = qchisq(.95, degreesOfFreedom)
+pVal = 1 - pchisq(testStat, degreesOfFreedom)
+
+if(critVal < testStat){
+  print('there is significant variability between total electrodes across regions')
+  print(paste('chiSq =', testStat, '; DF =', degreesOfFreedom, 'p-value =', pVal))
+} else {
+  print('there is not variability between total electrodes across regions')
+  print(paste('chiSq =', testStat, '; DF =', degreesOfFreedom, 'p-value =', pVal))
+}
+chisq.test(brainDat$total)
+
+```
+
+## Test goodness of fit: do we have a varied number of reactive electrodes? 
+```{r calcualte goodness of fit using R builtin}
+
+chisq.test(brainDat$reactive)
+
+
+```
