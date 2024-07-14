@@ -1,0 +1,144 @@
+---
+title: 'simulating data from different distributions'
+author: "Adam Dede"
+date: "2024-07-14"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+#check using chatGPT to find "how to I make a log sequence"
+install.packages("pracma")
+library(pracma)
+
+library(tidyverse)
+
+
+
+```
+
+## simualte data from a normal or gaussian distribution
+
+```{r dataframe}
+
+dat = rnorm(1000, mean = 0, sd = 1)
+
+ggplot(data.frame('norm' = dat), aes(x = norm)) + geom_freqpoly()
+
+sampleSize = logspace(log(10,10), log(100000,10), 200)
+df = data.frame()
+for (ss in sampleSize){
+  ss = round(ss)
+  curDat = rnorm(ss, mean = 0, sd = 1)
+  df = rbind(df, data.frame('samp' = replicate(ss, ss), 
+                            'val' = curDat))
+}
+
+bin_breaks = seq(-4, 4, .1)
+
+discretizeAndPlot <- function(df, bin_breaks){
+
+  df_bins <- df %>%
+    mutate(bin = cut(val, breaks = bin_breaks, right = F)) %>%  
+    count(samp, bin)
+  
+  # Create a complete data frame with all possible combinations of samp and bins
+  complete_bins <- expand.grid(
+    samp = unique(df$samp),
+    bin = levels(cut(df$val, breaks = bin_breaks, right = F))
+  )
+  
+  # Join the counts with the complete data frame
+  df_hist <- complete_bins %>%
+    left_join(df_bins, by = c("samp", "bin")) %>%
+    replace_na(list(n = 0)) %>%
+    group_by(samp) %>%
+    mutate(proportion = n / sum(n))
+  
+  # Extract bin midpoints for plotting
+  df_hist <- df_hist %>% group_by(samp, bin) %>%
+    mutate(bin_midpoint = 
+               mean(sapply(strsplit(as.character(bin), ","), 
+                      function(x) {
+                        as.numeric(gsub("\\(|\\[|\\]|\\)", "", x))
+                        }
+                      ))) 
+  
+  ggplot(df_hist, aes(x = bin_midpoint, y = proportion, group = samp, color = samp)) + 
+    geom_line() +
+    scale_color_gradient(trans = "log")  
+}
+
+discretizeAndPlot(df, bin_breaks)
+
+```
+## simulate data from a uniform distribution 
+```{r uniform distribution}
+#useful for simulating random probabilities 
+
+sampleSize = logspace(log(10,10), log(100000,10), 200)
+df = data.frame()
+for (ss in sampleSize){
+  ss = round(ss)
+  curDat = runif(ss, min = 0, max = 1)
+  df = rbind(df, data.frame('samp' = replicate(ss, ss), 
+                            'val' = curDat))
+}
+
+bin_breaks = seq(-.05, 1.05, .05)
+discretizeAndPlot(df, bin_breaks)
+
+
+
+
+```
+
+## simulate data from a log normal distribution
+
+```{r log normal distribution}
+#useful for modeling things like income 
+sampleSize = logspace(log(10,10), log(100000,10), 200)
+df = data.frame()
+for (ss in sampleSize){
+  ss = round(ss)
+  curDat = rlnorm(ss, meanlog = log(106270.90), sdlog = 1)
+  df = rbind(df, data.frame('samp' = replicate(ss, ss), 
+                            'val' = curDat))
+}
+# df$val = log(df$val, 10) #toggle here to see conversion back to normal!
+# bin_breaks = seq(2, 10, .05)
+bin_breaks = seq(0, 600000, 10000)
+discretizeAndPlot(df, bin_breaks)
+
+
+```
+
+## simulate data from a poisson distribution
+```{r poisson distribution}
+#useful for modeling events like receiving emails! 
+sampleSize = logspace(log(10,10), log(100000,10), 200)
+df = data.frame()
+for (ss in sampleSize){
+  ss = round(ss)
+  curDat = rpois(ss, lambda = 3)
+  df = rbind(df, data.frame('samp' = replicate(ss, ss), 
+                            'val' = curDat))
+}
+
+bin_breaks = seq(-1, 15)
+discretizeAndPlot(df, bin_breaks)
+
+
+```
+

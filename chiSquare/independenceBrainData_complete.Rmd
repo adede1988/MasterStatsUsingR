@@ -106,23 +106,4 @@ chisq.test(brainDat[,2:3])
 
 ```
 
-## adding rows and columns to matrices
-```{r rows and columns}
 
-
-```
-## recycling in matrices
-```{r recycling}
-
-```
-##dimensions can get dropped and break your code
-```{r dimension dropping}
-
-```
-
-## arrays (matrices with more than 2 dimensions)
-```{r arrays}
-
-
-
-```

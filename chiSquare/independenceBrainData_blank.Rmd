@@ -41,13 +41,12 @@ brainDat = data.frame('region'  = c('ACC', 'dlPFC', 'Hip', 'PHG', 'pPFC'),
 ## are there more reactive channels in some regions than others?
 
 ```{r visualize total and reactive}
+brainLong = pivot_longer(brainDat, cols = c(total, reactive),
+                         names_to = 'type', 
+                         values_to= 'elecs')
 
-brainLong = pivot_longer(brainDat, cols = c(total, reactive), 
-                         names_to = "type", values_to = "chans")
-
-brainLong %>% ggplot(aes(x = region, color = region, fill = type, 
-                         y = chans))+
-  geom_bar(stat = 'identity', size = 3) +  brightFil + myTheme
+brainLong %>% ggplot(aes(x=region, color = region, fill = type, y = elecs))+
+  geom_bar(stat = 'identity', size = 3) + brightFil + myTheme
 
 
 ```
@@ -58,8 +57,9 @@ brainLong %>% ggplot(aes(x = region, color = region, fill = type,
 brainDat$propReact = brainDat$reactive / brainDat$total
 
 brainDat %>% ggplot(aes(x = region, color = region, fill = region, 
-                          y = propReact))+
-  geom_bar(stat = 'identity') +  brightCol + brightFil + myTheme
+                        y = propReact))+
+  geom_bar(stat = 'identity') + brightCol + brightFil + myTheme
+
 
 
 ```
@@ -67,6 +67,7 @@ brainDat %>% ggplot(aes(x = region, color = region, fill = region,
 ## Test independence:  
 ```{r independence test by hand}
 
+#what's the number of regions? 
 numReg = length(brainDat$region)
 #what's the column total for total channels? 
 totChannels = sum(brainDat$total)
@@ -79,17 +80,18 @@ brainDat$regSum = brainDat$total + brainDat$reactive
 #get the expected values
 brainDat$totalExpected = brainDat$regSum * totChannels / totAll
 brainDat$reactiveExpected = brainDat$regSum * totReact / totAll
+
 #calculate the chi squared contribution for each cell
-brainDat$chiSquareTotal = (brainDat$total - brainDat$totalExpected)^2/
+brainDat$chiSquareTotal = (brainDat$total - brainDat$totalExpected)^2 /
                           brainDat$totalExpected
-brainDat$chiSquareReact = (brainDat$reactive - brainDat$reactiveExpected)^2/
+brainDat$chiSquareReact = (brainDat$reactive - brainDat$reactiveExpected)^2 / 
                           brainDat$reactiveExpected
 
-#get the total test stat and do the significance test: 
-testStat = sum(brainDat$chiSquareTotal) + sum(brainDat$chiSquareReact)
-numConditions = 2 
-degreesOfFreedom = (numReg - 1) * (numConditions - 1)
 
+#get the total test stat and do the significance test: 
+testStat = sum(brainDat$chiSquareReact) + sum(brainDat$chiSquareTotal)
+numConditions = 2
+degreesOfFreedom = (numReg - 1) * (numConditions - 1)
 critVal = qchisq(.95, degreesOfFreedom)
 pVal = 1 - pchisq(testStat, degreesOfFreedom)
 
@@ -101,7 +103,8 @@ if(critVal < testStat){
   print(paste('chiSq =', testStat, '; DF =', degreesOfFreedom, 'p-value =', pVal))
 }
 
-chisq.test(brainDat[,2:3])
+chisq.test(brainDat[,c('reactive', 'total')])
+
 
 
 ```

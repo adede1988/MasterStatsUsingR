@@ -1,0 +1,218 @@
+---
+title: 'Chi Square c-sections by state!'
+author: "Adam Dede"
+date: "2024-06-22"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(maps)
+library(mapdata)
+# more info about plotting on US maps: 
+# https://jtr13.github.io/cc19/different-ways-of-plotting-u-s-map-in-r.html
+
+```
+
+## import c-section data
+
+```{r c-sec dat}
+
+#data downloaded from: https://www.cdc.gov/nchs/pressroom/sosmap/cesarean_births/cesareans.htm
+path = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\data\\'
+
+cSec = read.csv(paste0(path, 'CsectionRates.csv'))
+
+```
+## how to plot a US map
+```{r plotting a US map}
+
+state <- map_data('state')
+ggplot(data = state, aes(x = long, y = lat, fill = region, group = group))+
+  geom_polygon(color = 'white') + 
+  guides(fill=FALSE) + 
+  theme(axis.title.x=element_blank(), 
+        axis.text.x=element_blank(), 
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank()) + 
+  ggtitle('U.S. Map with States') + 
+  coord_fixed(1.3)
+
+#challenge: we have long names in the state data frame but abbreviations in the 
+#           c-section data! Can you solve this issue? 
+
+```
+## match long names to abreviations in c-section data
+```{r get long names}
+
+#I'm going to use chat gpt to get a data frame to match abbreviations to names
+
+state_abbreviations <- data.frame(
+  State = c(
+    "Alabama", "Alaska", "Arizona", "Arkansas", 
+    "California", "Colorado", "Connecticut", "Delaware", 
+    "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", 
+    "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", 
+    "Maine", "Maryland", "Massachusetts", "Michigan", 
+    "Minnesota", "Mississippi", "Missouri", "Montana", 
+    "Nebraska", "Nevada", "New Hampshire", "New Jersey",
+    "New Mexico", "New York", "North Carolina", 
+    "North Dakota", "Ohio", "Oklahoma", "Oregon", 
+    "Pennsylvania", "Rhode Island", "South Carolina",
+    "South Dakota", "Tennessee", "Texas", "Utah", 
+    "Vermont", "Virginia", "Washington", "West Virginia", 
+    "Wisconsin", "Wyoming"
+  ),
+  Abbreviation = c(
+    "AL", "AK", "AZ", "AR", "CA",
+    "CO", "CT", "DE", "FL", "GA",
+    "HI", "ID", "IL", "IN", "IA",
+    "KS", "KY", "LA", "ME", "MD",
+    "MA", "MI", "MN", "MS", "MO",
+    "MT", "NE", "NV", "NH", "NJ",
+    "NM", "NY", "NC", "ND", "OH",
+    "OK", "OR", "PA", "RI", "SC",
+    "SD", "TN", "TX", "UT", "VT",
+    "VA", "WA", "WV", "WI", "WY"
+  )
+)
+#before merging, make sure there is a "STATE" variable like in cSec
+names(state_abbreviations) <- c("stateLong", "STATE")
+#now we can link this information together! 
+merge(state_abbreviations, cSec) -> cSec
+
+#rename the region to stateLong to match with what's in cSec
+names(state)[5] = 'stateLong'
+
+#let's just plot one year of data
+cSec = filter(cSec, YEAR == 2021)
+
+#merge! 
+merge(cSec, state) -> plotDat
+
+#uh oh! needs to be lower case to match 
+cSec$stateLong <- tolower(cSec$stateLong)
+
+merge(state, cSec) -> plotDat
+
+ggplot(data = plotDat, aes(x = long, y = lat, fill = RATE, group = group))+
+  geom_polygon(color = 'white')  + 
+  theme(axis.title.x=element_blank(), 
+        axis.text.x=element_blank(), 
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank()) + 
+  ggtitle('U.S. C-section rate map') + 
+  coord_fixed(1.3)
+#why are we getting those weird unplotted areas? 
+ggplot(plotDat, aes(x = c(1:length(order)), y = order)) + geom_point()
+
+plotDat <- plotDat %>% arrange(order)
+
+ggplot(data = plotDat, aes(x = long, y = lat, fill = RATE, group = group))+
+  geom_polygon(color = 'white')  + 
+  theme(axis.title.x=element_blank(), 
+        axis.text.x=element_blank(), 
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank()) + 
+  ggtitle('U.S. C-section rate map') + 
+  coord_fixed(1.3)
+#the challenge is that chi squared plotDats work on observed versus 
+#expected values, so we need to know the actual counts! 
+
+
+```
+## combining data with actual counts
+
+```{r get birth counts}
+
+#here are the total births for each state
+#data downloaded from: https://wonder.cdc.gov/
+
+data <- read_delim(paste0(path, 'Natality, 2016-2022 expanded.txt'), 
+                   delim = "\t", # Specify tab as the delimiter
+                   quote = "\"", # Specify quotation marks as text qualifiers
+                   col_names = c("Notes", "StateOfRes", "StateCode", "Births"),
+                   skip = 1 # Adjust this as needed to skip any header info
+)
+
+data <- data[!is.na(data$StateCode), ]
+data <- select(data, -Notes) # Remove the 'Notes' column
+
+
+
+data$StateOfRes <- tolower(data$StateOfRes)
+
+names(data) <- c("stateLong", "code", "Births")
+cSec <- merge(cSec, data) %>% select(c('YEAR', 'stateLong', 'RATE', 'Births'))
+
+```
+## make a new plot showing total births!
+
+```{r total birth plot}
+
+merge(state, cSec) -> plotDat
+plotDat <- plotDat %>% arrange(order)
+
+ggplot(data = plotDat, aes(x = long, y = lat, fill = Births, group = group))+
+  geom_polygon(color = 'white')  + 
+  theme(axis.title.x=element_blank(), 
+        axis.text.x=element_blank(), 
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank()) + 
+  ggtitle('U.S. births map') + 
+  coord_fixed(1.3)
+
+
+```
+
+## do a chi-square test to assess if c-section vs vaginal births 
+## are independent from state
+
+```{r chi squared test}
+cSec$cSec = round(cSec$Births * (cSec$RATE/100))
+cSec$vaginal = cSec$Births - cSec$cSec
+cSec$expectedC =  round(cSec$Births * mean((cSec$RATE/100)))
+cSec$deviation = (cSec$cSec - cSec$expectedC) / cSec$expectedC
+
+chisq.test(cSec[,c('vaginal', 'cSec')])
+
+
+merge(state, cSec) -> plotDat
+plotDat <- plotDat %>% arrange(order)
+
+ggplot(data = plotDat, aes(x = long, y = lat, fill = deviation, group = group))+
+  geom_polygon(color = 'white')  + 
+  scale_fill_gradientn(
+    colors = c('navy',  "green", "red")) +
+  theme(axis.title.x=element_blank(), 
+        axis.text.x=element_blank(), 
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank()) + 
+  ggtitle('U.S. c-section deviation') + 
+  coord_fixed(1.3) 
+
+
+```
+

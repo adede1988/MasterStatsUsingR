@@ -1,0 +1,174 @@
+---
+title: 'Importing gmail timestamps'
+author: "Adam Dede"
+date: "2024-07-14"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+# Install gmailr from GitHub
+install.packages("gmailr", repos = "https://cloud.r-project.org/")
+
+
+# Load gmailr package
+library(gmailr)
+
+library(lubridate)
+library(tidyverse)
+
+
+```
+
+## authenticate
+
+```{r authenticate}
+
+
+# Path to your credentials.json file
+credentials_path <- "C:/Users/Adam/Downloads/gmailCountAuth.json"
+
+# Configure the OAuth 2.0 client ID and secret
+gm_auth_configure(path = credentials_path)
+
+# Authenticate and authorize access to your Gmail account
+gm_auth()
+
+```
+
+## timestamp function as given by chatGPT
+
+```{r chatGPT function}
+
+# Function to extract email timestamps
+get_email_timestamps <- function(query = "in:inbox", max_results = 500) {
+  # List messages based on query
+  messages <- gm_messages(search = query, num_results = max_results)
+  
+  # Initialize a list to store timestamps
+  timestamps <- list()
+  
+  # Loop through each message and extract the internal date
+  for (msg_id in messages$id) {
+    msg <- gm_message(msg_id)
+    internal_date <- msg$internalDate
+    timestamp <- as.POSIXct(as.numeric(internal_date) / 1000, origin = "1970-01-01")
+    timestamps <- append(timestamps, list(timestamp))
+  }
+  
+  # Convert list to a data frame
+  timestamps_df <- data.frame(Timestamp = unlist(timestamps))
+  
+  return(timestamps_df)
+}
+
+# Extract timestamps for the last 100 emails in the inbox
+email_timestamps <- get_email_timestamps(max_results = 500)
+
+
+```
+## edited version of timestamp function
+
+```{r edited timestamp function}
+
+get_email_timestamps <- function(query = "in:inbox", max_results = 100) {
+  # List messages based on query
+  messages <- gm_messages(search = query, num_results = max_results)
+  outmessages = data.frame()
+  for (page in 1:length(messages)) {
+    print(page)
+    messages[[page]]$messages -> test
+    as.data.frame(test) -> test
+    test[,grepl("id", names(test))] -> test
+    pivot_longer(test,
+                 cols = c(1:dim(test)[2]), 
+                 values_to = "IDs",
+                 names_to = "ord") -> test
+    outmessages = rbind(outmessages, test)
+  }
+  
+  
+  # Loop through each message and extract the internal date
+  counter = 1
+  for (msg_id in outmessages$IDs) {
+    if(counter %% 100 == 0){
+      print(counter)
+    }
+    msg <- gm_message(msg_id)
+    check = T
+    errorFlag = F
+    idx = 1
+    while(check){
+      if(msg$payload$headers[[idx]]$name == 'Date' |
+         msg$payload$headers[[idx]]$name == 'date') {
+        check = F
+      }else if (idx == length(msg$payload$headers)){
+        print(paste('out of bounds with no date found: ',  counter))
+        check = F
+        errorFlag = T
+      }else {
+        idx = idx + 1
+      }
+    }
+    if(!errorFlag){
+    date <- msg$payload$headers[[idx]]$value
+    
+    date_time <- dmy_hms(date, tz = "UTC")
+    
+    # Create a data frame with the desired columns
+    df_time <- data.frame(
+      Time = date_time
+    ) %>%
+      mutate(
+        DayOfWeek = wday(Time, label = TRUE, abbr = TRUE),
+        Month = month(Time, label = TRUE, abbr = TRUE),
+        DayOfMonth = day(Time),
+        Year = year(Time),
+        Hour = hour(Time),
+        Minute = minute(Time)
+      )
+    
+    if(counter == 1){
+      timestamps = df_time
+    } else {
+      timestamps = rbind(timestamps, df_time)
+    }
+    }
+    counter = 1+counter
+  }
+  
+  return(timestamps)
+}
+
+# Extract timestamps for the last 100 emails in the inbox
+timestamps_df <- get_email_timestamps(max_results = 20000)
+
+write.csv(timestamps_df, 
+  'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\data\\emailTimes.csv')
+
+```
+## get number of emails in each hour of the sample
+```{r email per hour data}
+
+timestamps_df %>% group_by(Month, DayOfMonth, Year) %>%
+  summarize(count = n()) -> test
+
+test %>% ggplot(aes(x=count)) + geom_histogram(breaks = seq(0,50, 1))
+
+
+
+
+```
+
+

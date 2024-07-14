@@ -1,0 +1,90 @@
+---
+title: 'Chi Square c-sections by state!'
+author: "Adam Dede"
+date: "2024-06-22"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(maps)
+library(mapdata)
+# more info about plotting on US maps: 
+# https://jtr13.github.io/cc19/different-ways-of-plotting-u-s-map-in-r.html
+
+```
+
+## import c-section data
+
+```{r c-sec dat}
+
+#data downloaded from: https://www.cdc.gov/nchs/pressroom/sosmap/cesarean_births/cesareans.htm
+path = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\data\\'
+
+cSec = read.csv(paste0(path, 'CsectionRates.csv'))
+
+```
+## how to plot a US map
+```{r plotting a US map}
+
+state <- map_data('state')
+
+
+#challenge: we have long names in the state data frame but abbreviations in the 
+#           c-section data! Can you solve this issue? 
+
+```
+## match long names to abreviations in c-section data
+```{r get long names}
+
+#I'm going to use chat gpt to get a data frame to match abbreviations to names
+
+
+
+
+
+```
+## combining data with actual counts
+
+```{r get birth counts}
+
+#here are the total births for each state
+#data downloaded from: https://wonder.cdc.gov/
+
+
+
+```
+## make a new plot showing total births!
+
+```{r total birth plot}
+
+
+
+```
+
+## do a chi-square test to assess if c-sections vary over states
+
+```{r chi squared test}
+
+
+
+```
+## make a plot of deviation from the expectation of independence
+
+```{r deviation plot}
+
+
+
+```
