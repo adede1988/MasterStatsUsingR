@@ -1,0 +1,159 @@
+---
+title: 'variability parametric'
+author: "Adam Dede"
+date: "2024-07-21"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+courseThemePath = 
+  "C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\courseTheme.R"
+
+library(tidyverse) # data manipulation and visualization
+source(courseThemePath)
+library(pracma) #practical numerical math functions (needed for Mode)
+
+```
+
+## simualte data from all four distributions we know
+
+```{r simulate data}
+
+sampSize = 10000
+
+df = data.frame('norm' = rnorm(sampSize, 3, 1),
+                'lnorm' = rlnorm(sampSize,log(3), 1), 
+                'unif' = runif(sampSize,-2, 8),
+                'pois' = rpois(sampSize, lambda = 3))
+
+df <- df %>% pivot_longer(cols = c(names(df)), 
+                   values_to = 'observed', 
+                   names_to = 'dist')
+
+
+```
+## let's work with just the normal distribution data for now, start with plotting
+```{r plot norm dist}
+
+p <- df %>% filter(dist == 'norm') %>%
+  ggplot(aes(x = observed, group = dist, color = dist, fill = dist)) + 
+  geom_freqpoly(breaks = seq(-1, 7, .1), linewidth = 3) + 
+  myTheme + brightCol + brightFil 
+
+print(p) 
+```
+## calculate the range of the data
+
+``` {r norm range}
+
+normDat = df$observed[df$dist == 'norm'] 
+
+#what's the max value
+max(normDat)-> maxVal
+  
+#what's the min value
+min(normDat) -> minVal
+  
+#what's the max - min = range 
+maxVal - minVal -> range
+
+
+# Add vertical lines for the range
+p + geom_vline(xintercept = minVal, linetype = 'solid', size = 3, color = 'red') + 
+    geom_vline(xintercept = maxVal, linetype = 'solid', size = 3, color = 'red') 
+
+
+```
+## calculate the inter quartile range
+
+``` {r norm IQR}
+
+normDat = sort(normDat)
+
+#25th percentile first quartile
+median(normDat[1:(sampSize/2)]) -> q25
+#75th percentile third quartile
+median(normDat[(1+(sampSize/2)):sampSize]) -> q75
+
+# Add vertical lines for the interquartile range
+p + geom_vline(xintercept = q25, linetype = 'solid', size = 3, color = 'red') + 
+    geom_vline(xintercept = q75, linetype = 'solid', size = 3, color = 'red') 
+  
+
+#alternatively box plots show the IQR by default: 
+ggplot(data = data.frame('values' = normDat), 
+       aes(y = values)) + geom_boxplot()
+
+```
+
+## calculate the mean absolute deviation 
+
+``` {r norm MAD}
+
+#MAD = sum(abs(x - mean(x))) / (n-1)
+
+#mean val
+mean(normDat) -> meanVal
+
+#absolute deviations
+abs(normDat - meanVal) -> abDevs
+
+#sum and divide 
+sum(abDevs) / (sampSize - 1) -> madVal
+
+# Add vertical lines for the mad
+p + geom_vline(xintercept = meanVal +madVal, linetype = 'solid', size = 3, color = 'red') + 
+    geom_vline(xintercept = meanVal - madVal, linetype = 'solid', size = 3, color = 'red') 
+
+
+```
+## use summarize to get all the descriptive stats we know in one shot! 
+```{r descriptives}
+#mistake code: 
+df  %>%
+  group_by(dist) %>%
+  summarise(mean_val = mean(observed),
+            mode_val = Mode(round(observed,1)),
+            median_val = median(observed), 
+            var_val = var(observed), 
+            sd_val = sd(observed), 
+            ss_val = sum((observed - mean_val)^2),
+            range_val = max(observed) - min(observed),
+            IQR_val = quantile(observed,.75) - quantile(observed,.25),
+            mad_val = abs(observed - mean_val)/(sampSize-1)
+              )-> descriptives 
+
+#corrected: 
+df  %>%
+  group_by(dist) %>%
+  summarise(mean_val = mean(observed),
+            mode_val = Mode(round(observed,1)),
+            median_val = median(observed), 
+            var_val = var(observed), 
+            sd_val = sd(observed), 
+            ss_val = sum((observed - mean_val)^2),
+            range_val = max(observed) - min(observed),
+            IQR_val = quantile(observed,.75) - quantile(observed,.25),
+            mad_val = sum(abs(observed - mean_val))/(sampSize-1)
+              )-> descriptives 
+
+#let's round the values so that the table is easier to read
+descriptives %>% mutate_if(is.numeric, ~ round(.,2)) -> roundedDes
+
+#equivalently: 
+descriptives %>% mutate_if(is.numeric, function(x) round(x,2)) -> roundedDes
+
+
+```

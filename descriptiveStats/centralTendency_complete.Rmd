@@ -23,7 +23,7 @@ courseThemePath =
 
 library(tidyverse) # data manipulation and visualization
 source(courseThemePath)
-
+library(pracma) #practical numerical math functions (needed for Mode)
 
 ```
 
@@ -31,54 +31,234 @@ source(courseThemePath)
 
 ```{r simulate data}
 
-sampSize = 100000
+sampSize = 10000
 
 df = data.frame('norm' = rnorm(sampSize, 3, 1),
                 'lnorm' = rlnorm(sampSize,log(3), 1), 
                 'unif' = runif(sampSize,-2, 8),
                 'pois' = rpois(sampSize, lambda = 3))
+
 df <- df %>% pivot_longer(cols = c(names(df)), 
                    values_to = 'observed', 
                    names_to = 'dist')
 
-p <- df %>% filter(dist != 'pois') %>%
+
+```
+## let's work with just the normal distribution data for now, start with plotting
+```{r plot norm dist}
+
+p <- df %>% filter(dist == 'norm') %>%
   ggplot(aes(x = observed, group = dist, color = dist, fill = dist)) + 
-  geom_freqpoly(breaks = seq(-3, 15, .1), linewidth = 3) + 
-  myTheme + brightCol + brightFil
+  geom_freqpoly(breaks = seq(-1, 7, .1), linewidth = 3) + 
+  myTheme + brightCol + brightFil 
 
 print(p) 
 ```
+## calculate the central tendancy measures for the normal distribution
+
+``` {r norm analysis}
+
+normDat = df$observed[df$dist == 'norm'] 
+
+#what's the mean value? 
+# mean = sum(x) / length(x) 
+sum(normDat) / length(normDat) -> meanVal
+  
+#what's the median value? 
+#value in the middle: 
+normDat = sort(normDat)
+if(length(normDat) %% 2 ==0) { #even length! 
+  midVal = length(normDat)/2
+  (normDat[midVal] + normDat[midVal+1]) / 2 -> medVal
+} else { #odd length!
+  midVal = length(normDat)/2  + .5 
+  normDat[midVal] -> medVal
+}
+  
+#what's the modal value? 
+#this line is a bit of a hack to get a central mode in continuous data: 
+round(normDat, 1) -> normDat  
+
+uniSet = unique(normDat)
+#are there even any repeated values? 
+if(length(uniSet) == length(normDat)){ #every value unique! 
+  sort(normDat)[1] -> modVal
+} else { #there's going to be a proper mode! 
+  lengths = rep(0, length(uniSet))
+  
+  for(jj in 1:length(uniSet)){
+    lengths[jj] = sum(normDat==uniSet[jj])
+  }
+  
+  uniSet[which.max(lengths)] -> modVal
+}
+
+# Add vertical lines for central tendency measures
+p + geom_vline(xintercept = meanVal, linetype = 'solid', size = 3, color = 'red') + 
+    geom_vline(xintercept = modVal, linetype = 'dashed', size = 3, color = 'red') + 
+    geom_vline(xintercept = medVal, linetype = 'dotted', size = 3, color = 'red')
+
+
+```
+
 ## calculate the central tendancy measures for the different distributions
 ``` {r central tendency measures}
 
+#how many distributions do we have data for? 
+dists = unique(df$dist)
+L = length(dists)
+
+#create a data.frame to put all the central tendancy values into: 
+group_averages = data.frame('dist' = dists, 
+                            'meanVal' = rep(NA,L), 
+                            'modeVal' = rep(NA,L), 
+                            'medianVal' = rep(NA,L))
+
+#Challenge: can you write a for loop to fill out the group_averages data frame? 
+
+for(ii in 1:L){
+  curDat = df$observed[df$dist == dists[ii]]
+  
+  #what's the mean value? 
+  # mean = sum(x) / length(x) 
+  group_averages$meanVal[ii] = sum(curDat) / length(curDat)
+  
+  #what's the median value? 
+  #value in the middle: 
+  curDat = sort(curDat)
+  if(length(curDat) %% 2 ==0) { #even length! 
+    midVal = length(curDat)/2
+    group_averages$medianVal[ii] = (curDat[midVal] + curDat[midVal+1]) / 2
+  } else { #odd length!
+    midVal = length(curDat)/2  + .5 
+    group_averages$medianVal[ii] = curDat[midVal]
+  }
+  
+  #what's the modal value? 
+  round(curDat, 1) -> curDat
+  uniSet = unique(curDat)
+  #are there even any repeated values? 
+  if(length(uniSet) == length(curDat)){ #every value unique! 
+    group_averages$modeVal[ii] = curDat[1]
+  } else { #there's going to be a proper mode! 
+    lengths = rep(0, length(uniSet))
+    
+    for(jj in 1:length(uniSet)){
+      lengths[jj] = sum(curDat==uniSet[jj])
+    }
+    
+    group_averages$modeVal[ii] = uniSet[which.max(lengths)]
+    }
+  
+}
+
+group_averages
+
+group_averages <- group_averages %>% pivot_longer(cols = c('meanVal', 'modeVal', 'medianVal'), 
+                                names_to = 'measure', 
+                                values_to = 'centralTend') 
 
 
+```
+
+## calculating the central tendency using builtin functions!
+
+```{r builtin demo}
 # Calculate group means
-group_means <- df %>% filter(dist != 'pois') %>%
+df  %>%
   group_by(dist) %>%
   summarise(mean_val = mean(observed),
-            mode_val = Mode(observed),
-            median_val = median(observed)) %>%
-  pivot_longer(cols = -all_of(c('dist')), 
-               values_to = 'centralTend', 
-               names_to = 'type')
+            mode_val = Mode(round(observed,1)),
+            median_val = median(observed)) -> builtinAvg 
 
+```
+## plot for the poisson distribution data with central tendency values
 
-# Add vertical lines for group means
-p + geom_vline(data = group_means, aes(xintercept = centralTend, 
-                                       color = dist,
-                                       linetype = type), size = 1) +
-   guides(
-    linetype = guide_legend(override.aes = list(color = "pink"))) + 
-  theme(legend.key.height = unit(1.5, "cm")) +
-  facet_grid(dist~.)
+```{r pois plot}
+
+p <- df %>% filter(dist == 'pois') %>%
+  ggplot(aes(x = observed, group = dist, color = dist, fill = dist)) + 
+  geom_freqpoly(breaks = seq(-1.5, 9.5, 1), linewidth = 3) + 
+  myTheme + brightCol + brightFil 
+
+print(p)
+
+#for now, just hard code in the central tendency values 
+p + geom_vline(data = filter(group_averages, dist == 'pois'),
+               aes(xintercept = centralTend, linetype = measure), 
+               size = 3, color = 'red') 
 
 
 ```
-## can you make a plot for the poisson distribution? 
+## can you make plots for the uniform and log normal distributions? 
 
-```{r plotting poisson}
+```{r plot the other distributions}
 
+#lnorm: 
+p <- df %>% filter(dist == 'lnorm') %>%
+  ggplot(aes(x = observed, group = dist, color = dist, fill = dist)) + 
+  geom_freqpoly(breaks = seq(-1.5, 9.5, 1), linewidth = 3) + 
+  myTheme + brightCol + brightFil 
+
+print(p)
+
+#for now, just hard code in the central tendency values 
+p + geom_vline(data = filter(group_averages, dist == 'lnorm'),
+               aes(xintercept = centralTend, linetype = measure), 
+               size = 3, color = 'red') 
+  
+#unif: 
+p <- df %>% filter(dist == 'unif') %>%
+  ggplot(aes(x = observed, group = dist, color = dist, fill = dist)) + 
+  geom_freqpoly(breaks = seq(-1.5, 9.5, 1), linewidth = 3) + 
+  myTheme + brightCol + brightFil 
+
+print(p)
+
+#for now, just hard code in the central tendency values 
+p + geom_vline(data = filter(group_averages, dist == 'unif'),
+               aes(xintercept = centralTend, linetype = measure), 
+               size = 3, color = 'red') 
 
 
 ```
+## make all plots in one go? merge the central tendencies with the data to make it happen! 
+
+```{r make all plots}
+## challenge: 
+## 1) Calculate central tendency with builtin functions
+## 2) generate all the freq_poly plots for all distributions at once! 
+## 3) put all the central tendency measures on all of them at once! 
+## hint: use faceting to make the plots easy to read
+
+#calcualte central tendency: 
+df  %>%
+  group_by(dist) %>%
+  summarise(mean_val = mean(observed),
+            mode_val = Mode(round(observed,1)),
+            median_val = median(observed)) -> builtinAvg 
+
+#pivot longer to facilitate plotting
+builtinAvg <- builtinAvg %>% 
+              pivot_longer(cols = -c('dist'), 
+                           names_to = 'type', 
+                           values_to = 'centralTend')
+
+df %>% ggplot(aes(x = observed, color = dist)) + 
+  geom_freqpoly(breaks = seq(-1.5, 8, 1), linewidth = 2) + 
+  facet_grid(dist~.) + myTheme + brightCol -> p
+
+p + geom_vline(data = builtinAvg,
+               aes(xintercept = centralTend, linetype = type), 
+               size = 3, color = 'red') +
+  theme(axis.title.y = element_blank(), 
+        axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank())
+
+#challenge question: If you regenerate the simulated data, 
+#                    what will happen to the mode of the mode 
+#                    of the uniform data? 
+
+
+```
+

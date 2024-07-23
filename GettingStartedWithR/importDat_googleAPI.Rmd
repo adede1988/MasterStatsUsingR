@@ -21,7 +21,10 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 # Install gmailr from GitHub
 install.packages("gmailr", repos = "https://cloud.r-project.org/")
 
-
+# Path to your credentials.json file
+credentials_path <- "C:/Users/Adam/Downloads/gmailCountAuth.json"
+#path to your github folder for this course
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
 # Load gmailr package
 library(gmailr)
 
@@ -36,8 +39,7 @@ library(tidyverse)
 ```{r authenticate}
 
 
-# Path to your credentials.json file
-credentials_path <- "C:/Users/Adam/Downloads/gmailCountAuth.json"
+
 
 # Configure the OAuth 2.0 client ID and secret
 gm_auth_configure(path = credentials_path)
@@ -154,17 +156,24 @@ get_email_timestamps <- function(query = "in:inbox", max_results = 100) {
 # Extract timestamps for the last 100 emails in the inbox
 timestamps_df <- get_email_timestamps(max_results = 20000)
 
-write.csv(timestamps_df, 
-  'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\data\\emailTimes.csv')
+write.csv(timestamps_df, paste0(gitHubPath,'data\\emailTimes.csv'))
 
 ```
 ## get number of emails in each hour of the sample
 ```{r email per hour data}
 
+timestamps_df <- read.csv(paste0(gitHubPath,'data\\emailTimes.csv'))
+
 timestamps_df %>% group_by(Month, DayOfMonth, Year) %>%
   summarize(count = n()) -> test
 
-test %>% ggplot(aes(x=count)) + geom_histogram(breaks = seq(0,50, 1))
+test$dummy = as.factor(1)
+
+test %>% ggplot(aes(x=count, color = dummy, fill = dummy)) + 
+  geom_histogram(breaks = seq(0,50, 1)) +
+  myTheme + brightCol + brightFil + 
+  ggtitle('emails per day') + 
+  theme(legend.position = 'none')
 
 
 
