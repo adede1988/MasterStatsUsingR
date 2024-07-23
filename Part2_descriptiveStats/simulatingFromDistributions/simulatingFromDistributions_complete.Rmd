@@ -1,0 +1,72 @@
+---
+title: 'simulating data from different distributions'
+author: "Adam Dede"
+date: "2024-07-14"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+
+
+
+```
+
+## simualte data from a normal or gaussian distribution
+
+```{r dataframe}
+
+dat = rnorm(30, mean = 3, sd = 1)
+
+ggplot(data.frame('norm' = dat), aes(x = norm)) + geom_freqpoly()
+
+
+
+```
+## simulate data from a uniform distribution 
+```{r uniform distribution}
+#useful for simulating random probabilities 
+
+
+dat = runif(30, min = -2, max = 8)
+
+ggplot(data.frame('uni' = dat), aes(x = uni)) + geom_freqpoly()
+
+
+
+```
+
+## simulate data from a log normal distribution
+
+```{r log normal distribution}
+#useful for modeling things like income 
+dat = rlnorm(30,log(3), 1)
+
+ggplot(data.frame('lnorm' = dat), aes(x = lnorm)) + geom_freqpoly()
+
+
+```
+
+## simulate data from a poisson distribution
+```{r poisson distribution}
+#useful for modeling events like receiving emails! 
+dat = rpois(30, lambda = 3)
+
+ggplot(data.frame('pois' = dat), aes(x = pois)) + 
+  geom_freqpoly(breaks = seq(-.5, 8.5, 1))
+
+
+```
+

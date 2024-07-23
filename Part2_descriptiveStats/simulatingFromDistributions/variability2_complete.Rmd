@@ -24,6 +24,7 @@ courseThemePath =
 library(tidyverse) # data manipulation and visualization
 source(courseThemePath)
 library(pracma) #practical numerical math functions (needed for Mode)
+library(knitr)
 
 ```
 
@@ -131,7 +132,9 @@ df  %>%
             sd_val = sd(observed), 
             ss_val = sum((observed - mean_val)^2),
             range_val = max(observed) - min(observed),
-            IQR_val = quantile(observed,.75) - quantile(observed,.25),
+            Q_25 = quantile(observed, .25), 
+            Q_75 = quantile(observed, .75),
+            IQR_val = Q_75 - Q_25,
             mad_val = abs(observed - mean_val)/(sampSize-1)
               )-> descriptives 
 
@@ -145,7 +148,9 @@ df  %>%
             sd_val = sd(observed), 
             ss_val = sum((observed - mean_val)^2),
             range_val = max(observed) - min(observed),
-            IQR_val = quantile(observed,.75) - quantile(observed,.25),
+            Q_25 = quantile(observed, .25), 
+            Q_75 = quantile(observed, .75),
+            IQR_val = Q_75 - Q_25,
             mad_val = sum(abs(observed - mean_val))/(sampSize-1)
               )-> descriptives 
 
@@ -154,6 +159,8 @@ descriptives %>% mutate_if(is.numeric, ~ round(.,2)) -> roundedDes
 
 #equivalently: 
 descriptives %>% mutate_if(is.numeric, function(x) round(x,2)) -> roundedDes
+
+kable(roundedDes)
 
 
 ```

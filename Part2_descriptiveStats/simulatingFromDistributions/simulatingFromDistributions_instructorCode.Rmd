@@ -325,3 +325,26 @@ df %>% ggplot(aes(x = simulatedData, color = dummy, fill = dummy)) +
     axis.text.y = element_blank()) 
 
 ```
+## main simulation 
+```{r sim from 4 dists}
+
+sampSize = 10000
+
+df = data.frame('norm' = rnorm(sampSize, 3, 1),
+                'lnorm' = rlnorm(sampSize,log(3), 1), 
+                'unif' = runif(sampSize,-2, 8),
+                'pois' = rpois(sampSize, lambda = 3))
+
+df <- df %>% pivot_longer(cols = c(names(df)), 
+                   values_to = 'observed', 
+                   names_to = 'dist')
+
+df %>% ggplot(aes(x = dist, y = observed,  fill = dist)) + 
+  geom_boxplot(color = 'pink') + myTheme  + brightFil + 
+  ylim(c(-3, 10))
+
+df %>% ggplot(aes(x = observed, color = dist)) + 
+  geom_freqpoly(breaks = seq(-3.5,10.5, 1), linewidth = 3) + myTheme + brightCol + 
+  xlim(c(-3, 10))
+
+```
