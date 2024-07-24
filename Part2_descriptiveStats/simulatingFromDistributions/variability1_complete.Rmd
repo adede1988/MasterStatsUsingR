@@ -85,7 +85,7 @@ p + geom_vline(xintercept = meanVal, linetype = 'solid', size = 3, color = 'red'
 
 ``` {r builtin calculations}
 
-#calcualte central tendency: 
+#calculate key values: 
 df  %>%
   group_by(dist) %>%
   summarise(mean_val = mean(observed),
