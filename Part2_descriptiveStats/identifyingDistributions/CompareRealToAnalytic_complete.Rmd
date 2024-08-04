@@ -131,7 +131,7 @@ plotAgainstDists <- function(df, varOfInterest, empiricalBreaks, sumVals, title)
                                              sd = sumVals$sdVal),
                               'poisson' = dpois(round(empiricalBreaks), 
                                              lambda = sumVals$meanVal), 
-                              'logNorm' = dlnorm(empiricalBreaks, 
+                              'logNorm' = dlnorm(empiricalBreaks+sumVals$offSet, 
                                                  meanlog = sumVals$logMean, 
                                                  sdlog = sumVals$logSD), 
                               'unif' = dunif(empiricalBreaks, 
@@ -144,8 +144,8 @@ plotAgainstDists <- function(df, varOfInterest, empiricalBreaks, sumVals, title)
                                                  values_to = 'density', 
                                                  names_to = 'dist')
   
-  analyticDists$xVal[analyticDists$dist == 'logNorm'] <- 
-              analyticDists$xVal[analyticDists$dist == 'logNorm'] - sumVals$offSet
+  # analyticDists$xVal[analyticDists$dist == 'logNorm'] <- 
+  #             analyticDists$xVal[analyticDists$dist == 'logNorm'] - sumVals$offSet
   
   analyticDists <- analyticDists %>% group_by(dist) %>%
                   mutate(density = density / sum(density))
