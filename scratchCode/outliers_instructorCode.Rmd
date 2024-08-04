@@ -1,5 +1,5 @@
 ---
-title: 'identifying distributions '
+title: 'outliers'
 author: "Adam Dede"
 date: "2024-07-23"
 output:
@@ -31,18 +31,28 @@ source(paste0(gitHubPath, 'courseTheme.R'))
 
 df = read.csv(paste0(gitHubPath, 'data\\restingEEG.csv'))
 
-df$dummy = as.factor(1) 
+df$dummy = as.factor(1)
+df$idx = randsample(length(df$name), length(df$name)) 
 
-ggplot(df, aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
-  geom_histogram(breaks = seq(0, 250, .5)) + 
+ggplot(EEGdat, aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
   myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+ggplot(EEGdat, aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
+  geom_histogram(breaks = seq(0,250,.5)) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+ggplot(df, aes(x = idx, y = pow_delta_O, color = dummy, fill = dummy)) + 
+  geom_point() + 
+  scale_y_log10() + 
+  myTheme + brightCol + theme(legend.position = 'none')
 
 ```
 ## my emails per day 
 
 ```{r EEG}
 
-df = read.csv(paste0(gitHubPath, 'emailTimes.csv'))
+df = read.csv(paste0(gitHubPath, 'data\\emailTimes.csv'))
 
 df <- df %>% group_by(DayOfWeek, Month, DayOfMonth, Year) %>% 
   summarize(count = n())
@@ -58,7 +68,7 @@ ggplot(df, aes(x = count, color = dummy, fill = dummy)) +
 
 ```{r sp 500}
 
-df = read.csv(paste0(gitHubPath, 'SP500HistoricalData.csv'))
+df = read.csv(paste0(gitHubPath, 'data\\SP500HistoricalData.csv'))
 names(df)[6] <- 'Change'
 
 df$Change = unlist(lapply(df$Change, function(x) as.numeric(strsplit(x, '%')[[1]])))
@@ -71,19 +81,19 @@ ggplot(df, aes(x = Change, color = dummy, fill = dummy)) +
   xlab('Daily Change (%)')
 
 ```
-## human memory performance
+## country garbage data
+```{r country garbage example}
 
-```{r human memory}
-df = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
-
-df <- df %>% filter(TargALL_UVSD_d >=0)
+#import the country garbage data set and visualize the totalPop variable: 
+wasteDat = read.csv(paste0(gitHubPath, 'data\\plasticWaste.csv'))
 
 #first plot the histogram of country total populations 
-df$dummy = as.factor(1)
-df %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) + 
-  geom_histogram(bins = 10) + 
+wasteDat$dummy = as.factor(1)
+wasteDat %>% ggplot(aes(x = totalPop, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
   myTheme + brightCol + brightFil + theme(legend.position = 'none')
 
+mean(wasteDat$totalPop)
+mean(wasteDat$totalPop[-which(wasteDat$totalPop > 500000000)])
 
 ```
-

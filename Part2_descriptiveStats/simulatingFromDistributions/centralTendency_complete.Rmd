@@ -27,7 +27,7 @@ library(pracma) #practical numerical math functions (needed for Mode)
 
 ```
 
-## simualte data from all four distributions we know
+## simulate data from all four distributions we know
 
 ```{r simulate data}
 
@@ -48,9 +48,9 @@ df <- df %>% pivot_longer(cols = c(names(df)),
 ```{r plot norm dist}
 
 p <- df %>% filter(dist == 'norm') %>%
-  ggplot(aes(x = observed, group = dist, color = dist, fill = dist)) + 
-  geom_freqpoly(breaks = seq(-1, 7, .1), linewidth = 3) + 
-  myTheme + brightCol + brightFil 
+  ggplot(aes(x = observed, group = dist, color = dist)) + 
+  geom_freqpoly(breaks = seq(-1, 7, .1), linewidth = 1) + 
+  myTheme + brightCol 
 
 print(p) 
 ```
