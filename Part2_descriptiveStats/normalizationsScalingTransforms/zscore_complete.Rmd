@@ -1,0 +1,182 @@
+---
+title: 'describing real data'
+author: "Adam Dede"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+
+
+## sp 500 daily change 
+
+```{r sp 500}
+
+df = read.csv(paste0(gitHubPath, '\\data\\SP500HistoricalData.csv'))
+names(df)[6] <- 'Change'
+
+df$Change = unlist(lapply(df$Change, function(x) as.numeric(strsplit(x, '%')[[1]])))
+
+df$dummy = as.factor(1) 
+
+ggplot(df, aes(x = Change, color = dummy, fill = dummy)) +
+  geom_histogram(breaks = seq(-2, 2, .1)) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  xlab('Daily Change (%)') 
+
+```
+
+## sp 500 z-scores
+
+```{r z score sp500}
+
+df$zscore = (df$Change - mean(df$Change)) / sd(df$Change)
+
+
+#can you figure out how to do the adjustment in the histogram breaks to make
+#the plot look exactly like the previous one? 
+M = mean(df$Change)
+S = sd(df$Change)
+
+ggplot(df, aes(x = zscore, color = dummy, fill = dummy)) +
+  geom_histogram(breaks = seq((-2-M)/S, (2-M)/S, .1/S)) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  xlab('Daily Change (z-score)') 
+
+
+```
+
+## Using the normal distribution to tell how rare a daily % change is
+
+```{r determining probabilities}
+
+#What percentage of the time is the daily change greater than 2%? 
+
+z = (2 - M) / S
+
+1-pnorm(z)
+
+ggplot(df, aes(x = zscore, color = dummy, fill = dummy)) +
+  geom_histogram(breaks = seq((-2-M)/S, (2-M)/S, .1/S)) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  xlab('Daily Change (z-score)') +
+  geom_vline(xintercept = z, color = 'red')
+
+#what percentage of the time is the daily change positive? 
+
+z = (0 - M) / S
+
+1-pnorm(z)
+
+ggplot(df, aes(x = zscore, color = dummy, fill = dummy)) +
+  geom_histogram(breaks = seq((-2-M)/S, (2-M)/S, .1/S)) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  xlab('Daily Change (z-score)') +
+  geom_vline(xintercept = z, color = 'red')
+
+#what percentage of the time is the z-score greater than 0? 
+
+z = 0
+
+1-pnorm(z)
+
+ggplot(df, aes(x = zscore, color = dummy, fill = dummy)) +
+  geom_histogram(breaks = seq((-2-M)/S, (2-M)/S, .1/S)) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  xlab('Daily Change (z-score)') +
+  geom_vline(xintercept = z, color = 'red')
+
+#what percentage of the time is the daily change between -1% and +1%
+
+z1 = (1 - M) / S
+z1neg = (-1 - M) / S
+
+pnorm(z1) - pnorm(z1neg)
+
+ggplot(df, aes(x = zscore, color = dummy, fill = dummy)) +
+  geom_histogram(breaks = seq((-2-M)/S, (2-M)/S, .1/S)) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  xlab('Daily Change (z-score)') +
+  geom_vline(xintercept = c(z1, z1neg), color = 'red')
+
+
+```
+
+## plot particular z-scores onto the raw data distribution
+
+```{r z scores on raw}
+
+#where are the +- 1 z-score boundaries in the raw data? 
+
+#1 = (X - M) / S
+#S = (x - M)
+S+M -> X
+M-S -> Xneg
+
+
+ggplot(df, aes(x = Change, color = dummy, fill = dummy)) +
+  geom_histogram(breaks = seq(-2, 2, .1)) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  xlab('Daily Change (%)') +
+  geom_vline(xintercept = c(X, Xneg), color = 'red')
+
+#what percentage of the raw data fall between +- 1 z-score? 
+sum(df$Change>Xneg & df$Change<X) / length(df$Change)
+
+#what percentage of the normal distribution is between +- 1 z-score? 
+pnorm(1) - pnorm(-1)
+
+
+```
+
+## How rare are the most extreme changes in our dataset? 
+
+```{r rarity of events}
+
+pnorm(min(df$Change), M, S)
+
+1-pnorm(max(df$Change), M, S)
+
+#In 252 trading days, would you expect to observe such rare events by chance? 
+numberLessThanMin = rep(0, 1000)
+numberMoreThanMax = rep(0, 1000)
+for(ii in 1:1000){
+  simSP500 = rnorm(252, M, S)
+  numberLessThanMin[ii] = min(simSP500) < min(df$Change)
+  numberMoreThanMax[ii] = max(simSP500) > max(df$Change)
+}
+
+print(paste0("In 1000 years we expect ", sum(numberLessThanMin), 
+             " years with worse days than the worst day last year"))
+print(paste0("In 1000 years we expect ", sum(numberMoreThanMax), 
+             " years with better days than the best day last year"))
+
+#does this make sense? Was the z-score of the maximum more extreme (more rare)
+#than the maximum? 
+
+#zmin
+(min(df$Change) - M) / S
+#zmax
+(max(df$Change) - M) / S
+
+
+```

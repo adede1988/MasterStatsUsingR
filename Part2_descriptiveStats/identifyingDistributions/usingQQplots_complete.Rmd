@@ -31,49 +31,37 @@ library(pracma)
 ```{r functionitize}
 #you could experiment with putting this into another separate R script
 #the same way that we did with the courseTheme! 
-plotAgainstDists <- function(df, varOfInterest, empiricalBreaks, sumVals, title){
 
-  L = length(empiricalBreaks)
-  empiricalDensity = rep(0, L)
-  
-  for(ii in 1: L){
-    empiricalDensity[ii] = sum(df[[varOfInterest]] < empiricalBreaks[ii])
-  }
-  empiricalDensity = (empiricalDensity[-1] - empiricalDensity[-L]) / 
-                     (empiricalBreaks[-1] - empiricalBreaks[-L]) 
-  empiricalBreaks = (empiricalBreaks[-1] + empiricalBreaks[-L]) / 2
-  
-  analyticDists <- data.frame('empiricalData' =empiricalDensity,
-                              'norm' = dnorm(empiricalBreaks, 
-                                             mean = sumVals$meanVal, 
-                                             sd = sumVals$sdVal),
-                              'poisson' = dpois(round(empiricalBreaks), 
-                                             lambda = sumVals$meanVal), 
-                              'logNorm' = dlnorm(empiricalBreaks+sumVals$offSet, 
-                                                 meanlog = sumVals$logMean, 
-                                                 sdlog = sumVals$logSD), 
-                              'unif' = dunif(empiricalBreaks, 
-                                             min = min(df[[varOfInterest]]), 
-                                             max = max(df[[varOfInterest]])), 
-                              'xVal' = empiricalBreaks)
-  
-  
-  analyticDists <- analyticDists %>% pivot_longer(cols = names(analyticDists)[-6], 
-                                                 values_to = 'density', 
-                                                 names_to = 'dist')
-  
-  # analyticDists$xVal[analyticDists$dist == 'logNorm'] <- 
-  #             analyticDists$xVal[analyticDists$dist == 'logNorm'] - sumVals$offSet
-  
-  analyticDists <- analyticDists %>% group_by(dist) %>%
-                  mutate(density = density / sum(density))
-  
-  analyticDists %>% ggplot(aes(x = xVal, y = density, color = dist)) + 
-    geom_line(linewidth = 2) + brightCol + myTheme + 
-    ggtitle(title)
+
+plotAgainstDists <- function(df, varOfInterest, sumVals, myTitle, binCount = 50){
+
+  x <- df[[varOfInterest]]
+analyticDists <- data.frame(
+                            'norm' = dnorm(x, 
+                                           mean = sumVals$meanVal, 
+                                           sd = sumVals$sdVal),
+                            'poisson' = dpois(round(x), 
+                                           lambda = sumVals$meanVal), 
+                            'logNorm' = dlnorm(x + sumVals$offSet, 
+                                               meanlog = sumVals$logMean, 
+                                               sdlog = sumVals$logSD), 
+                            'xVal' = x)
+
+
+analyticDists <- analyticDists %>% pivot_longer(cols = names(analyticDists)[-4], 
+                                               values_to = 'density', 
+                                               names_to = 'dist')
+
+
+
+df$dist = "empirical data"
+df %>% ggplot(aes_string(x = varOfInterest, color = 'dist')) + 
+  geom_freqpoly(aes(y = ..density..), linewidth = 2, bins = binCount) +
+  geom_line(data = analyticDists, aes(x = xVal, y = density), linewidth = 2) + 
+  brightCol +  myTheme + 
+  ggtitle(myTitle) 
 
 }
-
 
 
 ```
@@ -101,17 +89,11 @@ ggplot(df, aes(x = pow_delta_O, color = dummy, fill = dummy)) +
 ```{r descriptives for EEG}
 
 EEGsum <- df %>% summarize(setName = 'deltaPow', 
-                               meanVal = mean(pow_delta_O), 
-                               medianVal = median(pow_delta_O), 
-                               modeVal = Mode(round(pow_delta_O)), 
+                               meanVal = mean(pow_delta_O),  
                                sdVal = sd(pow_delta_O), 
                                logMean = mean(log(pow_delta_O)),
                                logSD = sd(log(pow_delta_O)), 
-                               offSet = 0, 
-                               q25 = quantile(pow_delta_O, .25), 
-                               q75 = quantile(pow_delta_O, .75), 
-                               MADval = sum(abs(pow_delta_O - meanVal)) / 
-                                          (n()-1)) 
+                               offSet = 0) 
 
 
 
@@ -124,7 +106,6 @@ EEGsum <- df %>% summarize(setName = 'deltaPow',
   sumVals = EEGsum
   qVals = seq(.01, 1, .01)
   plotAgainstDists(df, "pow_delta_O", 
-                   quantile(df$pow_delta_O, qVals), 
                    EEGsum, 'EEG data')
   
   
@@ -230,17 +211,11 @@ ggplot(df, aes(x = count, color = dummy, fill = dummy)) +
 ```{r descriptives for emails}
 
 emailSum <- df %>% summarize(setName = 'emailsPerDay', 
-                               meanVal = mean(count), 
-                               medianVal = median(count), 
-                               modeVal = Mode(round(count)), 
+                               meanVal = mean(count),
                                sdVal = sd(count), 
                                logMean = mean(log(count)),
                                logSD = sd(log(count)), 
-                               offSet = 0, 
-                               q25 = quantile(count, .25), 
-                               q75 = quantile(count, .75), 
-                               MADval = sum(abs(count - meanVal)) / 
-                                          (n()-1)) 
+                               offSet = 0) 
 
 
 
@@ -250,7 +225,7 @@ emailSum <- df %>% summarize(setName = 'emailsPerDay',
 
 ```{r analytic comparison for email frequency}
 
-plotAgainstDists(df, "count", c(min(df$count):max(df$count)), emailSum, 'email')
+plotAgainstDists(df, "count", emailSum, 'email')
 qqPlots(df, 'count', seq(.01, 1, .05), emailSum)
 
 ```
@@ -279,16 +254,10 @@ ggplot(df, aes(x = Change, color = dummy, fill = dummy)) +
 
 sp500Sum <- df %>% summarize(setName = 'sp500', 
                                meanVal = mean(Change), 
-                               medianVal = median(Change), 
-                               modeVal = Mode(round(Change)), 
                                sdVal = sd(Change), 
-                               logMean = mean(log(Change-min(Change)+.001)),
-                               logSD = sd(log(Change-min(Change)+.001)), 
-                               offSet = -min(Change)+.001, 
-                               q25 = quantile(Change, .25), 
-                               q75 = quantile(Change, .75), 
-                               MADval = sum(abs(Change - meanVal)) / 
-                                          (n()-1)) 
+                               logMean = mean(log(Change-min(Change)+.01)),
+                               logSD = sd(log(Change-min(Change)+.01)), 
+                               offSet = -min(Change)+.01) 
 
 
 
@@ -299,7 +268,7 @@ sp500Sum <- df %>% summarize(setName = 'sp500',
 ```{r analytic comparison for sp500}
 
 
-plotAgainstDists(df, "Change", quantile(df$Change, seq(.01,1,.025)), 
+plotAgainstDists(df, "Change", 
                  sp500Sum, 'sp500')
 qqPlots(df, 'Change', seq(.01, 1, .01), sp500Sum)
 
@@ -327,16 +296,10 @@ df %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) +
 
 memSum <- df %>% summarize(setName = 'humMem', 
                                meanVal = mean(TargALL_UVSD_d), 
-                               medianVal = median(TargALL_UVSD_d), 
-                               modeVal = Mode(round(TargALL_UVSD_d)), 
                                sdVal = sd(TargALL_UVSD_d),  
                                logMean = mean(log(TargALL_UVSD_d)),
                                logSD = sd(log(TargALL_UVSD_d)), 
-                               offSet = 0, 
-                               q25 = quantile(TargALL_UVSD_d, .25), 
-                               q75 = quantile(TargALL_UVSD_d, .75), 
-                               MADval = sum(abs(TargALL_UVSD_d - meanVal)) / 
-                                          (n()-1)) 
+                               offSet = 0) 
 
 
 
@@ -347,8 +310,7 @@ memSum <- df %>% summarize(setName = 'humMem',
 ```{r analytic comparison for human memory}
 
 plotAgainstDists(df, "TargALL_UVSD_d", 
-                 quantile(df$TargALL_UVSD_d, seq(.01,1,.025)), 
-                 memSum, "mem data")
+                 memSum, "mem data", 20)
 qqPlots(df, 'TargALL_UVSD_d', seq(.01, 1, .01), memSum)
 
 

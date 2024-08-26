@@ -100,8 +100,7 @@ exp(-1)
 #data obtained from: https://covid.ourworldindata.org/data/owid-covid-data.csv
 #data downloaded on: 17/11/2021
 
-covidDat <- read.csv('C:\\Users\\Adam\\Documents\\GitHub\\
-                     MasterStatsUsingR\data\\owid-covid-data.csv')
+covidDat <- read.csv('C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\data\\owid-covid-data.csv')
 covUSA <- covidDat %>% filter(iso_code == 'USA')
 
 #make a plot

@@ -22,8 +22,10 @@ gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
 library(tidyverse) # data manipulation and visualization
 source(paste0(gitHubPath, 'courseTheme.R'))
 library(knitr)
+library(pracma)
 
 ```
+
 ## human EEG data 
 
 ```{r EEG}
@@ -62,7 +64,7 @@ EEGsum <- df %>% summarize(setName = 'deltaPow',
 
 ## my emails per day 
 
-```{r EEG}
+```{r emails}
 
 df = read.csv(paste0(gitHubPath, '\\data\\emailTimes.csv'))
 
@@ -76,6 +78,7 @@ ggplot(df, aes(x = count, color = dummy, fill = dummy)) +
   myTheme + brightFil + brightCol + theme(legend.position = 'none')
 
 ```
+
 ## emails description
 
 ```{r descriptives for emails}
@@ -93,6 +96,7 @@ emailSum <- df %>% summarize(setName = 'emailsPerDay',
 
 
 ```
+
 ## sp 500 daily change 
 
 ```{r sp 500}
@@ -144,6 +148,7 @@ df %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) +
 
 
 ```
+
 ## human memory description
 
 ```{r descriptives for human mem}
@@ -161,7 +166,9 @@ memSum <- df %>% summarize(setName = 'humMem',
 
 
 ```
+
 ## let's look at all of our descriptive stats at once
+
 ```{r combine descriptive stats}
 
 descriptives <- rbind(EEGsum, emailSum, sp500Sum, memSum)

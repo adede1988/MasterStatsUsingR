@@ -1,0 +1,154 @@
+---
+title: 'describing real data'
+author: "Adam Dede"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## human EEG data 
+
+```{r EEG}
+#load in the restingEEG dataset. There are a lot of variables in this dataset
+#for this analysis let's just focus on the delta power in the occipital region 
+#of the head. 
+#Key variable name: pow_delta_O
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+ggplot(df, aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+```
+
+## TRANSFORM 1: What do EEG power values look like after log transform? 
+
+```{r take log transform}
+
+df$logPow_delta_O = log(df$pow_delta_O)
+
+ggplot(df, aes(x = logPow_delta_O, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+#looks much more normal! 
+#let's look at how these log transformed data compare to a normal distribution
+
+```
+
+## comparing log transformed data to normal distribution 
+
+```{r compare normal}
+
+
+x <- df$logPow_delta_O
+analyticDists <- data.frame(
+                            'norm' = dnorm(x, 
+                                           mean = mean(x), 
+                                           sd = sd(x)), 
+                            'xVal' = x)
+
+
+analyticDists <- analyticDists %>% pivot_longer(cols = names(analyticDists)[-2], 
+                                               values_to = 'density', 
+                                               names_to = 'dist')
+
+
+
+df$dist = "empirical data"
+df %>% ggplot(aes(x = logPow_delta_O, color = dist)) + 
+  geom_freqpoly(aes(y = ..density..), linewidth = 2, bins = 50) +
+  geom_line(data = analyticDists, aes(x = xVal, y = density), linewidth = 2) + 
+  brightCol +  myTheme + 
+  ggtitle("EEG data") 
+
+```
+
+
+
+## TRANSFORM 2: what if we transform back into raw data values? 
+
+```{r exp back}
+
+df %>% ggplot(aes(x = exp(logPow_delta_O), color = dist)) + 
+  geom_freqpoly(aes(y = ..density..), linewidth = 2, bins = 50) +
+  geom_line(data = analyticDists, aes(x = exp(xVal), 
+                                      y = density / df$pow_delta_O), 
+            linewidth = 2) + 
+  brightCol +  myTheme + 
+  ggtitle("EEG data") 
+
+
+```
+
+## REVIEW: what if we were to think about this as log normal from the start? 
+
+```{r as log normal}
+
+x <- df$pow_delta_O
+analyticDists <- data.frame( 
+                            'lnorm' = dlnorm(x, mean(log(x)), sd(log(x))),
+                            'xVal' = x)
+
+
+analyticDists <- analyticDists %>% pivot_longer(cols = names(analyticDists)[-2], 
+                                               values_to = 'density', 
+                                               names_to = 'dist')
+
+
+
+df$dist = "empirical data"
+df %>% ggplot(aes(x = pow_delta_O, color = dist)) + 
+  geom_freqpoly(aes(y = ..density..), linewidth = 2, bins = 50) +
+  geom_line(data = analyticDists, aes(x = xVal, y = density), linewidth = 2) + 
+  brightCol +  myTheme + 
+  ggtitle("EEG data") 
+
+
+```
+
+## Perfect equivalence between normal and log normal values
+
+```{r equivalence}
+
+## log normal values found relative to the raw data: 
+lnormVals_raw = dlnorm(df$pow_delta_O, 
+                       mean(log(df$pow_delta_O)), 
+                       sd(log(df$pow_delta_O)))
+
+## normal values found relative to the log transformed data: 
+
+normVals_log = dnorm(log(df$pow_delta_O), 
+                     mean(log(df$pow_delta_O)), 
+                     sd(log(df$pow_delta_O))) / 
+                     df$pow_delta_O
+
+plot(normVals_log, lnormVals_raw)
+
+
+all.equal(normVals_log, lnormVals_raw)
+
+```
+
