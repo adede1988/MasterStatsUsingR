@@ -1,0 +1,82 @@
+---
+title: 'modified z-score outliers'
+author: "Adam Dede"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## Repeat the process on the country garbage dataset?
+
+```{r country garbage}
+
+#import the country garbage data set and visualize the totalPop variable: 
+wasteDat = read.csv(paste0(gitHubPath, 'data\\plasticWaste.csv'))
+
+#first plot the histogram of country total populations 
+wasteDat$dummy = as.factor(1)
+wasteDat %>% ggplot(aes(x = totalPop, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+
+wasteDat %>% ggplot(aes(x = mismanagedTotal, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+
+wasteDat %>% ggplot(aes(x = totalPop, y = mismanagedTotal, color = dummy, fill = dummy)) + 
+  geom_point() + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+#divide the total waste by the total population 
+wasteDat %>% ggplot(aes(x = mismanagedTotal/totalPop, 
+                        color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+
+```
+
+## normalize delta power by the total power across all frequencies
+
+```{r relative power}
+
+#we've been working with delta power in the O (occipital) region
+
+#what other frequencies are there? 
+
+EEGdat = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+EEGdat$dummy = as.factor(1) 
+
+vars = names(EEGdat)
+vars = vars[grepl("_O", vars)]
+
+EEGdat$normPow = EEGdat$pow_delta_O / rowSums(EEGdat[,vars])
+
+ggplot(EEGdat, aes(x = normPow, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+
+```

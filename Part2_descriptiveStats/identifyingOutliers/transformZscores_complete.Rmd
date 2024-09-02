@@ -1,0 +1,74 @@
+---
+title: 'modified z-score outliers'
+author: "Adam Dede"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+## human EEG data 
+
+```{r EEG}
+#load in the restingEEG dataset. There are a lot of variables in this dataset
+#for this analysis let's just focus on the delta power in the occipital region 
+#of the head. 
+#Key variable name: pow_delta_O
+EEGdat = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+EEGdat$dummy = as.factor(1) 
+
+#plot the overall histogram 
+ggplot(EEGdat, aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+#this is the range of data that we worked with in the previous project: 
+ggplot(EEGdat, aes(x = log(pow_delta_O), color = dummy, fill = dummy)) + 
+  geom_histogram(bins = 50) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+EEGdat$pow_delta_O[EEGdat$pow_delta_O == 0] = .001
+
+EEGdat$logPow = log(EEGdat$pow_delta_O)
+
+```
+
+## z score calculation  
+
+```{r z score}
+
+#now calculate the modified z score using the median absolute deviation
+z = (EEGdat$logPow - mean(EEGdat$logPow)) / 
+          sd(EEGdat$logPow)
+
+#how many observations are outliers now? 
+sum(abs(z)>3) / length(z)
+
+#replot it
+ggplot(EEGdat[abs(z)<3,], aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
+  geom_histogram(bins = 100) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+#does this seem like the right method of outlier detection for these data? 
+
+```
+
+

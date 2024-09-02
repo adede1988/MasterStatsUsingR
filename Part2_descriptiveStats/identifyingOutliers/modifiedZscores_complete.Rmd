@@ -48,30 +48,13 @@ ggplot(EEGdat, aes(x = pow_delta_O, color = dummy, fill = dummy)) +
 
 ```
 
-## try regular z-score based outlier removal, let's try taking out z>3
-
-```{r z less than 3 remove}
-
-#calculate z scores
-normZ = (EEGdat$pow_delta_O - mean(EEGdat$pow_delta_O)) / sd(EEGdat$pow_delta_O)
-
-#how many observations are outliers by this method? 
-sum(abs(normZ)>3)
-
-#how does the plot look with these outliers removed? 
-ggplot(EEGdat[abs(normZ)<3,], aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
-  geom_histogram() + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none')
-
-
-```
-
 ## modified z score calculation  
 
 ```{r modified z score}
 
 #now calculate the modified z score using the median absolute deviation
-modZ = (EEGdat$pow_delta_O - median(EEGdat$pow_delta_O)) / mad(EEGdat$pow_delta_O)
+modZ = (EEGdat$pow_delta_O - median(EEGdat$pow_delta_O)) / 
+          mad(EEGdat$pow_delta_O)
 
 #how many observations are outliers now? 
 sum(abs(modZ)>3) / length(modZ)
@@ -88,6 +71,9 @@ ggplot(EEGdat[abs(modZ)<3,], aes(x = pow_delta_O, color = dummy, fill = dummy)) 
 ## modified z score compared to the normal way 
 
 ```{r compare z distributions}
+
+normZ = (EEGdat$pow_delta_O - mean(EEGdat$pow_delta_O)) / 
+        sd(EEGdat$pow_delta_O)
 zscores = data.frame(norm = normZ, mod = modZ)
 
 
@@ -102,8 +88,10 @@ zscores$idx = c(1:length(normZ))
 zscoresLong <- pivot_longer(zscores, cols = -c(idx), 
                             names_to = 'type', 
                             values_to = 'z')
+
 ggplot(zscoresLong, aes(x = idx, y = z, color = type)) + 
-  geom_point(size = 2) + myTheme + brightCol
+  geom_point(size = 2) + myTheme + brightCol + 
+  ylim(c(-1, 10))
 
 
 ```
@@ -154,7 +142,8 @@ zscoresLong <- pivot_longer(zscores, cols = -c(idx),
                             names_to = 'type', 
                             values_to = 'z')
 ggplot(zscoresLong, aes(x = idx, y = z, color = type)) + 
-  geom_point(size = 2) + myTheme + brightCol
+  geom_point(size = 2) + myTheme + brightCol + 
+  ylim(c(-1,10))
 
 ```
 

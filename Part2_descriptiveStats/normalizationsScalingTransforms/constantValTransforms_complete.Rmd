@@ -25,45 +25,6 @@ library(pracma)
 
 ```
 
-## function from previous
-
-```{r plotAgainstDists}
-
-plotAgainstDists <- function(df, varOfInterest, sumVals, myTitle, binCount = 50){
-
-  x <- df[[varOfInterest]]
-analyticDists <- data.frame(
-                            'norm' = dnorm(x, 
-                                           mean = sumVals$meanVal, 
-                                           sd = sumVals$sdVal),
-                            'poisson' = dpois(round(x), 
-                                           lambda = sumVals$meanVal), 
-                            'logNorm' = dlnorm(x + sumVals$offSet, 
-                                               meanlog = sumVals$logMean, 
-                                               sdlog = sumVals$logSD), 
-                            'xVal' = x)
-
-
-analyticDists <- analyticDists %>% pivot_longer(cols = names(analyticDists)[-4], 
-                                               values_to = 'density', 
-                                               names_to = 'dist')
-
-
-
-df$dist = "empirical data"
-df %>% ggplot(aes_string(x = varOfInterest, color = 'dist')) + 
-  geom_freqpoly(aes(y = ..density..), linewidth = 2, bins = binCount) +
-  geom_line(data = analyticDists, aes(x = xVal, y = density), linewidth = 2) + 
-  brightCol +  myTheme + 
-  ggtitle(myTitle) 
-
-}
-
-
-```
-
-
-
 ## sp 500 daily change 
 
 ```{r sp 500}
@@ -95,13 +56,15 @@ ggplot(df, aes(x = Change, y = logChange, color = dummy)) +
 
 df$logChange = log(df$Change + abs(min(df$Change))+.01)
 
+constantValAdjustment = abs(min(df$Change))+.01
+
 ggplot(df, aes(x = Change, y = logChange, color = dummy)) + 
   geom_point(size = 2) + myTheme + brightCol + theme(legend.position = 'none')
 
 ggplot(df, aes(x = logChange, color = dummy, fill = dummy)) +
   geom_histogram(breaks = seq(-3, 1, .1)) + 
   myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
-  xlab('Daily Change (%)') 
+  xlab('Daily Change (adjusted and log transformed)') 
 
 
 ```
@@ -126,7 +89,7 @@ df %>% ggplot(aes(x = logChange, color = dist)) +
   geom_freqpoly(aes(y = ..density..), linewidth = 2, bins = 50) +
   geom_line(data = analyticDists, aes(x = logChange, y = density), linewidth = 2) + 
   brightCol +  myTheme + 
-  ggtitle("log change SP 500 compare to normal") 
+  ggtitle("adjusted log change SP 500 compare to normal") 
 
 
 
@@ -139,7 +102,7 @@ df %>% ggplot(aes(x = logChange, color = dist)) +
 
 #how can we think about the density values we have relative to raw SP500 changes?
 #reverse the math! 
-analyticDists$rawChange = exp(analyticDists$logChange) - abs(min(df$Change))-.01
+analyticDists$rawChange = exp(analyticDists$logChange) - constantValAdjustment
 
 
 df %>% ggplot(aes(x = Change, color = dist)) + 

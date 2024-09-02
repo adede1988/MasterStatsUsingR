@@ -86,7 +86,7 @@ sd(delPow[-which(max(delPow)==delPow)])
 
 ## trimming data before calculating z-score based outliers
 
-```{r zscores of the middle 98%}
+```{r zscores of the middle 98}
 
 #let's calculate the z-scores based on only the middle 98% of the data
 limVals = quantile(delPow, c(.01, .99))
@@ -104,7 +104,8 @@ zcompare = data.frame(midZ = midZ, allZ = allZ)
 
 ggplot(zcompare, aes(x = midZ, y = allZ)) + geom_point()
 
-ggplot(zcompare, aes(x = midZ, y = allZ)) + geom_jitter(width = .001, height = .001) + 
+ggplot(zcompare, aes(x = midZ, y = allZ)) + 
+  geom_jitter(width = .001, height = .001) + 
   ylim(c(-.03,-.02)) + 
   xlim(c(-1,5))
 

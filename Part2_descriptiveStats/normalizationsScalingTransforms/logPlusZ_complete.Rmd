@@ -1,0 +1,162 @@
+---
+title: 'describing real data'
+author: "Adam Dede"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## human EEG data 
+
+```{r EEG}
+#load in the restingEEG dataset. There are a lot of variables in this dataset
+#for this analysis let's just focus on the delta power in the occipital region 
+#of the head. 
+#Key variable name: pow_delta_O
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+ggplot(df, aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+```
+
+## TRANSFORM 1: What do EEG power values look like after log transform? 
+
+```{r take log transform}
+
+df$logPow_delta_O = log(df$pow_delta_O)
+
+ggplot(df, aes(x = logPow_delta_O, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')+ 
+  xlab('EEG delta power (log transformed)') 
+
+#looks much more normal! 
+#let's look at how these log transformed data compare to a normal distribution
+
+```
+
+## comparing log transformed data to normal distribution 
+
+```{r compare normal}
+
+
+x <- df$logPow_delta_O
+analyticDists <- data.frame(
+                            'norm' = dnorm(x, 
+                                           mean = mean(x), 
+                                           sd = sd(x)), 
+                            'xVal' = x)
+
+
+analyticDists <- analyticDists %>% pivot_longer(cols = names(analyticDists)[-2], 
+                                               values_to = 'density', 
+                                               names_to = 'dist')
+
+
+
+df$dist = "empirical data"
+df %>% ggplot(aes(x = logPow_delta_O, color = dist)) + 
+  geom_freqpoly(aes(y = ..density..), linewidth = 2, bins = 50) +
+  geom_line(data = analyticDists, aes(x = xVal, y = density), linewidth = 2) + 
+  brightCol +  myTheme + 
+  ggtitle("EEG data") + 
+  xlab('EEG delta power (log transformed)') 
+
+```
+
+## TRANSFORM 2: stack a z-transform on top of a log transform
+
+```{r add z transform}
+
+df$log_z_Pow_delta_O = (df$logPow_delta_O - mean(df$logPow_delta_O)) / 
+  sd(df$logPow_delta_O)
+
+M = mean(df$logPow_delta_O)
+S = sd(df$logPow_delta_O)
+
+
+ggplot(df, aes(x = log_z_Pow_delta_O, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  xlab('EEG delta power (log and z transformed)') 
+
+
+```
+
+## using the z values to say things about the raw values
+
+```{r say things about raw based on z}
+
+#for this code block, z-score always refers to 
+# z-score in the log transformed data
+
+#what proportion of people have EEG delta power greater than 50? 
+
+z = (log(50) - M) / S
+1 - pnorm(log(50), M, S)
+1 - pnorm(z)
+
+#what EEG delta power values correspond to z scores of +- 1? 
+exp(1*S+M)
+exp(-1*S+M)
+
+print(paste0("Z = -1 corresponds to a raw power value of: ", 
+             round(exp(-1*S+M),2),
+             ", and Z = +1 corresponds to a raw power value of: ", 
+             round(exp(1*S+M),2)))
+
+#What proportion of the raw data fall between these +-1 z-score? 
+sum(df$pow_delta_O>exp(-1*S+M) & 
+    df$pow_delta_O<exp(1*S+M)  ) / length(df$X) -> midPercent
+
+print(paste0(round(midPercent,2), 
+             " of raw power values are between +- 1 z-score in the ",
+             "log-transformed distribution"))
+
+
+
+```
+
+## how would the +- 1 z-score proportion change if we hadn't log transformed?
+
+```{r no log}
+
+M = mean(df$pow_delta_O)
+S = sd(df$pow_delta_O)
+
+sum(df$pow_delta_O>(-1*S+M) & 
+    df$pow_delta_O<(1*S+M)  ) / length(df$X) -> midPercent
+
+print(paste0(round(midPercent,2), 
+             " of raw power values are between +- 1 z-score in the ",
+             "raw distribution"))
+
+
+
+```
+
+

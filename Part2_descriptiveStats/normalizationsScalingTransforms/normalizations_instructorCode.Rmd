@@ -205,3 +205,19 @@ simDat %>% ggplot(aes(x = values, color = dataType)) +
 
 
 ```
+
+## human memory data 
+
+```{r hum mem}
+
+df = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
+
+df <- df %>% filter(TargALL_UVSD_d >=0)
+
+#first plot the histogram of country total populations 
+df$dummy = as.factor(1)
+df %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) + 
+  geom_histogram(bins = 10) + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+```

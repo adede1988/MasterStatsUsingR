@@ -1,5 +1,5 @@
 ---
-title: 'modified z-score outliers'
+title: 'z-score outliers'
 author: "Adam Dede"
 output:
   html_document:
@@ -24,13 +24,76 @@ source(paste0(gitHubPath, 'courseTheme.R'))
 library(pracma)
 
 ```
+
+## example with human memory data
+
+```{r hum mem}
+
+# identify outliers by visualizing where the +-3 z-score limits are: 
+memDat = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
+
+M = mean(memDat$TargALL_UVSD_d)
+S = sd(memDat$TargALL_UVSD_d)
+
+
+#first plot the histogram of country total populations 
+memDat$dummy = as.factor(1)
+memDat %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  geom_vline(xintercept = c(M+3*S, M-3*S), color = 'magenta') + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+```
+
+## how do stats change when outliers are removed? 
+
+```{r remove outliers}
+
+#plot the mean and +- 1 SD in the full versus the outlier removed data
+memDat$outlier = memDat$TargALL_UVSD_d<(M-3*S)
+MO = mean(memDat$TargALL_UVSD_d[memDat$outlier == F])
+SO = sd(memDat$TargALL_UVSD_d[memDat$outlier == F])
+
+memDat %>% ggplot(aes(x = TargALL_UVSD_d, color = outlier, fill = outlier)) + 
+  geom_histogram() + 
+  geom_vline(xintercept = c(M+3*S, M-3*S), color = 'magenta') + 
+  geom_vline(xintercept = c(M, M+S, M-S), color = 'orange', linewidth = 2) + 
+  geom_vline(xintercept = c(MO, MO+SO, MO-SO), color = 'green', linewidth = 2) + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+```
+
+## removing outliers affects the z-scores of every single data points! 
+
+```{r remove outliers all effects}
+
+#what is the probability of observing someone with memory equal to the best 
+#participant both with and without outliers in the calculation? 
+
+1 - pnorm(max(memDat$TargALL_UVSD_d), M, S)
+1 - pnorm(max(memDat$TargALL_UVSD_d), MO, SO)
+
+#plot all z-scores both before and after getting rid of outliers
+memDat$z_ALL = (memDat$TargALL_UVSD_d - M) / S
+memDat$z_no_outliers = (memDat$TargALL_UVSD_d - MO) / SO
+
+memDat$idx = c(1:length(memDat$X))
+
+plotDat = memDat %>% select(z_ALL, z_no_outliers, idx) %>%
+  pivot_longer(cols = c(z_ALL, z_no_outliers), 
+               names_to = 'type', 
+               values_to = 'zVal')
+
+plotDat %>% ggplot(aes(x = idx, y = zVal, color = type)) + 
+  geom_point() + myTheme + brightCol  
+
+
+```
+
 ## human EEG data 
 
 ```{r EEG}
-#load in the restingEEG dataset. There are a lot of variables in this dataset
-#for this analysis let's just focus on the delta power in the occipital region 
-#of the head. 
-#Key variable name: pow_delta_O
+
 EEGdat = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
 
 EEGdat$dummy = as.factor(1) 
@@ -50,159 +113,31 @@ ggplot(EEGdat, aes(x = pow_delta_O, color = dummy, fill = dummy)) +
 
 ## try regular z-score based outlier removal, let's try taking out z>3
 
-```{r z less than 3 remove}
+```{r z greater than 3 remove}
 
-#calculate z scores
-normZ = (EEGdat$pow_delta_O - mean(EEGdat$pow_delta_O)) / sd(EEGdat$pow_delta_O)
+M = mean(EEGdat$pow_delta_O)
+S = sd(EEGdat$pow_delta_O)
 
-#how many observations are outliers by this method? 
-sum(abs(normZ)>3)
+
+#first plot the histogram of country total populations 
+EEGdat$dummy = as.factor(1)
+EEGdat %>% ggplot(aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  geom_vline(xintercept = c(M+3*S, M-3*S), color = 'magenta') + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+#how many values are actually outliers? 
+#What will the graph look like without them?
+sum((EEGdat$pow_delta_O - M)/ S>3)
 
 #how does the plot look with these outliers removed? 
-ggplot(EEGdat[abs(normZ)<3,], aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
+ggplot(EEGdat[(EEGdat$pow_delta_O - M)/ S<3,], 
+       aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
   geom_histogram() + 
   myTheme + brightFil + brightCol + theme(legend.position = 'none')
 
+sum(EEGdat$pow_delta_O < M) / length(EEGdat$X)
 
 ```
 
-## modified z score calculation  
 
-```{r modified z score}
-
-#now calculate the modified z score using the median absolute deviation
-modZ = (EEGdat$pow_delta_O - median(EEGdat$pow_delta_O)) / mad(EEGdat$pow_delta_O)
-
-#how many observations are outliers now? 
-sum(abs(modZ)>3) / length(modZ)
-
-#replot it
-ggplot(EEGdat[abs(modZ)<3,], aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
-  geom_histogram() + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none')
-
-#does this seem like the right method of outlier detection for these data? 
-
-```
-
-## modified z score compared to the normal way 
-
-```{r compare z distributions}
-zscores = data.frame(norm = normZ, mod = modZ)
-
-
-#plot the two types of z-score against each other to see how they relate
-ggplot(zscores, aes(x = norm, y = mod)) + 
-  geom_point() + 
-  ylim(c(-2, 30)) + 
-  xlim(c(-.0252, -.022))
-
-#plot again but this time with different colors for the z-score types: 
-zscores$idx = c(1:length(normZ))
-zscoresLong <- pivot_longer(zscores, cols = -c(idx), 
-                            names_to = 'type', 
-                            values_to = 'z')
-ggplot(zscoresLong, aes(x = idx, y = z, color = type)) + 
-  geom_point(size = 2) + myTheme + brightCol
-
-
-```
-
-## Repeat the process on the country garbage dataset?
-
-```{r country garbage}
-
-#import the country garbage data set and visualize the totalPop variable: 
-wasteDat = read.csv(paste0(gitHubPath, 'data\\plasticWaste.csv'))
-
-#first plot the histogram of country total populations 
-wasteDat$dummy = as.factor(1)
-wasteDat %>% ggplot(aes(x = totalPop, color = dummy, fill = dummy)) + 
-  geom_histogram() + 
-  myTheme + brightCol + brightFil + theme(legend.position = 'none')
-
-#calculate the z scores normal and modified 
-normZ = (wasteDat$totalPop - mean(wasteDat$totalPop)) / sd(wasteDat$totalPop)
-modZ = (wasteDat$totalPop - median(wasteDat$totalPop)) / mad(wasteDat$totalPop)
-
-#What proportion of the data are being called outliers with each method?
-sum(abs(modZ)>3) / length(wasteDat$totalPop)
-sum(abs(normZ)>3) / length(wasteDat$totalPop)
-
-#plot the histogram with the outliers removed 
-ggplot(wasteDat[abs(modZ)<3,], aes(x = totalPop, color = dummy, fill = dummy)) +
-  geom_histogram()+ 
-  myTheme + brightCol + brightFil + theme(legend.position = 'none')
-
-ggplot(wasteDat[abs(normZ)<3,], aes(x = totalPop, color = dummy, fill = dummy)) +
-  geom_histogram()+ 
-  myTheme + brightCol + brightFil + theme(legend.position = 'none')
-
-#what countries are being called outliers? Does this seem like the right method?
-
-# let's do some plotting to look at the two types of z-score
-zscores = data.frame(norm = normZ, mod = modZ)
-
-
-#plot the two types of z-score against each other to see how they relate
-ggplot(zscores, aes(x = norm, y = mod)) + 
-  geom_point() 
-
-#plot again but this time with different colors for the z-score types: 
-zscores$idx = c(1:length(normZ))
-zscoresLong <- pivot_longer(zscores, cols = -c(idx), 
-                            names_to = 'type', 
-                            values_to = 'z')
-ggplot(zscoresLong, aes(x = idx, y = z, color = type)) + 
-  geom_point(size = 2) + myTheme + brightCol
-
-```
-
-## How would this look if the data were more normal? 
-
-```{r human memory}
-
-memDat = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
-
-#first plot the histogram of country total populations 
-memDat$dummy = as.factor(1)
-memDat %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) + 
-  geom_histogram() + 
-  myTheme + brightCol + brightFil + theme(legend.position = 'none')
-
-#calculate the z scores normal and modified 
-normZ = (memDat$TargALL_UVSD_d - mean(memDat$TargALL_UVSD_d)) / 
-                sd(memDat$TargALL_UVSD_d )
-modZ = (memDat$TargALL_UVSD_d - median(memDat$TargALL_UVSD_d)) / 
-                mad(memDat$TargALL_UVSD_d)
-
-#What proportion of the data are being called outliers with each method?
-sum(abs(modZ)>3) / length(memDat$TargALL_UVSD_d)
-sum(abs(normZ)>3) / length(memDat$TargALL_UVSD_d)
-
-#plot the histogram with the outliers removed 
-ggplot(memDat[abs(modZ)<3,], aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) +
-  geom_histogram()+ 
-  myTheme + brightCol + brightFil + theme(legend.position = 'none')
-
-ggplot(memDat[abs(normZ)<3,], aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) +
-  geom_histogram()+ 
-  myTheme + brightCol + brightFil + theme(legend.position = 'none')
-
-# let's do some plotting to look at the two types of z-score
-zscores = data.frame(norm = normZ, mod = modZ)
-
-#plot the two types of z-score against each other to see how they relate
-ggplot(zscores, aes(x = norm, y = mod)) + 
-  geom_point()  
-
-#plot again but this time with different colors for the z-score types: 
-zscores$idx = c(1:length(normZ))
-zscoresLong <- pivot_longer(zscores, cols = -c(idx), 
-                            names_to = 'type', 
-                            values_to = 'z')
-ggplot(zscoresLong, aes(x = idx, y = z, color = type)) + 
-  geom_point(size = 2) + myTheme + brightCol
-
-
-```

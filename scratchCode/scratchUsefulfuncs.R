@@ -25,3 +25,5 @@ any()
 all()
 
 subset()
+
+pivot_longer()

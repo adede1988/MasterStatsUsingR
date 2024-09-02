@@ -1,0 +1,111 @@
+---
+title: 'normalizations'
+author: "Adam Dede"
+date: "2024-07-23"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## normal distribution properties! 
+
+```{r norm dist}
+
+df = data.frame('simulatedData' = rnorm(10000000))
+df$dummy = as.factor(1)
+df %>% ggplot(aes(x = simulatedData, color = dummy)) + 
+  geom_freqpoly(bins = 100, linewidth = 2) + 
+  geom_vline(xintercept = c(-3, 3), color = 'magenta') +
+  xlim(c(-5, 5)) + scale_x_continuous(breaks = c(-3, 3)) + 
+  myTheme + brightCol + theme(legend.position = 'none', 
+                              axis.text.y = element_blank())
+
+```
+
+## example with human memory data
+
+```{r hum mem}
+
+memDat = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
+
+M = mean(memDat$TargALL_UVSD_d)
+S = sd(memDat$TargALL_UVSD_d)
+
+
+#first plot the histogram of country total populations 
+memDat$dummy = as.factor(1)
+memDat %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  geom_vline(xintercept = c(M+3*S, M-3*S), color = 'magenta') + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+memDat$outlier = memDat$TargALL_UVSD_d<(M-3*S)
+MnoOut = mean(memDat$TargALL_UVSD_d[memDat$outlier == F])
+SnoOut = sd(memDat$TargALL_UVSD_d[memDat$outlier == F])
+
+memDat %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  geom_vline(xintercept = c(M+3*S, M-3*S), color = 'magenta') + 
+  geom_vline(xintercept = c(M, M+S, M-S), color = 'orange', linewidth = 2) + 
+  geom_vline(xintercept = c(MnoOut, MnoOut+SnoOut, MnoOut-SnoOut), color = 'green', linewidth = 2) + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+
+```
+
+## sp 500 daily change 
+
+```{r sp 500}
+
+df = read.csv(paste0(gitHubPath, '\\data\\SP500HistoricalData.csv'))
+names(df)[6] <- 'Change'
+
+df$Change = unlist(lapply(df$Change, function(x) as.numeric(strsplit(x, '%')[[1]])))
+
+M = mean(df$Change)
+S = sd(df$Change)
+
+df$dummy = as.factor(1) 
+
+ggplot(df, aes(x = Change, color = dummy, fill = dummy)) +
+  geom_histogram(breaks = seq(-2, 2, .1)) + 
+  geom_vline(xintercept = c(M+3*S, M-3*S), color = 'magenta') + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  xlab('Daily Change (%)') 
+
+```
+
+## yao ming height simulation
+
+```{r yao ming}
+
+
+TallerThanYao = rep(0,1000000)
+
+for(ii in 1:1000000){
+  curSamp = rnorm(100,70,3)
+  TallerThanYao[ii] = sum(curSamp > 80)
+}
+
+sum(TallerThanYao)
+
+```
