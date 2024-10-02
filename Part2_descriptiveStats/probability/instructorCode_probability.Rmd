@@ -1,0 +1,85 @@
+---
+title: 'probability instructor code'
+author: "Adam Dede"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+
+
+## sp 500 daily change 
+
+```{r sp 500}
+
+df = read.csv(paste0(gitHubPath, '\\data\\SP500HistoricalData.csv'))
+names(df)[6] <- 'Change'
+
+df$Change = unlist(lapply(df$Change, 
+                          function(x) as.numeric(strsplit(x, '%')[[1]])))
+
+df$dummy = as.factor(1) 
+
+ggplot(df, aes(x = Change, color = dummy, fill = dummy)) +
+  geom_histogram(breaks = seq(-2, 2, .1)) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  xlab('Daily Change (%)') +
+  geom_vline(xintercept = 1, color = 'red', linewidth = 1.5)
+
+```
+
+## human memory data
+
+```{r human mem}
+df = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
+
+df <- df %>% filter(TargALL_UVSD_d >=0)
+
+#first plot the histogram of country total populations 
+df$dummy = as.factor(1)
+df %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) + 
+  geom_histogram(breaks = seq(0,3,.2)) + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')+
+  geom_vline(xintercept = 1, color = 'red', linewidth = 1.5) + 
+  geom_vline(xintercept = 1.2, color = 'red', linewidth = 1.5) 
+
+sum(df$TargALL_UVSD_d>1) / length(df$X)
+
+df %>% ggplot(aes(x = TargALL_UVSD_d, y=rep(1,length(dummy)),
+                  color = dummy, fill = dummy)) + 
+  geom_col() + 
+  labs(y="count") + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+sum(df$TargALL_UVSD_d>=1 & df$TargALL_UVSD_d<=1.2) / length(df$X)
+
+df %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) + 
+  geom_histogram(breaks = seq(0,3,.2)) + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')+
+  geom_vline(xintercept = 1, color = 'red', linewidth = 1.5) + 
+  geom_vline(xintercept = 2, color = 'red', linewidth = 1.5)
+
+sum(df$TargALL_UVSD_d<1.5)
+sum(df$TargALL_UVSD_d>=1.0 & df$TargALL_UVSD_d<2)
+sum(df$TargALL_UVSD_d>1.5)
+
+```

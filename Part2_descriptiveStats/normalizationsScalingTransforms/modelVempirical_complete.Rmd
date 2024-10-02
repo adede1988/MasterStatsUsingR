@@ -1,0 +1,71 @@
+---
+title: 'modelVempirical'
+author: "Adam Dede"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+
+
+## sp 500 daily change 
+
+```{r sp 500}
+
+df = read.csv(paste0(gitHubPath, '\\data\\SP500HistoricalData.csv'))
+names(df)[6] <- 'Change'
+
+df$Change = unlist(lapply(df$Change, function(x) as.numeric(strsplit(x, '%')[[1]])))
+
+df$dummy = as.factor(1) 
+
+ggplot(df, aes(x = Change, color = dummy, fill = dummy)) +
+  geom_histogram(breaks = seq(-2, 2, .1)) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  xlab('Daily Change (%)') 
+
+```
+
+## using z-scores what is the probability of a 1% gain
+
+```{r model gain of 1}
+
+M = mean(df$Change)
+S = sd(df$Change)
+
+#based on using the normal distribution as a model, 
+#what is the probability of a 1% gain?
+(1 - pnorm(1, M, S))*100
+
+
+```
+
+## Using the empirical data what is the probability of a gain of 1%
+
+```{r empirical gain of 1}
+
+#empirically, what is the probability of 1% gain?
+(sum(df$Change>1) / length(df$Change))*100
+
+
+```
+

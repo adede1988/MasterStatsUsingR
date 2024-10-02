@@ -1,0 +1,101 @@
+---
+title: 'describing real data'
+author: "Adam Dede"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## human EEG data 
+
+```{r EEG}
+#load in the restingEEG dataset. There are a lot of variables in this dataset
+#for this analysis let's just focus on the delta power in the occipital region 
+#of the head. 
+#Key variable name: pow_delta_O
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+ggplot(df, aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+```
+
+## What is the probability of having low, medium, or high delta power? 
+
+```{r delta power probs}
+
+cutOffLow = 15
+cutOffHigh = 50
+N = length(df$X)
+
+#what is the probibility of low delta power? 
+sum(df$pow_delta_O<cutOffLow) / N -> lowProb
+#what is the probability of medium delta power
+sum(df$pow_delta_O>cutOffLow &
+    df$pow_delta_O<cutOffHigh) / N-> medProb
+#what is the probability of high delta power
+sum(df$pow_delta_O>cutOffHigh) / N-> highProb
+
+disp(paste0('the probability of low power is:  ', round(lowProb,2),
+               '\nthe probability of med power is:  ', round(medProb,2), 
+               '\nthe probability of high power is: ', round(highProb,2)))
+
+
+
+```
+
+## If we randomly sample from EEG power, 
+## what probabilities of low, medium, and high do we observe?  
+
+```{r random sampling}
+
+sampN = 100
+
+sampleVals = rep(0,sampN)
+for(ii in 1:sampN){
+  idx = round(rand(1)*N)
+  if(idx == 0){
+    idx = 1
+  }
+  sampleVals[ii] = df$pow_delta_O[idx]
+}
+
+sampDf <- reframe(data.frame(val = sampleVals), 
+          low = c(sum(val<cutOffLow), lowProb*sampN),
+          med = c(sum(val>=cutOffLow & val <cutOffHigh), medProb*sampN), 
+          high= c(sum(val>=cutOffHigh), highProb*sampN),
+          type = c('observed', 'prob')) %>%
+          pivot_longer(cols = c(low, med, high), 
+                       names_to = 'propGroup',
+                       values_to = 'value')
+
+sampDf %>% ggplot(aes(x = propGroup, y = value, 
+                      group = type, color = type, fill = type))+
+  geom_bar(stat = 'identity', position = 'dodge') + 
+  myTheme + brightCol + brightFil
+
+
+```
