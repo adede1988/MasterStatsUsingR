@@ -1,0 +1,104 @@
+---
+Title: 'Probability of a Sample'
+Section: 'Z-test'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## heights of basketball players 
+
+```{r data}
+#basketball player heights
+df = data.frame('heights' = c(72,74,76,80,78,73,73,71,78,81,75,75,79,77,79))
+
+#overall distribution of heights statistics: 
+M = 70
+S = 4
+
+```
+
+## Visualize players against the overall population 
+
+```{r visualization}
+
+
+dfOverall = data.frame('individuals' = dnorm(seq(50,90,.1), M, S),
+                       'samples' = dnorm(seq(50,90,.1), M, S/sqrt(15)),
+                       'height' = seq(50,90,.1))
+
+dfOverall = dfOverall %>% pivot_longer(cols = c('individuals', 'samples'),
+                                       names_to = 'dist', 
+                                       values_to = 'density')
+
+upper_bound <- M + 1.96 * (S / sqrt(15))
+lower_bound <- M - 1.96 * (S / sqrt(15))
+
+dfOverall %>% ggplot(aes(y = density, x = height, color = dist)) + 
+  geom_line(linewidth = 2) + 
+  xlim(c(62, 78)) +  
+  brightCol +  myTheme +
+  geom_vline(xintercept = upper_bound, color = 'green', linewidth = 2, linetype = 'dashed') +
+  geom_vline(xintercept = lower_bound, color = 'green', linewidth = 2, linetype = 'dashed') +
+  geom_ribbon(data = subset(filter(dfOverall, dist == 'samples'), 
+                            height < lower_bound), 
+              aes(y = density, x = height, ymax = density), 
+              ymin = 0,  fill = "purple", alpha = 1,
+              show.legend = FALSE) +
+  geom_ribbon(data = subset(filter(dfOverall, dist == 'samples'), 
+                            height > upper_bound), 
+              aes(y = density, x = height, ymax = density), 
+              ymin = 0,  fill = "purple", alpha = 1,
+              show.legend = FALSE) 
+
+
+
+```
+
+## add the sample mean on the graph
+
+```{r sample mean}
+
+m = mean(df$heights)
+
+dfOverall %>% ggplot(aes(y = density, x = height, color = dist)) + 
+  geom_line(linewidth = 2) + 
+  xlim(c(62, 78)) +  
+  brightCol +  myTheme +
+  geom_vline(xintercept = upper_bound, color = 'green', linewidth = 2, linetype = 'dashed') +
+  geom_vline(xintercept = lower_bound, color = 'green', linewidth = 2, linetype = 'dashed') +
+  geom_ribbon(data = subset(filter(dfOverall, dist == 'samples'), 
+                            height < lower_bound), 
+              aes(y = density, x = height, ymax = density), 
+              ymin = 0,  fill = "purple", alpha = 1,
+              show.legend = FALSE) +
+  geom_ribbon(data = subset(filter(dfOverall, dist == 'samples'), 
+                            height > upper_bound), 
+              aes(y = density, x = height, ymax = density), 
+              ymin = 0,  fill = "purple", alpha = 1,
+              show.legend = FALSE) +
+  geom_vline(xintercept = m, color = 'red', linewidth = 2)
+
+```
