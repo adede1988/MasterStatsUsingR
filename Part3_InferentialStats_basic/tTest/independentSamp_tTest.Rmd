@@ -1,0 +1,117 @@
+---
+Title: 'independent sample t-test'
+Section: 't-test'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(BSDA)
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## human memory data
+
+```{r data}
+df = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
+
+df <- df %>% filter(TargALL_UVSD_d >=0)
+
+df = df %>% select(c('L1cor_UVSD_d', 'L5_UVSD_d')) %>%
+  pivot_longer(cols = c('L1cor_UVSD_d', 'L5_UVSD_d'),
+               names_pattern = '(L1|L5)*',
+               names_to = 'lag',
+               values_to = 'd')
+
+
+df %>% ggplot(aes(x = d, color = lag, group = lag)) + 
+  geom_freqpoly(bins = 8, linewidth = 2) + 
+  myTheme + brightCol + brightFil
+
+```
+
+## do a t-test 
+
+```{r t test}
+
+
+
+#step 1: Do people exhibit different memory for images from L1 vs L5 trials? 
+
+#step 2: 
+#       NULL: 
+M = 0
+#       ALTERNATE: 
+# not the null 
+
+#step 3: 
+#       ALPHA:
+alpha = .05
+#       critical t value: 
+n1 = sum(df$lag=='L1')
+n5 = sum(df$lag=='L5')
+n = n1 + n5
+critVal = qt(1-(alpha/2),n-2)
+
+
+#step 4: 
+m1 = mean(df$d[df$lag=='L1'])
+m5 = mean(df$d[df$lag=='L5'])
+SS1 = sum((df$d[df$lag=='L1'] - m1)^2)
+SS5 = sum((df$d[df$lag=='L5'] - m5)^2)
+spooled = sqrt((SS1+SS5)/(n-2))
+SEpooled = spooled*sqrt(1/n1 + 1/n5)
+
+sampleT = (m1 - m5) / SEpooled
+
+#step 5: 
+if (sampleT>critVal | sampleT < -critVal){
+  print('mean value is different from 0!')
+} else { 
+  print('no evidence that the mean value is different from 0!')
+}
+
+#step 6: 
+#What does the result in step 5 mean for answering our original question? 
+
+
+t.test(df$d[df$lag=='L1'], df$d[df$lag=='L5'])
+
+
+```
+
+## what happened to the significance? 
+
+```{r individual variability}
+df = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
+
+df <- df %>% filter(TargALL_UVSD_d >=0)
+
+df %>% ggplot(aes(x = L1cor_UVSD_d, y= L5_UVSD_d)) +
+  geom_point(size = 2, color = 'orange') + myTheme +
+  geom_abline(slope = 1, intercept = 0, color = 'green')
+
+#how many participants exhibit greater L1 than L5 memory? 
+sum(df$L1cor_UVSD_d > df$L5_UVSD_d) / length(df$X.1)
+
+
+```

@@ -1,5 +1,5 @@
 ---
-Title: 'Probability of a Sample'
+Title: 'NBA z-test'
 Section: 'Z-test'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
@@ -60,15 +60,15 @@ S = 4
 alpha = .05
 #       critical z value: 
 critVal = abs(qnorm(alpha/2))
-#       critical threshold values: 
-lowerBound = M - critVal * (S / sqrt(n))
-upperBound = M + critVal * (S / sqrt(n))
+
 
 #step 4: 
 m = mean(df$heights)
+n = length(df$heights)
+sampleZ = (m - M) / (S/sqrt(n))
 
 #step 5: 
-if (m>upperBound | m<lowerBound){
+if (sampleZ>critVal | sampleZ< -critVal){
   print('mean value is more extreme than critical threshold!')
 } else { 
   print('mean value is not more extreme than critical threshold!')

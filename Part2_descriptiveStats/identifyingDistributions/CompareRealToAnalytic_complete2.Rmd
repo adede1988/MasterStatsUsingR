@@ -1,7 +1,9 @@
 ---
-title: 'describing real data'
-author: "Adam Dede"
-output:
+title: 'Describing Real Data'
+Section: 'Determining Distribution'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
   html_document:
     toc: yes
     toc_float: yes
@@ -84,7 +86,7 @@ analyticDists <- analyticDists %>% pivot_longer(cols = names(analyticDists)[-4],
 
 df$dist = "empirical data"
 df %>% ggplot(aes(x = pow_delta_O, color = dist)) + 
-  geom_freqpoly(aes(y = ..density..), linewidth = 2, bins = 50) +
+  geom_freqpoly(aes(y = after_stat(density)), linewidth = 2, bins = 50) +
   geom_line(data = analyticDists, aes(x = xVal, y = density), linewidth = 2) + 
   brightCol +  myTheme + 
   ggtitle("EEG data") 
@@ -120,7 +122,7 @@ analyticDists <- analyticDists %>% pivot_longer(cols = names(analyticDists)[-4],
 
 df$dist = "empirical data"
 df %>% ggplot(aes_string(x = varOfInterest, color = 'dist')) + 
-  geom_freqpoly(aes(y = ..density..), linewidth = 2, bins = binCount) +
+  geom_freqpoly(aes(y = after_stat(density)), linewidth = 2, bins = binCount) +
   geom_line(data = analyticDists, aes(x = xVal, y = density), linewidth = 2) + 
   brightCol +  myTheme + 
   ggtitle(myTitle) 

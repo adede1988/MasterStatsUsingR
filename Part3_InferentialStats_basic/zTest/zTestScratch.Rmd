@@ -102,3 +102,94 @@ dfOverall %>% ggplot(aes(y = density, x = height, color = dist)) +
   geom_vline(xintercept = m, color = 'red', linewidth = 2)
 
 ```
+
+## type 2 error
+
+```{r type 2}
+m = mean(df$heights)
+n = 1
+dfOverall = data.frame('individuals' = dnorm(seq(50,90,.1), M, S),
+                       'samples_n.1' = dnorm(seq(50,90,.1), M, S/sqrt(n)),
+                       'NBA_players' = dnorm(seq(50,90,.1), m, S),
+                       'NBA_teams_n.1'  = dnorm(seq(50,90,.1), m, S/sqrt(n)),
+                       'height' = seq(50,90,.1))
+dfOverall = dfOverall %>% pivot_longer(cols = c('individuals', 'samples_n.1',
+                                                'NBA_players', 'NBA_teams_n.1'),
+                                       names_to = 'dist', 
+                                       values_to = 'density')
+# dfOverall$dist = factor(dfOverall$dist, levels = c('individuals', 'samples',
+#                                                 'NBA_players', 'NBA_teams'))
+upper_bound <- M + 1.96 * (S / sqrt(n))
+lower_bound <- M - 1.96 * (S / sqrt(n))
+# %>% filter(dist == "NBA_players" | dist == 'individuals')
+dfOverall  %>% filter(dist == 'samples_n.1' |
+                      dist == 'NBA_teams_n.1') %>%
+  ggplot(aes(y = density, x = height, color = dist)) +
+  geom_line( linewidth = 2) +
+  geom_ribbon(data = subset(filter(dfOverall, dist == 'samples_n.1'), 
+                            height < lower_bound), 
+              aes(y = density, x = height, ymax = density), 
+              ymin = 0,  fill = "purple", alpha = 1,
+              show.legend = FALSE) +
+  geom_ribbon(data = subset(filter(dfOverall, dist == 'NBA_teams_n.1'), 
+                            height > upper_bound), 
+              aes(y = density, x = height, ymax = density), 
+              ymin = 0,  fill = "green", alpha = 1,
+              show.legend = FALSE) +
+  geom_ribbon(data = subset(filter(dfOverall, dist == 'samples_n.1'), 
+                            height > upper_bound), 
+              aes(y = density, x = height, ymax = density), 
+              ymin = 0,  fill = "purple", alpha = 1,
+              show.legend = FALSE) +
+  geom_ribbon(data = subset(filter(dfOverall, dist == 'NBA_teams_n.1'), 
+                            height < upper_bound), 
+              aes(y = density, x = height, ymax = density), 
+              ymin = 0,  fill = "red", alpha = 1,
+              show.legend = FALSE) + 
+  geom_line( linewidth = 2) + 
+  xlim(c(58, 90)) +  
+  brightCol +  myTheme +
+  geom_vline(xintercept = upper_bound, color = 'green', linewidth = 2, linetype = 'dashed') +
+  geom_vline(xintercept = lower_bound, color = 'green', linewidth = 2, linetype = 'dashed')
+
+
+
+
+```
+## EEG data
+
+```{r eeg dat}
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+ggplot(df, aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+#sampling distribution of various sizes
+dat = df$pow_delta_O
+sampSize = seq(1,50,1)
+reps = 10000
+n_sizes <- length(sampSize)
+
+# Pre-allocate result data frame
+sampDat <- data.frame(
+  sampMean = numeric(reps * n_sizes),
+  n = rep(sampSize, each = reps)
+)
+
+# Use vapply and replicate to speed up the sampling process
+sampDat$sampMean <- unlist(lapply(sampSize, function(n) {
+  replicate(reps, mean(sample(dat, n)))
+}))
+
+sampDat %>% ggplot(aes(x=sampMean, group = as.factor(n), color = n)) + 
+  geom_freqpoly(linewidth = 1.5, bins = 50) + myTheme + xlim(c(0,50)) + 
+  geom_vline(xintercept = mean(dat), color = 'red') + 
+  scale_color_gradient2(low = "green", mid = "white", high = "magenta",
+                        midpoint = 15)
+
+
+```

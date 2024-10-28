@@ -1,0 +1,80 @@
+---
+Title: 'Confidence Intervals'
+Section: 't-test'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(BSDA)
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## human memory data
+
+```{r data}
+df = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
+
+df <- df %>% filter(TargALL_UVSD_d >=0)
+
+#first plot the histogram of country total populations 
+df$dummy = as.factor(1)
+df %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) + 
+  geom_histogram(bins = 10) + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+```
+
+## let's compare z and t tests 
+
+```{r test compare}
+
+#let's pretend that we actually know the standard deviation of the 
+#whole population of all humans and it's the same as this sample's SD: 
+S = sd(df$TargALL_UVSD_d)
+M = 0
+#let's compare z and t-tests 
+t.test(df$TargALL_UVSD_d, mu = M)
+z.test(df$TargALL_UVSD_d, mu = M, sigma.x = S)
+
+
+#what if we make someone's memory be 10000? This is just crazy high!  
+
+df$TargALL_UVSD_d[3] = 10000
+
+t.test(df$TargALL_UVSD_d, mu = M)
+z.test(df$TargALL_UVSD_d, mu = M, sigma.x = S)
+
+
+df = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
+
+df <- df %>% filter(TargALL_UVSD_d >=0)
+
+#what if we add 10000 to each person?  
+
+df$TargALL_UVSD_d = df$TargALL_UVSD_d + 10000
+
+t.test(df$TargALL_UVSD_d, mu = M)
+z.test(df$TargALL_UVSD_d, mu = M, sigma.x = S)
+
+```
+
