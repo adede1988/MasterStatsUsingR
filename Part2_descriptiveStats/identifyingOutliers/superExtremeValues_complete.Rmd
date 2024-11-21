@@ -112,6 +112,9 @@ ggplot(zcompare, aes(x = midZ, y = allZ)) +
 #what proportion of the data would this method eliminate: 
 sum(abs(midZ)>3) / length(delPow)
 
+#What is the cutoff value associated with this z value? 
+max(delPow[midZ<3])
+
 
 
 ```

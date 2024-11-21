@@ -56,12 +56,18 @@ dfOverall = dfOverall %>% pivot_longer(cols = c('individuals', 'samples'),
 upper_bound <- M + 1.96 * (S / sqrt(15))
 lower_bound <- M - 1.96 * (S / sqrt(15))
 
+#remove line for all included: 
+dfOverall <- dfOverall %>% filter(dist == 'samples')
+
 dfOverall %>% ggplot(aes(y = density, x = height, color = dist)) + 
   geom_line(linewidth = 2) + 
-  xlim(c(62, 78)) +  
-  brightCol +  myTheme +
-  geom_vline(xintercept = upper_bound, color = 'green', linewidth = 2, linetype = 'dashed') +
-  geom_vline(xintercept = lower_bound, color = 'green', linewidth = 2, linetype = 'dashed') +
+  xlim(c(62, 78)) + myTheme +
+  theme(axis.text.x = element_blank(),
+         axis.title.y = element_blank(),
+        axis.text.y = element_blank()) + 
+  brightCol +  
+  geom_vline(xintercept = upper_bound, color = '#20CDF2', linewidth = 2, linetype = 'dashed') +
+  geom_vline(xintercept = lower_bound, color = '#20CDF2', linewidth = 2, linetype = 'dashed') +
   geom_ribbon(data = subset(filter(dfOverall, dist == 'samples'), 
                             height < lower_bound), 
               aes(y = density, x = height, ymax = density), 
@@ -71,7 +77,10 @@ dfOverall %>% ggplot(aes(y = density, x = height, color = dist)) +
                             height > upper_bound), 
               aes(y = density, x = height, ymax = density), 
               ymin = 0,  fill = "purple", alpha = 1,
-              show.legend = FALSE) 
+              show.legend = FALSE)  + 
+  theme(axis.text.x = element_blank(),      # REMOVE TO INCLUDE LABELS
+         axis.title.x = element_blank()) +
+  xlim(c(66, 74))
 
 
 
@@ -80,6 +89,14 @@ dfOverall %>% ggplot(aes(y = density, x = height, color = dist)) +
 ## add the sample mean on the graph
 
 ```{r sample mean}
+
+dfOverall = data.frame('individuals' = dnorm(seq(50,90,.1), M, S),
+                       'samples' = dnorm(seq(50,90,.1), M, S/sqrt(15)),
+                       'height' = seq(50,90,.1))
+
+dfOverall = dfOverall %>% pivot_longer(cols = c('individuals', 'samples'),
+                                       names_to = 'dist', 
+                                       values_to = 'density')
 
 m = mean(df$heights)
 
