@@ -1,0 +1,256 @@
+---
+Title: 'abScratch'
+Section: 'AB-testing'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(BSDA)
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+library(lme4)
+library(kableExtra)
+
+```
+
+## advertising data
+#https://www.kaggle.com/datasets/chebotinaa/fast-food-marketing-campaign-ab-test
+
+```{r data}
+df <- read.csv(paste0(gitHubPath, 'data\\WA_Marketing-Campaign.csv'))
+temp = df$SalesInThousands[df$Promotion == 3 & df$MarketSize == "Large"] 
+df$SalesInThousands[df$Promotion == 3 & df$MarketSize == "Large"] = temp - 
+  rnorm(length(temp), 1.5, 30)
+min(df$SalesInThousands)
+df$SalesInThousands[df$SalesInThousands<0] <- rnorm(sum(df$SalesInThousands<0),
+                                                    10, 3)
+min(df$SalesInThousands)
+df$Promotion = as.factor(df$Promotion)
+
+
+df %>% ggplot(aes(y = SalesInThousands, color = Promotion)) + 
+    geom_boxplot(linewidth = 2)+ 
+  myTheme + brightCol + brightFil+
+        theme(axis.text.x = element_blank()) + 
+  facet_grid(~MarketSize)
+
+
+df %>% ggplot(aes(y = SalesInThousands, color = MarketSize)) + 
+  geom_boxplot(linewidth = 2)+ 
+  myTheme + brightCol + brightFil+
+        theme(axis.text.x = element_blank())
+
+df %>% ggplot(aes(x = AgeOfStore, y = SalesInThousands, color = MarketSize)) + 
+  geom_jitter() + 
+  myTheme + brightCol + brightFil
+
+df %>% ggplot(aes(x = week, y = SalesInThousands, 
+                  group = LocationID, color = LocationID)) + 
+  geom_line(alpha = .5) + 
+  myTheme +
+  scale_color_gradient2(low = "green", mid = "white", high = "magenta",
+                        midpoint = 500)
+
+df<- df %>% group_by(LocationID) %>%
+  summarize(SalesInThousands = mean(SalesInThousands),
+    across(everything(), ~ first(.), .names = "{.col}"))
+
+
+```
+
+## t-tests 
+
+```{r t test regular}
+
+pooled_sd <- function(x1, x2) {
+  n1 <- length(x1)
+  n2 <- length(x2)
+  s1 <- sd(x1)
+  s2 <- sd(x2)
+  
+  sqrt(((n1 - 1) * s1^2 + (n2 - 1) * s2^2) / (n1 + n2 - 2))
+}
+
+alphaAdjusted = .05/3
+results = data.frame('test' = c('0','0','0'), 
+                     'pval' = c(0,0,0),
+                     'n1' = c(0,0,0),
+                     'n2' = c(0,0,0),
+                     'mean1' = c(0,0,0),
+                     'mean2' = c(0,0,0),
+                     'pooledSD' = c(0,0,0),
+                     'sigDif'= c(0,0,0))
+
+out = t.test(df$SalesInThousands[df$Promotion == 1], 
+       df$SalesInThousands[df$Promotion == 2])
+results$test[1] = paste0('promo', 1, '_v_promo', 2)
+results$pval[1] = out$p.value
+results$n1[1] = sum(df$Promotion == 1)
+results$n2[1] = sum(df$Promotion == 2)
+results$mean1[1] = round(out$estimate[1])
+results$mean2[1] = round(out$estimate[2])
+results$pooledSD[1] = pooled_sd(df$SalesInThousands[df$Promotion == 1],
+                                df$SalesInThousands[df$Promotion == 2])
+results$sigDif[1] = out$p.value < alphaAdjusted
+
+out = t.test(df$SalesInThousands[df$Promotion == 1], 
+       df$SalesInThousands[df$Promotion == 3])
+results$test[2] = paste0('promo', 1, '_v_promo', 3)
+results$pval[2] = out$p.value
+results$n1[2] = sum(df$Promotion == 1)
+results$n2[2] = sum(df$Promotion == 3)
+results$mean1[2] = round(out$estimate[1])
+results$mean2[2] = round(out$estimate[2])
+results$pooledSD[2] = pooled_sd(df$SalesInThousands[df$Promotion == 1],
+                                df$SalesInThousands[df$Promotion == 3])
+results$sigDif[2] = out$p.value < alphaAdjusted
+
+out = t.test(df$SalesInThousands[df$Promotion == 2], 
+       df$SalesInThousands[df$Promotion == 3])
+results$test[3] = paste0('promo', 2, '_v_promo', 3)
+results$pval[3] = out$p.value
+results$n1[3] = sum(df$Promotion == 2)
+results$n2[3] = sum(df$Promotion == 3)
+results$mean1[3] = round(out$estimate[1])
+results$mean2[3] = round(out$estimate[2])
+results$pooledSD[3] = pooled_sd(df$SalesInThousands[df$Promotion == 2],
+                                df$SalesInThousands[df$Promotion == 3])
+results$sigDif[3] = out$p.value < alphaAdjusted
+
+results$meanDif = results$mean1 - results$mean2
+
+results %>% 
+  kbl(align = 'c', digits = 4) %>% 
+  kable_classic(full_width = F, 
+                font_size = 20)
+
+
+```
+
+## do a matched-sample t-test
+
+```{r t test}
+# install.packages("MatchIt")
+library(MatchIt)
+
+
+promoCompare <- function(df, targPromos){
+  #compare 1 v. 2
+  dfTmp = df %>% filter(Promotion == targPromos[1] | 
+                        Promotion == targPromos[2])
+  
+  out = t.test(dfTmp$SalesInThousands[dfTmp$Promotion == targPromos[1]],
+         dfTmp$SalesInThousands[dfTmp$Promotion == targPromos[2]], 
+         paired = F)
+  print(out)
+  
+  print(dfTmp %>% ggplot(aes(y = SalesInThousands, 
+                             color = Promotion))+
+          geom_boxplot() +
+          myTheme + brightCol + brightFil)
+  
+  print(dfTmp %>% ggplot(aes(x = MarketSize, 
+                             color = Promotion, fill = Promotion))+
+          geom_bar(position = "dodge") +
+          myTheme + brightCol + brightFil) 
+  # Use nearest neighbor matching on the chosen variable
+  matching_result <- matchit(Promotion ~ MarketSize, 
+                             data = dfTmp, method = "nearest")
+  
+  # Get the matched data
+  matched_data <- match.data(matching_result)
+  
+  matched_data = matched_data %>% arrange(subclass, Promotion)
+ 
+  # matched_pairs <- matched_data %>% 
+  #   group_by(subclass) %>% 
+  #   ungroup()
+  
+  
+    # filter(sum(Promotion == targPromos[1]) == 1 & 
+    #        sum(Promotion == targPromos[2]) == 1) 
+  
+  p1 = matched_data %>% filter(Promotion == targPromos[1])
+  p2 = matched_data %>% filter(Promotion == targPromos[2])
+  
+  #which campaign gets more impressions? 
+  print(t.test(p1$SalesInThousands, p2$SalesInThousands, paired = T))
+  # matched_pairs = matched_pairs %>% arrange(Promotion)
+  
+  print(matched_data %>% group_by(subclass) %>% 
+          summarize(difVal = SalesInThousands[1] - SalesInThousands[2]) %>% 
+          ggplot(aes(x = difVal))+
+          geom_histogram(color = '#20CDF2', fill = '#20CDF2') +
+          myTheme)
+  
+}
+
+df %>% arrange(runif(length(df$LocationID))) -> df
+promoCompare(df, c(1,3))
+promoCompare(df, c(1,2)) 
+
+promoCompare(df, c(2,3))
+
+test.lm = lm(SalesInThousands ~ Promotion * MarketSize, data = df)
+
+summary(test.lm)
+
+library(emmeans)
+pairwise_results <- emmeans(test.lm, pairwise ~ Promotion)
+
+# View results
+print(pairwise_results$contrasts)
+
+```
+
+# mixed effects model 
+
+```{r}
+
+df <- read.csv(paste0(gitHubPath, 'data\\WA_Marketing-Campaign.csv'))
+df$Promotion = as.factor(df$Promotion)
+
+df <- df %>%
+  mutate(
+    MarketID = as.factor(MarketID),
+    LocationID = as.factor(LocationID),
+    week = as.factor(week)
+  )
+
+test.lm <- lmer(
+  SalesInThousands ~ Promotion * MarketSize  + 
+      (1 | LocationID), 
+  data = df
+)   
+
+summary(test.lm)
+
+
+```
+
+## country garbage 
+
+```{r country garbage}
+
+
+
+```
+

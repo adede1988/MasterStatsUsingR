@@ -1,0 +1,111 @@
+---
+Title: 'Coding Exercise: pivot practice'
+Section: 't-test'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(BSDA)
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## human memory data
+
+```{r data}
+df = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
+
+df <- df %>% filter(TargALL_UVSD_d >=0)
+
+df$memDif = df$L1cor_UVSD_d - df$L5_UVSD_d
+
+dfSimp = df %>% select(L1cor_UVSD_d, L5_UVSD_d)
+
+#can you pivot the simplified dataframe to make it twice as long? 
+#goal is three columns: 
+#col 1: memory score (d)
+#col 2: L1 or L5 
+#col 3: subject ID number
+dfSimp$subID = seq(1,length(dfSimp$L1cor_UVSD_d),1)
+
+dfSimp <- dfSimp %>% pivot_longer(cols = -subID, 
+                        names_to = "variable", 
+                        values_to = "value")
+
+t.test(value ~ variable, data = dfSimp, paired = T)
+
+                        #names_pattern = "^(L\\d+)",
+
+
+
+#first plot the histogram of country total populations 
+df$dummy = as.factor(1)
+df %>% ggplot(aes(x = memDif, color = dummy, fill = dummy)) + 
+  geom_histogram(bins = 10) + 
+  xlab('L5 better     Mem Dif      L1 better') +
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+```
+
+## do a t-test 
+
+```{r t test}
+
+
+
+#step 1: Do people exhibit different memory for images from L1 vs L5 trials? 
+
+#step 2: 
+#       NULL: 
+M = 0
+#       ALTERNATE: 
+# not the null 
+
+#step 3: 
+#       ALPHA:
+alpha = .05
+#       critical t value: 
+n = length(df$memDif)
+critVal = qt(1-(alpha/2),n-1)
+
+
+#step 4: 
+m = mean(df$memDif)
+s = sd(df$memDif)
+sampleT = (m - M) / (s/sqrt(n))
+
+#step 5: 
+if (sampleT>critVal | sampleT < -critVal){
+  print('mean value is different from 0!')
+} else { 
+  print('no evidence that the mean value is different from 0!')
+}
+
+#step 6: 
+#What does the result in step 5 mean for answering our original question? 
+
+
+t.test(df$memDif, mu = M)
+
+
+```
+

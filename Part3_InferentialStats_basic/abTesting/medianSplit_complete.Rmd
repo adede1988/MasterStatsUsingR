@@ -1,0 +1,69 @@
+---
+title: 't-test on split continuous data'
+Section: 'AB testing'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## human EEG data 
+
+```{r EEG}
+
+#Key variable name: pow_delta_O
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+df <- df %>% filter(age<(8*12))
+
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+
+```
+
+## human EEG babies vs. kids
+
+```{r t test split}
+
+df$babyChild = df$age<50
+df$babyChild[df$babyChild] = 'baby'
+df$babyChild[df$babyChild=='FALSE'] = 'child'
+
+ggplot(df, aes(x = log(pow_delta_O,10), color = babyChild)) + 
+  geom_freqpoly(linewidth = 2) + myTheme + brightCol
+
+t.test(log(df$pow_delta_O[df$babyChild=='baby'],10),
+       log(df$pow_delta_O[df$babyChild=='child'],10))
+
+```
+

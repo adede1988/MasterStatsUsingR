@@ -27,12 +27,10 @@ https://www.science.org/doi/10.1126/sciadv.aaz5803#sec-4
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-# Load packages
-courseThemePath = 
-  "G:\\My Drive\\Teaching\\stats\\RCourse\\t_test_vs_regression_analysis\\courseTheme.R"
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
 
 library(tidyverse) # data manipulation and visualization
-source(courseThemePath)
+source(paste0(gitHubPath, 'courseTheme.R'))
 ```
 
 # load data that we previously cleaned and organized

@@ -1,0 +1,109 @@
+---
+title: 'Describing Real Data'
+Section: 'Determining Distribution'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+library(MatchIt)
+
+```
+
+## sp500: Does the market go up or down by the same average absolute amount?
+
+```{r sp500}
+
+
+df = read.csv(paste0(gitHubPath, '\\data\\SP500HistoricalData.csv'))
+names(df)[6] <- 'Change'
+
+df$Change = unlist(lapply(df$Change, function(x) as.numeric(strsplit(x, '%')[[1]])))
+df$posNeg = df$Change > 0
+
+t.test(abs(df$Change[df$posNeg]), abs(df$Change[!df$posNeg]))
+
+```
+
+## Maybe our sample wasn't properly balanced. Volatile days have bigger changes
+
+```{r volatility}
+
+#let's look at the total swing from high point to low point in each day
+df$swing = as.numeric(gsub(",", "", df$High)) -
+            as.numeric(gsub(",", "", df$Low))
+
+#is the size of the change related to the swing? 
+ggplot(df, aes(x = swing, y = abs(Change), color = dummy)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+#is the amount of swing different on up versus down days? 
+t.test(abs(df$swing[df$posNeg]), abs(df$swing[!df$posNeg]))
+
+```
+
+## do matching of individual up with individual down days using swing
+
+``` {r matching}
+
+#we can do a paired sample test by matching days that have nearly the same swing
+matching_result <- matchit(posNeg ~ swing, 
+                             data = df, method = "nearest")
+
+matched_data <- match.data(matching_result)
+
+matched_data = matched_data %>% arrange(subclass, posNeg)
+
+matched_pairs <- matched_data %>%
+  group_by(subclass) %>%
+  summarize(matchGoodness = swing[posNeg] - swing[!posNeg],
+            changeDif = abs(Change[posNeg]) - abs(Change[!posNeg]))
+
+
+t.test(matched_pairs$changeDif)
+
+#how good was the matching? 
+ggplot(matched_pairs, aes(x = matchGoodness)) + 
+  geom_histogram(fill = "green", color = 'green') + 
+  myTheme 
+
+#question to ponder: is it that negative days 
+
+
+```
+
+## human EEG babies vs. kids
+
+```{r t test split}
+
+df$babyChild = df$age<50
+df$babyChild[df$babyChild] = 'baby'
+df$babyChild[df$babyChild=='FALSE'] = 'child'
+
+ggplot(df, aes(x = log(pow_delta_O,10), color = babyChild)) + 
+  geom_freqpoly(linewidth = 2) + myTheme + brightCol
+
+t.test(log(df$pow_delta_O[df$babyChild=='baby'],10),
+       log(df$pow_delta_O[df$babyChild=='child'],10))
+
+```
+

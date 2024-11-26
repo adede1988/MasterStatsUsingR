@@ -60,6 +60,52 @@ results %>% ggplot(aes(x=pval, color = dummy, fill = dummy)) +
   geom_vline(xintercept = .05, color = 'red', linewidth = 2, linetype = 'dashed')
 
 
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+df = df[df$group == 'CON' | df$group == 'AD',]
+library(MatchIt)
+
+df$groupNum = as.numeric(df$group == 'AD')
+df <- df %>% filter(!is.na(IQ))
+matching_result <- matchit(groupNum ~ age*sex*IQ, 
+                             data = df, method = "nearest")
+  
+  # Get the matched data
+  matched_data <- match.data(matching_result)
+  
+  #confirm pairs: 
+  pair_check <- matched_data %>%
+  group_by(subclass) %>%
+  summarize(n = n()) %>%
+  ungroup()
+
+# Print summary of pair counts
+print(pair_check)
+
+# Check if all pairs have exactly two observations
+all(pair_check$n == 2)  
+  
+  matched_data = matched_data %>% arrange(subclass, sexNum)
+  df = matched_data
+  oldRes = results
+powidx = which(grepl('pow', names(df)))
+results = data.frame('pval' = rep(0,length(powidx)),
+                     'sig'  = rep(0,length(powidx)))
+for(ii in 1:length(powidx)){
+  x = df[df$group == "AD",powidx[ii]]
+  y = df[df$group == "CON",powidx[ii]]
+  y = y[0<x & x<250]
+  x = x[0<x & x<250]
+  x = x[0<y & y<250]
+  y = y[0<y & y<250]
+    out = t.test(log(x), log(y), paired = F)
+    results$pval[ii] = out$p.value
+    results$sig[ii] = as.numeric(out$p.value < .05)
+    results$sigCor[ii] = as.numeric(out$p.value < (.05/length(powidx)))
+    results$varName[ii] = names(df)[powidx[ii]]
+    results$n = length(x) + length(y)
+}
+
+
 ```
 
 ## simulating multiple small real differences with a function

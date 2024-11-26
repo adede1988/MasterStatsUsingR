@@ -112,9 +112,26 @@ df %>% ggplot(aes(x = week, y = SalesInThousands,
   scale_color_gradient2(low = "green", mid = "white", high = "magenta",
                         midpoint = 500)
 
+#is there much variability week to week? 
+df %>% group_by(week) %>% summarize(weeklyMean = mean(SalesInThousands),
+                                    se = sd(SalesInThousands)/sqrt(n()))%>%
+  ggplot(aes(x = week, y = weeklyMean, group = 1)) +
+  geom_line(linewidth = 3, color = 'green') +            # Linegraph
+  geom_point(size = 3, color = 'green') +                # Points for means
+  geom_errorbar(aes(ymin = weeklyMean - se,   # Lower bound of error
+                    ymax = weeklyMean + se),  # Upper bound of error
+                width = 0.2, color = 'green') +          # Width of error bars
+  myTheme
+
 df<- df %>% group_by(LocationID) %>%
   summarize(SalesInThousands = mean(SalesInThousands),
     across(everything(), ~ first(.), .names = "{.col}"))
+
+#After averaging over weeks, variability is lower: 
+df %>% ggplot(aes(y = SalesInThousands, color = Promotion)) + 
+    geom_boxplot(linewidth = 2)+ 
+  myTheme + brightCol + brightFil+
+        theme(axis.text.x = element_blank())
 
 ```
 

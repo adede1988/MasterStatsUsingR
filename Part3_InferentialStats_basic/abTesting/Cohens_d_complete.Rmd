@@ -1,0 +1,123 @@
+---
+Title: 'Marketing Data'
+Section: 'AB-testing'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(BSDA)
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+library(kableExtra)
+
+```
+
+## advertising data
+#https://www.kaggle.com/datasets/chebotinaa/fast-food-marketing-campaign-ab-test
+
+```{r data}
+df <- read.csv(paste0(gitHubPath, 'data\\WA_Marketing-Campaign.csv'))
+df$Promotion = as.factor(df$Promotion)
+
+df<- df %>% group_by(LocationID) %>%
+  summarize(SalesInThousands = mean(SalesInThousands),
+    across(everything(), ~ first(.), .names = "{.col}"))
+
+df %>% ggplot(aes(y = SalesInThousands, color = Promotion)) + 
+    geom_boxplot(linewidth = 2)+ 
+  myTheme + brightCol + brightFil+
+        theme(axis.text.x = element_blank())
+
+
+```
+
+## t-test code, update it to include cohen's d calculation 
+
+```{r t}
+
+pooled_sd <- function(x1, x2) {
+  n1 <- length(x1)
+  n2 <- length(x2)
+  s1 <- sd(x1)
+  s2 <- sd(x2)
+  
+  sqrt(((n1 - 1) * s1^2 + (n2 - 1) * s2^2) / (n1 + n2 - 2))
+}
+
+alphaAdjusted = .05/3
+results = data.frame('test' = c('0','0','0'), 
+                     'pval' = c(0,0,0),
+                     'n1' = c(0,0,0),
+                     'n2' = c(0,0,0),
+                     'mean1' = c(0,0,0),
+                     'mean2' = c(0,0,0),
+                     'pooledSD' = c(0,0,0),
+                     'sigDif'= c(0,0,0))
+
+out = t.test(df$SalesInThousands[df$Promotion == 1], 
+       df$SalesInThousands[df$Promotion == 2])
+results$test[1] = paste0('promo', 1, '_v_promo', 2)
+results$pval[1] = out$p.value
+results$n1[1] = sum(df$Promotion == 1)
+results$n2[1] = sum(df$Promotion == 2)
+results$mean1[1] = round(out$estimate[1])
+results$mean2[1] = round(out$estimate[2])
+results$pooledSD[1] = pooled_sd(df$SalesInThousands[df$Promotion == 1],
+                                df$SalesInThousands[df$Promotion == 2])
+results$sigDif[1] = out$p.value < alphaAdjusted
+
+out = t.test(df$SalesInThousands[df$Promotion == 1], 
+       df$SalesInThousands[df$Promotion == 3])
+results$test[2] = paste0('promo', 1, '_v_promo', 3)
+results$pval[2] = out$p.value
+results$n1[2] = sum(df$Promotion == 1)
+results$n2[2] = sum(df$Promotion == 3)
+results$mean1[2] = round(out$estimate[1])
+results$mean2[2] = round(out$estimate[2])
+results$pooledSD[2] = pooled_sd(df$SalesInThousands[df$Promotion == 1],
+                                df$SalesInThousands[df$Promotion == 3])
+results$sigDif[2] = out$p.value < alphaAdjusted
+
+out = t.test(df$SalesInThousands[df$Promotion == 2], 
+       df$SalesInThousands[df$Promotion == 3])
+results$test[3] = paste0('promo', 2, '_v_promo', 3)
+results$pval[3] = out$p.value
+results$n1[3] = sum(df$Promotion == 2)
+results$n2[3] = sum(df$Promotion == 3)
+results$mean1[3] = round(out$estimate[1])
+results$mean2[3] = round(out$estimate[2])
+results$pooledSD[3] = pooled_sd(df$SalesInThousands[df$Promotion == 2],
+                                df$SalesInThousands[df$Promotion == 3])
+results$sigDif[3] = out$p.value < alphaAdjusted
+
+
+#calcualte cohen's d: 
+results$meanDif = results$mean1 - results$mean2
+results$d = results$meanDif / results$pooledSD
+
+results %>% 
+  kbl(align = 'c', digits = 4) %>% 
+  kable_classic(full_width = F, 
+                font_size = 20)
+
+
+```
+
