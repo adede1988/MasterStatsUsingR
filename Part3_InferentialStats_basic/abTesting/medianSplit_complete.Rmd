@@ -40,7 +40,8 @@ df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
 
 ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
   geom_point(size = 2) + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
+  xlab("age (months)")
 
 df <- df %>% filter(age<(8*12))
 

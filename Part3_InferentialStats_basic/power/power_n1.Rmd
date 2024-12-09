@@ -1,0 +1,113 @@
+---
+Title: 'Power When n is One'
+Section: 'Power'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+# library(pracma)
+# library(kableExtra)
+
+```
+
+## Example 1: hypothetical heights 
+
+```{r height example}
+
+M_mean = 70
+F_mean = 65
+all_sd = 3
+
+#What is the probability that a random man will be taller than 95% of women?
+
+#how tall is a woman in the 95th percentile? 
+W95 = qnorm(.95, F_mean, all_sd)
+zCrit = qnorm(.95)
+W95_2 = zCrit*all_sd + F_mean
+
+#what is the probability that a random man will be taller than W95? 
+power = 1-pnorm(W95, M_mean, all_sd)
+
+print(paste0("The power of detecting men taller than",
+             " women with one observation is: ", round(power, 2)))
+
+```
+
+## Example 2: varying the true difference in heights
+
+```{r varying dif}
+
+M_mean = seq(65,75,1)
+F_mean = 65
+all_sd = 3
+
+#What is the probability that a random man will be taller than 95% of women?
+
+#how tall is a woman in the 95th percentile? 
+W95 = qnorm(.95, F_mean, all_sd)
+zCrit = qnorm(.95)
+W95_2 = zCrit*all_sd + F_mean
+
+#what is the probability that a random man will be taller than W95? 
+power = 1-pnorm(W95, M_mean, all_sd)
+
+df = data.frame(power = power,
+                TrueDif = M_mean - F_mean)
+df %>% ggplot(aes(x = TrueDif, y = power)) + 
+  geom_line(linewidth = 2, color = 'green') + 
+  myTheme 
+
+
+```
+
+## Example 3: thinking in terms of effect size
+
+```{r effect size}
+
+M_mean = seq(65,75,1)
+F_mean = 65
+all_sd = 3
+
+#convert differences to Cohen's d effect size values
+cohenD = (M_mean - F_mean) / all_sd
+
+#What is the probability that a random man will be taller than 95% of women?
+ 
+zCrit = qnorm(.95)
+
+#what is the probability that a random man will be taller than zCrit? 
+power = 1-pnorm(zCrit, cohenD)
+
+df = data.frame(power = power,
+                TrueDif = M_mean - F_mean)
+df %>% ggplot(aes(x = TrueDif, y = power)) + 
+  geom_line(linewidth = 2, color = 'green') + 
+  myTheme 
+
+#How big would the true difference between men and women need to be 
+#in order to have an 80% chance of detecting it with n = 1? 
+print(df)
+
+```
+
+

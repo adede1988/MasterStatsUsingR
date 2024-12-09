@@ -63,14 +63,6 @@ pooled_sd <- function(x1, x2) {
 }
 
 alphaAdjusted = .05/3
-# results = data.frame('test' = c('0','0','0'), 
-#                      'pval' = c(0,0,0),
-#                      'n1' = c(0,0,0),
-#                      'n2' = c(0,0,0),
-#                      'mean1' = c(0,0,0),
-#                      'mean2' = c(0,0,0),
-#                      'pooledSD' = c(0,0,0),
-#                      'sigDif'= c(0,0,0))
 
 getSummary <- function(df, idx1, idx2, alphaAdjusted){
   results = data.frame(test = 'a')
@@ -88,6 +80,22 @@ getSummary <- function(df, idx1, idx2, alphaAdjusted){
   #add on for d
   results$meanDif = results$mean1 - results$mean2
   results$d = results$meanDif / results$pooledSD
+  
+  #add on power calculation
+  
+  critDif = qnorm(1-(alphaAdjusted/2), 0, 
+                  results$pooledSD / sqrt(results$n1+results$n2))
+
+
+#what is the probability that a mean dif will be 
+#  greater than critical given a small effect size? 
+  
+  results$powerSmall = 1-pnorm(critDif, .2*results$pooledSD, 
+                results$pooledSD / sqrt(results$n1+results$n2))
+  
+  results$powerMed = 1-pnorm(critDif, .4*results$pooledSD, 
+                results$pooledSD / sqrt(results$n1+results$n2))
+
 
   return(results)
 }

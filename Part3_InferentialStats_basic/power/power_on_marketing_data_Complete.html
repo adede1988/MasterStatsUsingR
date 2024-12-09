@@ -11,7 +11,7 @@
 
 
 
-<title>Cohens_d_complete.knit</title>
+<title>power_on_marketing_data_Complete.knit</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1746,14 +1746,6 @@ df %&gt;% ggplot(aes(y = SalesInThousands, color = Promotion)) +
 }
 
 alphaAdjusted = .05/3
-# results = data.frame(&#39;test&#39; = c(&#39;0&#39;,&#39;0&#39;,&#39;0&#39;), 
-#                      &#39;pval&#39; = c(0,0,0),
-#                      &#39;n1&#39; = c(0,0,0),
-#                      &#39;n2&#39; = c(0,0,0),
-#                      &#39;mean1&#39; = c(0,0,0),
-#                      &#39;mean2&#39; = c(0,0,0),
-#                      &#39;pooledSD&#39; = c(0,0,0),
-#                      &#39;sigDif&#39;= c(0,0,0))
 
 getSummary &lt;- function(df, idx1, idx2, alphaAdjusted){
   results = data.frame(test = &#39;a&#39;)
@@ -1771,6 +1763,19 @@ getSummary &lt;- function(df, idx1, idx2, alphaAdjusted){
   #add on for d
   results$meanDif = results$mean1 - results$mean2
   results$d = results$meanDif / results$pooledSD
+  
+  #add on power calculation
+  tCrit &lt;- qt(1 - alphaAdjusted, results$n1 + results$n2 - 2)
+  #how far from zero is the alternate distribution&#39;s difference? 
+  shift &lt;- .2 * sqrt(results$n1 + results$n2)
+  shift2 = results$meanDif / 
+    (results$pooledSD / sqrt(results$n1 + results$n2))
+  results$powerSmall = 1 - pt(tCrit - abs(shift), 
+                 results$n1 + results$n2 - 2)
+  
+  shift &lt;- .4 * sqrt(results$n1 + results$n2)
+  results$powerMed = 1 - pt(tCrit - abs(shift), 
+                 results$n1 + results$n2 - 2)
 
   return(results)
 }
@@ -1818,6 +1823,12 @@ meanDif
 <th style="text-align:center;">
 d
 </th>
+<th style="text-align:center;">
+powerSmall
+</th>
+<th style="text-align:center;">
+powerMed
+</th>
 </tr>
 </thead>
 <tbody>
@@ -1852,6 +1863,12 @@ TRUE
 <td style="text-align:center;">
 0.9475
 </td>
+<td style="text-align:center;">
+0.3960
+</td>
+<td style="text-align:center;">
+0.9470
+</td>
 </tr>
 <tr>
 <td style="text-align:center;">
@@ -1884,6 +1901,12 @@ FALSE
 <td style="text-align:center;">
 0.4937
 </td>
+<td style="text-align:center;">
+0.3960
+</td>
+<td style="text-align:center;">
+0.9470
+</td>
 </tr>
 <tr>
 <td style="text-align:center;">
@@ -1915,6 +1938,12 @@ TRUE
 </td>
 <td style="text-align:center;">
 -0.5624
+</td>
+<td style="text-align:center;">
+0.4126
+</td>
+<td style="text-align:center;">
+0.9554
 </td>
 </tr>
 </tbody>
