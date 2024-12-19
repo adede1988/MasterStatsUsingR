@@ -1,0 +1,257 @@
+---
+title: 'scratch Wilcoxon'
+Section: 'AB testing'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## human EEG data 
+
+```{r EEG}
+
+#Key variable name: pow_delta_O
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
+  xlab("age (months)")
+
+df <- df %>% filter(age<(8*12))
+
+ggplot(df, aes(x = age, y = pow_delta_O, color = dummy)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+
+```
+
+## human EEG babies vs. kids
+
+```{r t test split}
+
+df$babyChild = df$age<50
+df$babyChild[df$babyChild] = 'baby'
+df$babyChild[df$babyChild=='FALSE'] = 'child'
+
+
+
+child95 = quantile(log(df$pow_delta_O[df$babyChild=='child'],10), .95)
+babyGreater = sum(log(df$pow_delta_O[df$babyChild=='baby'],10)>child95) / 
+              sum(df$babyChild == 'baby')
+
+childM = mean(log(df$pow_delta_O[df$babyChild=='child'],10))
+childSD = sd(log(df$pow_delta_O[df$babyChild=='child'],10))
+
+childNorm = qnorm(.95, childM, childSD)
+
+ggplot(df, aes(x = log(pow_delta_O,10), color = babyChild)) + 
+  geom_freqpoly(linewidth = 2) + myTheme + brightCol #+ 
+  # geom_vline(xintercept = child95, color = 'red', linetype = 'dashed')+ 
+  # geom_vline(xintercept = childNorm, color = 'purple', linetype = 'dashed')
+
+child95 = quantile(df$pow_delta_O[df$babyChild=='child'], .95)
+babyGreater = sum(df$pow_delta_O[df$babyChild=='baby']>child95) / 
+              sum(df$babyChild == 'baby')
+childM = mean(df$pow_delta_O[df$babyChild=='child'])
+childSD = sd(df$pow_delta_O[df$babyChild=='child'])
+
+childNorm = qnorm(.95, childM, childSD)
+
+ggplot(df, aes(x = pow_delta_O, color = babyChild)) + 
+  geom_freqpoly(linewidth = 2) + myTheme + brightCol #+ 
+  # geom_vline(xintercept = child95, color = 'red', linetype = 'dashed')+ 
+  # geom_vline(xintercept = childNorm, color = 'purple', linetype = 'dashed')
+
+
+t.test(log(df$pow_delta_O[df$babyChild=='baby'],10),
+       log(df$pow_delta_O[df$babyChild=='child'],10), var.equal = T)
+
+
+t.test(df$pow_delta_O[df$babyChild=='baby'],
+       df$pow_delta_O[df$babyChild=='child'], var.equal = T)
+
+```
+
+## random sub sample
+
+```{r random}
+pvals = data.frame(tlog = rep(0,100),
+           t = rep(0,100),
+           wil = rep(0,100))
+for(ii in 1:100){
+set.seed(ii)
+
+child = df$pow_delta_O[df$babyChild == 'child']
+baby = df$pow_delta_O[df$babyChild == 'baby']
+
+child = child[randsample(length(child), 10)]
+baby = baby[randsample(length(baby), 10)]
+
+res = t.test(log(child,10), log(baby,10))
+res2 = t.test(child, baby)
+res3 = wilcox.test(child,baby)
+pvals$tlog[ii] = res$p.value
+pvals$t[ii] = res2$p.value
+pvals$wil[ii] = res3$p.value
+}
+
+```
+
+## working with a specific example
+
+```{r n 10}
+
+set.seed(8)
+
+child = df$pow_delta_O[df$babyChild == 'child']
+baby = df$pow_delta_O[df$babyChild == 'baby']
+
+child = child[randsample(length(child), 10)]
+baby = baby[randsample(length(baby), 10)]
+
+t.test(log(child,10), log(baby,10))
+t.test(child, baby, var.equal = T)
+wilcox.test(child,baby)
+
+tmp = data.frame(pow = c(child,baby),
+                 childBaby = c(rep('child', 10),
+                               rep('baby', 10)))
+ggplot(tmp, aes(x = pow, color = childBaby)) + 
+  geom_freqpoly(linewidth = 2) + myTheme + brightCol + 
+  geom_vline(xintercept = mean(baby), color = '#20CDF2', 
+             linewidth = 2, linetype = 'dashed')+ 
+  geom_vline(xintercept = mean(child), color = '#6EE11F', 
+             linewidth = 2, linetype = 'dashed') + 
+  geom_line(data = data.frame(pow = seq(0,200), 
+                       count = dnorm(seq(0,200),mean(child), sd(child))), 
+            aes(x = pow, y = count*300), color = 'purple')
+
+tmp = data.frame(pow = c(child),
+                 childBaby = c(rep('child', 10)))
+ggplot(tmp, aes(x = pow)) + 
+  geom_freqpoly(linewidth = 2, color = '#6EE11F') + 
+  myTheme + brightCol + 
+  geom_vline(xintercept = mean(baby), color = '#20CDF2', 
+             linewidth = 2, linetype = 'dashed')+ 
+  geom_vline(xintercept = mean(child), color = '#6EE11F', 
+             linewidth = 2, linetype = 'dashed') + 
+  geom_line(data = data.frame(pow = seq(0,200), 
+                       count = dnorm(seq(0,200),mean(child), sd(child))), 
+            aes(x = pow, y = count*300), color = '#6EE11F', 
+            linewidth = 1)
+
+
+tmp = data.frame(pow = c(child[child<150]),
+                 childBaby = c(rep('child', 9)))
+ggplot(tmp, aes(x = pow)) + 
+  geom_freqpoly(linewidth = 2, color = '#6EE11F') + 
+  myTheme + brightCol + 
+  geom_vline(xintercept = mean(baby), color = '#20CDF2', 
+             linewidth = 2, linetype = 'dashed')+ 
+  geom_vline(xintercept = mean(child), color = '#6EE11F', 
+             linewidth = 2, linetype = 'dashed') + 
+  geom_line(data = data.frame(pow = seq(0,200), 
+                       count = dnorm(seq(0,200),mean(child[child<150]),
+                                     sd(child[child<150]))),
+            aes(x = pow, y = count*150), color = '#6EE11F', 
+            linewidth = 1)
+
+
+
+
+tmp = data.frame(pow = c(child,baby),
+                 childBaby = c(rep('child', 10),
+                               rep('baby', 10)))
+ggplot(tmp, aes(x = log(pow,10), color = childBaby)) + 
+  geom_freqpoly(linewidth = 2) + myTheme + brightCol
+
+tmp <- tmp %>% arrange(pow)
+tmp$rank = seq(1,length(tmp$pow))
+tmp %>% group_by(childBaby) %>% summarize(sum(rank)) -> sumRanks
+
+data.frame(all_ranks <- combn(20,10,sum)) -> allRanks
+
+allRanks %>% ggplot(aes(x = all_ranks)) + 
+  geom_histogram(fill = 'purple') + myTheme + 
+  geom_vline(xintercept = 75, color = 'green', 
+             linewidth = 2, linetype = 'dashed')+ 
+  geom_vline(xintercept = 135, color = 'green', 
+             linewidth = 2, linetype = 'dashed')
+
+```
+
+# load data that we previously cleaned and organized
+```{r load plastic waste data}
+
+df = read.csv('G:\\My Drive\\Teaching\\stats\\RCourse\\cleanData\\plasticWaste.csv')
+
+
+
+devThresh = 14000
+
+df %>% ggplot(aes(x = gdpPerCap)) + 
+  geom_histogram(breaks = seq(1,131000,5000),
+                 color = '#6EE11F', fill = '#6EE11F') + 
+  myTheme + 
+  geom_vline(xintercept = devThresh, color = 'purple', linewidth = 2)
+
+t.test(df$gdpPerCap, mu = devThresh)
+
+df$relativeDif = df$gdpPerCap - devThresh
+df$abdif = abs(df$relativeDif)
+df$signDif = df$relativeDif / df$abdif
+
+df <- df %>% arrange(abdif)
+
+df$rank = seq(1,length(df$abdif))
+
+posRank = sum(df$rank[df$signDif == 1])
+negRank = sum(df$rank[df$signDif == -1])
+
+min(posRank, negRank)
+
+
+n = length(df$countryLong)
+
+
+effectSize = abs(posRank - negRank) / ((n*(n+1))/2)
+
+meanW = n*(n+1) / 4
+sdW = sqrt(n * (n + 1) * (2 * n + 1) / 24)
+
+zpos = (posRank - meanW) / sdW
+zneg = (negRank - meanW) / sdW
+pnorm(zneg)*2
+
+median(df$gdpPerCap)
+
+wilcox.test(df$gdpPerCap, mu = devThresh)
+
+```

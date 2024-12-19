@@ -1,0 +1,118 @@
+---
+title: 'Wilcoxon Rank Sum'
+Section: 'Wilcoxon Test'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## human EEG data 
+
+```{r EEG}
+
+#Key variable name: pow_delta_O
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+
+df <- df %>% filter(age<(8*12))
+df$babyChild = df$age<50
+df$babyChild[df$babyChild] = 'baby'
+df$babyChild[df$babyChild=='FALSE'] = 'child'
+
+ggplot(df, aes(x = age, y = pow_delta_O, color = babyChild)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol 
+
+
+```
+
+## human EEG babies vs. kids small sample
+
+```{r t test}
+
+set.seed(8)
+
+child = df$pow_delta_O[df$babyChild == 'child']
+baby = df$pow_delta_O[df$babyChild == 'baby']
+
+child = child[randsample(length(child), 10)]
+baby = baby[randsample(length(baby), 10)]
+
+tmp = data.frame(pow = c(child,baby),
+                 childBaby = c(rep('child', 10),
+                               rep('baby', 10)))
+ggplot(tmp, aes(x = pow, color = childBaby)) + 
+  geom_freqpoly(linewidth = 2) + myTheme + brightCol + 
+  geom_vline(xintercept = mean(baby), color = '#20CDF2', 
+             linewidth = 2, linetype = 'dashed')+ 
+  geom_vline(xintercept = mean(child), color = '#6EE11F', 
+             linewidth = 2, linetype = 'dashed')
+
+t.test(child, baby, var.equal = T)
+
+#it's still not quite significant with log transform! 
+t.test(log(child,10), log(baby,10))
+
+
+
+```
+
+## Wilcoxon rank sum test
+
+```{r rank sum}
+
+#form a null distribution of all possible rank sums
+#take all possible random combinations of 10 from the set 1:20 and sum them:
+allRanks = data.frame(all_ranks <- combn(20,10,sum)) 
+
+#calcualte the rank sums in our data: 
+tmp <- tmp %>% arrange(pow)
+tmp$rank = seq(1,length(tmp$pow))
+tmp %>% group_by(childBaby) %>% summarize(sum(rank))
+
+
+#plot all possible rank sums with the observed values
+allRanks %>% ggplot(aes(x = all_ranks)) + 
+  geom_histogram(fill = 'purple') + myTheme + 
+  geom_vline(xintercept = 75, color = 'green', 
+             linewidth = 2, linetype = 'dashed')+ 
+  geom_vline(xintercept = 135, color = 'green', 
+             linewidth = 2, linetype = 'dashed')
+
+#are the observed values in the most extreme 2.5% on either end? 
+oneSide_pval = sum(allRanks$all_ranks<=75)/length(allRanks$all_ranks) 
+otherSide_pval = sum(allRanks$all_ranks>=135)/length(allRanks$all_ranks)
+
+pval = oneSide_pval + otherSide_pval
+
+#reject the null
+print(paste0('we can reject the null with p=', pval))
+
+wilcox.test(child,baby)
+
+```
+

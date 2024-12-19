@@ -1,0 +1,89 @@
+---
+title: 'Signed Rank Test'
+Section: 'Wilcoxon Test'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+# load our plastic waste dataset
+
+```{r load plastic waste data}
+
+df = read.csv('G:\\My Drive\\Teaching\\stats\\RCourse\\cleanData\\plasticWaste.csv')
+
+
+
+devThresh = 14000
+
+
+df %>% ggplot(aes(x = gdpPerCap)) + 
+  geom_histogram(breaks = seq(1,131000,5000),
+                 color = '#6EE11F', fill = '#6EE11F') + 
+  myTheme + 
+  geom_vline(xintercept = devThresh, color = 'purple', linewidth = 2)
+
+```
+
+## What does a t-test reveal? 
+
+```{r t test}
+
+t.test(df$gdpPerCap, mu = devThresh)
+
+```
+
+## now let's do a signed rank test
+
+```{r signed rank}
+
+#calcualte the difference scores from the development threshold: 
+df$relativeDif = df$gdpPerCap - devThresh
+
+#rank their absolute values and store if each dif is negative or positive
+df$abdif = abs(df$relativeDif)
+df$signDif = df$relativeDif / df$abdif
+df <- df %>% arrange(abdif)
+df$rank = seq(1,length(df$abdif))
+
+#get the total positive and negative ranks
+posRank = sum(df$rank[df$signDif == 1])
+negRank = sum(df$rank[df$signDif == -1])
+
+#get the mean and sd for the approximate distribution of rank sum
+n = length(df$countryLong)
+meanW = n*(n+1) / 4
+sdW = sqrt(n * (n + 1) * (2 * n + 1) / 24)
+
+#z score and find p value
+zpos = (posRank - meanW) / sdW
+zneg = (negRank - meanW) / sdW
+print(paste('The approximate 2-tailed p value is: ', 
+            round((1-pnorm(zpos))*2,3), 
+            ' based on a rank sum of: ', posRank))
+
+#use R builtin: 
+wilcox.test(df$gdpPerCap, mu = devThresh)
+
+```

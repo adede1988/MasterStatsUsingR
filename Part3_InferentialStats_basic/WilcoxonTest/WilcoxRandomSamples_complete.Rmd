@@ -1,0 +1,80 @@
+---
+title: 'Wilcoxon Random Samples'
+Section: 'Wilcoxon Test'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## human EEG data 
+
+```{r EEG}
+
+#Key variable name: pow_delta_O
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+df <- df %>% filter(age<(8*12))
+
+df$babyChild = df$age<50
+df$babyChild[df$babyChild] = 'baby'
+df$babyChild[df$babyChild=='FALSE'] = 'child'
+
+
+
+```
+
+## random sub sample of size 10 per group
+
+```{r random}
+pvals = data.frame(tlog = rep(0,100),
+           t = rep(0,100),
+           wil = rep(0,100))
+for(ii in 1:100){
+set.seed(ii)
+
+child = df$pow_delta_O[df$babyChild == 'child']
+baby = df$pow_delta_O[df$babyChild == 'baby']
+
+child = child[randsample(length(child), 10)]
+baby = baby[randsample(length(baby), 10)]
+
+res = t.test(log(child,10), log(baby,10))
+res2 = t.test(child, baby)
+res3 = wilcox.test(child,baby)
+pvals$tlog[ii] = res$p.value
+pvals$t[ii] = res2$p.value
+pvals$wil[ii] = res3$p.value
+}
+
+print(paste(sum(pvals$tlog<.05), 'of 100 for Log Transformed t-test'))
+print(paste(sum(pvals$t<.05), 'of 100 for raw t-test'))
+print(paste(sum(pvals$wil<.05), 'of 100 for Wilcoxon Rank Sum test'))
+
+
+```
+
+
