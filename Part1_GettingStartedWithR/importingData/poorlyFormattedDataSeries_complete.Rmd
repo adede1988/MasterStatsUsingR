@@ -1,0 +1,121 @@
+---
+title: 'Poorly Formatted Data'
+Section: 'Importing Data into R'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:/Users/Adam/Documents/GitHub/MasterStatsUsingR/'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+library(readxl)
+
+```
+
+## ice cream sales and murder
+
+```{r}
+#https://www.nyc.gov/site/nypd/stats/reports-analysis/homicide.page
+murderFiles = list.files(paste0(gitHubPath, 'data/murderFiles'))
+
+
+
+start = T
+for(file in murderFiles){
+  curDat = read_excel(paste0(gitHubPath, 'data/murderFiles/', file))
+  year = as.numeric(strsplit(strsplit(file, 'cy')[[1]][2],
+                             '.xlsx')[[1]][1])
+  if(start){
+    nameVals = unlist(curDat[4,]) 
+    curDat = curDat[,!is.na(nameVals)]
+    nameVals = nameVals[!is.na(nameVals)]
+    
+  } else {
+    temp = unlist(curDat[4,]) 
+    
+    #this code is used to debug when a format change was found:
+    # temp_lower <- tolower(temp)
+    # nameVals_lower <- tolower(nameVals)
+    # 
+    # # Identify items in temp but not in nameVals
+    # only_in_temp <- setdiff(temp_lower, nameVals_lower)
+    # 
+    # # Identify items in nameVals but not in temp
+    # only_in_nameVals <- setdiff(nameVals_lower, temp_lower)
+    
+    
+    
+    curDat = curDat[,!is.na(temp) ]
+    temp = temp[!is.na(temp)]
+    temp_lower <- tolower(temp)
+    curDat = curDat[,temp_lower != 'victim birth date' &
+                      temp_lower != 'perp victim relationship']
+  }
+  curDat = curDat[-c(1,2,3,4),]
+  names(curDat) = nameVals
+  curDat$DATE = as.Date(as.numeric(curDat$DATE), origin = "1899-12-30")
+  curDat = curDat[!is.na(curDat$DATE),]
+  curDat$YEAR = year
+  curDat$MONTH = as.numeric(curDat$MONTH)
+  if(start){
+    allMurders = curDat
+    start = F
+  } else { 
+    allMurders = rbind(allMurders, curDat)
+  }
+  
+}
+
+#save out all the compiled murder data:   
+write.csv(allMurders, file.path(gitHubPath,
+  'data/',
+  'murderDatCombined.csv'))
+
+
+
+```
+
+## A quick graph of murder data over time
+
+
+```{r}
+
+allMurders %>% group_by(YEAR, MONTH) %>% 
+  reframe(count = n(), year = YEAR+MONTH/12) %>% 
+  ggplot(aes(x = year, y = count)) + 
+  geom_line(color = 'purple', linewidth = 2)+ 
+  myTheme + brightCol
+
+
+months = c('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+             'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
+
+allMurders %>% group_by(MONTH) %>% 
+  reframe(count = n()) %>% 
+  ggplot(aes(x = MONTH, y = count)) + 
+  geom_line(color = 'purple', linewidth = 2) + 
+  scale_x_continuous(
+    breaks = seq(1,12),     # Custom tick positions
+    labels = months  # Custom labels
+  ) + 
+  myTheme + brightCol
+
+
+```
+
