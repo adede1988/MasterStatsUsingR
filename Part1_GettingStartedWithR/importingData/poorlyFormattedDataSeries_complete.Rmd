@@ -106,6 +106,7 @@ allMurders %>% group_by(YEAR, MONTH) %>%
 months = c('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
 
+#use a bar plot? categorical should we use bars? 
 allMurders %>% group_by(MONTH) %>% 
   reframe(count = n()) %>% 
   ggplot(aes(x = MONTH, y = count)) + 

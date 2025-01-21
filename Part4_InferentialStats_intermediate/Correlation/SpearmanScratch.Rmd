@@ -1,5 +1,5 @@
 ---
-title: 'Pearson Measures Linear'
+title: 'Spearman Correlation Scratch'
 Section: 'Correlation'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
@@ -89,3 +89,57 @@ ggplot(results, aes(x = cutOff, y = corVal)) +
 
 ```
 
+## make a spearman correlation function
+
+```{r spear func}
+
+#run pearson code first!
+#deal with ties! 
+mySpear = function(x, y){
+  x = rank(x)
+  y = rank(y)
+  d = x - y
+  dSq = d^2
+  n = length(x)
+  r =1 - ( 6*sum(dSq) / 
+    (n*(n^2-1)) )
+ 
+  return(r)
+}
+
+
+```
+
+## try correlations with different age cut offs Spearman
+
+```{r age cut off spear}
+
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
+  xlab("age (months)")
+
+ageCut = seq(12,1000,12)
+
+ageVals = df$age
+powVals = log(df$pow_delta_O)
+results = data.frame(cutOff = ageCut, 
+                     corPer = rep(0, length(ageCut)), 
+                     corSpr = rep(0, length(ageCut)))
+for(ii in 1:length(ageCut)){
+  results$corSpr[ii] = mySpear(powVals[ageVals<ageCut[ii]], 
+                             ageVals[ageVals<ageCut[ii]])
+  results$corPer[ii] = myCor(powVals[ageVals<ageCut[ii]], 
+                             ageVals[ageVals<ageCut[ii]])
+}
+
+results = results %>% pivot_longer(cols = c(corSpr, corPer),
+                         names_to = 'corType',
+                         values_to = 'corVal')
+
+ggplot(results, aes(x = cutOff, y = corVal, color = corType)) +
+  geom_line(linewidth = 2) +
+  myTheme + brightFil + brightCol +
+  xlab("cut off age (months)")
+
+```

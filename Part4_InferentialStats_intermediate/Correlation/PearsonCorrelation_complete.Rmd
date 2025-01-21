@@ -53,7 +53,8 @@ allMurders$dummy = as.factor(1)
 
 ```{r ice cream simulation}
 #I couldn't find real data for New York city ice cream sales, 
-#but roughly $2.3 million of ice cream is sold in NYC every day! 
+#but google results found that roughly $2.3 million of ice cream 
+#is sold in NYC every day! 
 #It's a safe bet this number varies with the season!
 
 #guesses for monthly averages of daily ice cream sales in millions of $
