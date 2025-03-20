@@ -1,0 +1,108 @@
+---
+title: 'Spearman Correlation'
+Section: 'Correlation'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:/Users/Adam/Documents/GitHub/MasterStatsUsingR/'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+library(readxl)
+
+```
+
+## human EEG data 
+
+```{r EEG}
+
+#Key variable name: pow_delta_O
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+
+```
+
+## make a correlation function
+
+```{r cor func}
+spearCor = function(x, y){
+  rX = rank(x)
+  rY = rank(y)
+  d = rX - rY
+  n = length(x)
+  rs = 1 - (6*sum(d^2)) / (n*(n^2 - 1))
+  
+  return(rs)
+}
+
+
+```
+
+## comparing raw v ranked scatter plots
+
+```{r scatter plots}
+
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
+  geom_point(size = 2) + 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 1), 
+              color = "green", se = FALSE) +
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
+  xlab("age (months)")
+
+ggplot(df, aes(x = rank(age), y = rank(log(pow_delta_O,10)), color = dummy)) +
+  geom_point(size = 2) + 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 1), 
+              color = "green", se = FALSE) +
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
+  xlab("rank( age (months) )")
+```
+
+## try correlations with different age cut offs
+
+```{r age cut off}
+
+ageCut = seq(12,1000,12)
+
+ageVals = df$age
+powVals = log(df$pow_delta_O)
+results = data.frame(cutOff = ageCut, 
+                     personCor = rep(0, length(ageCut)),
+                     spearCor  = rep(0, length(ageCut)))
+for(ii in 1:length(ageCut)){
+  results$spearCor[ii] = spearCor(powVals[ageVals<ageCut[ii]], 
+                             ageVals[ageVals<ageCut[ii]])
+  results$personCor[ii] = cor(powVals[ageVals<ageCut[ii]], 
+                             ageVals[ageVals<ageCut[ii]])
+}
+
+resLong = pivot_longer(results, cols = c('personCor', 'spearCor'), 
+                       names_to = 'corType', 
+                       values_to = 'cor')
+
+ggplot(resLong, aes(x = cutOff, y = cor, color = corType)) +
+  geom_line(linewidth = 2) +
+  myTheme + brightCol + 
+  xlab("cut off age (months)")
+
+```
+
+

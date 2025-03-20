@@ -66,8 +66,10 @@ myCor = function(x, y){
 
 ```{r age cut off}
 
-ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) +
   geom_point(size = 2) + 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 3), 
+              color = "green", se = FALSE) +
   myTheme + brightFil + brightCol + theme(legend.position = 'none') +
   xlab("age (months)")
 

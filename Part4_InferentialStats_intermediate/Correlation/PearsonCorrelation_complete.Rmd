@@ -70,6 +70,11 @@ allMurders$Ice_Cream_Sales = rnorm(length(allMurders$MONTH),
 allMurders %>% ggplot(aes(x = Ice_Cream_Sales, y = murders, color = dummy)) + 
   geom_point(size = 3) + myTheme + brightCol + theme(legend.position = 'none') 
 
+write.csv(allMurders, file.path(gitHubPath,
+  'data/',
+  'murderDatCombined_iceCream.csv'))
+
+
 ```
 
 ## calculating Pearson Correlation 
@@ -90,7 +95,7 @@ r = covMurIce / (sdMur * sdIce)
 print(paste('the correlation between ice cream sales and murders in NYC is:',
             round(r, 3)))
 
-cor.test(allMurders$murders, allMurders$Ice_Cream_Sales)
+
 
 ```
 

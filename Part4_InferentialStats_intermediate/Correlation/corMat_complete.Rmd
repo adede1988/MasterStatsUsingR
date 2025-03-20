@@ -1,0 +1,130 @@
+---
+title: 'correlation matrices'
+Section: 'Correlation'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:/Users/Adam/Documents/GitHub/MasterStatsUsingR/'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+
+# Load package
+library(corrplot)
+
+```
+
+## human EEG data 
+
+```{r EEG}
+
+#Key variable name: pow_delta_O
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+
+```
+
+## make a correlation matrix
+
+```{r cor mat}
+
+
+# Compute correlation matrix
+cor_matrix <- cor(select(df, colnames(df)[grepl("pow", colnames(df))]),
+                  method = 'spearman') 
+
+corrplot(cor_matrix, method = "color", type = "lower", tl.cex = 0.8)
+
+
+```
+
+## make correlation matrix averaged within region
+
+```{r region mat}
+
+splitNames = str_split(rownames(cor_matrix), "_")
+
+freq_region_df <- data.frame(
+  variable = rownames(cor_matrix),
+  freqs = sapply(splitNames, function(x) x[2]),
+  region = sapply(splitNames, function(x) x[3])
+)
+
+
+long_df <- expand.grid(Row_Region = freq_region_df$region, 
+                       Col_Region = freq_region_df$region)
+long_df$Correlation <- as.vector(cor_matrix)
+
+reg_df = long_df %>% group_by(Row_Region, Col_Region) %>%
+  summarize(corVal = mean(Correlation))
+
+reg_df = reg_df %>%
+  pivot_wider(names_from = Col_Region, values_from = corVal) %>%
+  ungroup() %>%  # Ungroup to avoid automatic inclusion
+  select(-Row_Region)  # Remove Row_Region
+
+rownames(reg_df) = colnames(reg_df)  
+
+
+reg_df = as.matrix(reg_df)
+
+minVal = min(reg_df)
+maxVal = max(reg_df)
+
+corrplot(reg_df, method = "color", 
+         type = "lower", tl.cex = 0.8,
+         col.lim = c(minVal, maxVal), is.corr = F)
+
+
+```
+
+## correlation matrix averaged within frequencies 
+
+```{r freq mat}
+
+long_df <- expand.grid(Row_Freq = freq_region_df$freqs, 
+                       Col_Freq = freq_region_df$freqs)
+long_df$Correlation <- as.vector(cor_matrix)
+
+freq_df = long_df %>% group_by(Row_Freq, Col_Freq) %>%
+  summarize(corVal = mean(Correlation))
+
+freq_df = freq_df %>%
+  pivot_wider(names_from = Col_Freq, values_from = corVal) %>%
+  ungroup() %>%  # Ungroup to avoid automatic inclusion
+  select(-Row_Freq)  # Remove Row_Region
+
+rownames(freq_df) = colnames(freq_df)  
+
+freq_df = as.matrix(freq_df)
+
+minVal = min(freq_df)
+maxVal = max(freq_df)
+
+corrplot(freq_df, method = "color", 
+         type = "lower", tl.cex = 0.8,
+         col.lim = c(minVal, maxVal), is.corr = F)
+
+
+
+
+```
+

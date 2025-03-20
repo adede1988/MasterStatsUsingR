@@ -1,0 +1,89 @@
+---
+title: 'Pearson Correlation'
+Section: 'Correlation'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:/Users/Adam/Documents/GitHub/MasterStatsUsingR/'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+library(readxl)
+
+```
+
+## load data from last time 
+
+```{r}
+
+allMurders = read.csv(file.path(gitHubPath,
+  'data/',
+  'murderDatCombined_iceCream.csv'))
+
+
+
+```
+
+## doing a null hypothesis test: 
+
+```{r pearson}
+#Step 1 Question: 
+#Are ice cream sales related to murder rate? 
+
+#Step 2 null v. alternative: 
+#null: rho = 0
+#alternative: rho != 0
+
+#Step 3 Decision rule: 
+df = length(allMurders$murders) - 2
+critT = qt(.975, df)
+
+#step 4 calculate r stat and convert to t: 
+#this time let's use the builtin function for correlation
+r = cor(allMurders$murders, allMurders$Ice_Cream_Sales)
+t = r*sqrt(df) / sqrt(1-r^2)
+
+#step 5 compare to decision rule: 
+sig = abs(t) > critT
+
+#step 6 answer the question: 
+if(sig){
+  print(paste('There is a significant relationship between',
+              'ice cream sales and murder rate. t =',
+              round(abs(t),2), '; p =', round(1-pt(abs(t),df),3)))
+} else {
+  print(paste('There is no evidence for a relationship between',
+              'ice cream sales and murder rate. t =',
+              round(abs(t),2), '; p =', round(1-pt(abs(t),df),3)))
+}
+
+
+
+```
+
+## OR we can just use the R builtin
+
+```{r corTest}
+
+cor.test(allMurders$murders, allMurders$Ice_Cream_Sales)
+
+
+
+```
+

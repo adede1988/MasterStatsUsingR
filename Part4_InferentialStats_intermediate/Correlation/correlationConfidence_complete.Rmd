@@ -1,0 +1,75 @@
+---
+title: 'Pearson Correlation'
+Section: 'Correlation'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:/Users/Adam/Documents/GitHub/MasterStatsUsingR/'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+library(readxl)
+
+```
+
+## load data from last time 
+
+```{r}
+
+allMurders = read.csv(file.path(gitHubPath,
+  'data/',
+  'murderDatCombined_iceCream.csv'))
+
+
+
+```
+
+## calculating confidence intervals for r 
+
+```{r confidence intervals}
+
+
+cor.test(allMurders$murders, allMurders$Ice_Cream_Sales)
+
+n = length(allMurders$murders)
+df = n - 2
+
+r = cor(allMurders$murders, allMurders$Ice_Cream_Sales)
+t = r*sqrt(df) / sqrt(1-r^2)
+
+#convert r into z (normal) distribution: 
+z = .5*log((1+r) / (1-r))
+SEz = 1 / sqrt(n-3)
+
+#what's the confidence interval in z units? 
+zlow = z + qnorm(.025)*SEz
+zhigh =z + qnorm(.975)*SEz
+
+#convert back into r units: 
+rlow = (exp(1)^(2*zlow) - 1) / (exp(1)^(2*zlow) + 1)
+rhigh = (exp(1)^(2*zhigh) - 1) / (exp(1)^(2*zhigh) + 1)
+
+print(paste('our calculated 95% confidence interval is:',
+            round(rlow,4), 'to', round(rhigh, 4)))
+
+
+```
+
+
+
