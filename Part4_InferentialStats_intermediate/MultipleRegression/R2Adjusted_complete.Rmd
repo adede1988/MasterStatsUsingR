@@ -1,0 +1,134 @@
+---
+title: 'Adding Extra Predictors'
+Section: 'Multiple Linear Regression'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+
+
+```
+
+## human EEG data 
+
+```{r EEG}
+
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+df = df[df$group == 'CON' | df$group == "AD",]
+
+df <- df %>% filter(age<(18*12))
+
+reduced.lm = lm(log(pow_delta_O,10) ~ age , data = df)
+full.lm = lm(log(pow_delta_O,10) ~ age+sex+group , data = df)
+
+
+
+```
+
+## Calculate R2 and R2 adjusted
+
+```{r r2}
+
+
+dftot = length(df$age) - 1 #total degrees of freedom in the data
+#degrees of freedom for the model overall (non-nested)
+dferrFull = length(df$age) - 3 - 1 
+dferrRed = length(df$age) - 1 - 1
+
+
+#SS error values
+SSerrFull = sum(full.lm$residuals^2)
+SSerrRed = sum(reduced.lm$residuals^2)
+#SS total: 
+yMean = mean(log(df$pow_delta_O, 10))
+SStotal = sum((log(df$pow_delta_O,10) - yMean)^2) 
+
+#calcualte R2
+R2Full = 1 - SSerrFull / SStotal
+R2Red  = 1 - SSerrRed  / SStotal
+
+#calcualte R2 adjusted
+R2adjustedFull = 1 - (SSerrFull / dferrFull) / (SStotal / dftot)
+R2adjustedRed = 1 - (SSerrRed / dferrRed) / (SStotal / dftot)
+
+cat('Full model,    R2: ', round(R2Full, 3), 
+    'R2adjusted: ', round(R2adjustedFull, 3), 
+    '\nReduced model, R2: ', round(R2Red, 3), 
+    'R2adjusted: ', round(R2adjustedRed, 3))
+
+summary(full.lm)
+summary(reduced.lm)
+
+
+
+```
+
+## demonstrating that R2 always goes up!
+
+```{r add random predictors}
+
+dfCut = df %>% select(age, pow_delta_O, sex, group)
+
+
+results = data.frame(r2 = rep(0,500),
+                     r2adj = rep(0,500))
+
+for(ii in 1:500){
+  dfCut[paste0('rand', ii)] = rnorm(length(dfCut$age))
+  #make a list of random variables: 
+  varList = list()
+  for(jj in 1:ii){
+    varList[[jj]] = paste0('rand', jj)
+  }
+  #concatenate into a formula
+  formula_string = paste('log(pow_delta_O,10)', "~", 
+                         paste(varList, collapse = " + "))
+  #turn it into a formula 
+  formula = as.formula(formula_string)
+  
+  tmp.lm = lm(formula, data = dfCut)
+  sumTab = summary(tmp.lm)
+  results$r2[ii] = sumTab$r.squared
+  results$r2adj[ii] = sumTab$adj.r.squared
+  
+}
+
+results$predictors = seq(1,500)
+
+resLong = results %>% 
+            pivot_longer(
+                  cols = c('r2', 'r2adj'),
+                  names_to = 'r2Type',
+                  values_to = 'r2')
+
+
+ggplot(resLong, aes(x = predictors, y = r2, color = r2Type))+
+  geom_point(size = 2) + brightCol + myTheme 
+
+
+```
+
+

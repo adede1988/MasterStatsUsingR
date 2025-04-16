@@ -1,0 +1,71 @@
+---
+Title: 'Residual Check'
+Section: 'One-way ANOVA'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## Set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+
+
+```
+
+## advertising data
+#https://www.kaggle.com/datasets/chebotinaa/fast-food-marketing-campaign-ab-test
+
+```{r data}
+df <- read.csv(paste0(gitHubPath, 'data\\WA_Marketing-Campaign.csv'))
+df$Promotion <- as.factor(df$Promotion)
+
+#average over weeks within store
+df<- df %>% group_by(LocationID) %>%
+  summarize(SalesInThousands = mean(SalesInThousands),
+    across(everything(), ~ first(.), .names = "{.col}"))
+```
+
+## check assumption that the residuals are normally distributed 
+
+```{r qqplot}
+
+test = lm(SalesInThousands ~ Promotion, data = df)
+df$residuals = test$residuals
+qVals = seq(.01, 1, .01)
+
+
+qqVals = data.frame('empirical' = quantile(df$residuals, qVals),
+                      'norm'      = qnorm(qVals, mean = mean(df$residuals), 
+                                          sd = sd(df$residuals)),
+                      'qVals'     = qVals)
+  
+  
+  ggplot(qqVals, aes(x = norm, y = empirical, color = qVals)) + 
+    geom_point(size = 3) + 
+    geom_abline(slope = 1, intercept = 0)
+  
+  df$dummy = as.factor(1)
+  ggplot(df, aes(x = residuals, fill = dummy))+
+    geom_histogram() + brightCol + myTheme + 
+  theme(legend.position = 'none')
+
+
+```
+

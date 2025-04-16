@@ -121,15 +121,99 @@ ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) +
 ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
   geom_point(size = 2) + 
   myTheme + brightFil + brightCol + theme(legend.position = 'none') +
-  geom_abline(slope = b, intercept = a, color = 'red', size = 2) + 
-  geom_vline(xintercept = ageMean, linetype = 'dashed', color = 'green', size = 2) + 
-  geom_hline(yintercept = powMean, linetype = 'dashed', color = 'green', size = 2) 
+  geom_abline(slope = b, intercept = a, color = 'red', size = 2) 
+
+
+
+set.seed(13)
+
+subDF = df[sample(length(df$age), 10),]
+
+ggplot(subDF, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
+  geom_point(size = 3) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
+  geom_abline(slope = b, intercept = a, color = 'red', size = 2, linetype = 'dashed') + 
+  geom_hline(yintercept = powMean, linetype = 'dashed', color = 'green', size = 2)
+
+# + 
+#   geom_vline(xintercept = ageMean, linetype = 'dashed', color = 'green', size = 2) + 
+#   geom_hline(yintercept = powMean, linetype = 'dashed', color = 'green', size = 2) 
 
 cor.test(df$age, log(df$pow_delta_O, 10))
 
 
 
+```
+
+## regression without intercept
+
+```{r no int}
+
+pow.age = lm(log(pow_delta_O,10) ~ age + 0, data = df)
+
+b = pow.age$coefficients[[1]]
+a = 0
+
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
+  geom_abline(slope = b, intercept = a, color = 'red', size = 2) 
+
+ggplot(data.frame('residuals' = pow.age$residuals, 
+                  'dummy' = as.factor(1)), 
+       aes(x = residuals, fill = dummy)) + 
+  geom_histogram() + brightFil + myTheme + 
+  theme(legend.position = 'none')
+
+ggplot(data.frame('residuals' = pow.age$residuals, 
+                  'age' = df$age, 
+                  'dummy' = as.factor(1)),
+      aes(x = age, y = residuals, color = dummy))+
+  geom_point(size = 2) + brightCol + myTheme + 
+  theme(legend.position = 'none') + 
+  geom_hline(yintercept = 0, color = 'red')
+
+
+```
+
+## showing different R2 strengths
+
+```{r}
+
+# Parameters
+
+rho <- 0.7  # desired correlation
+
+corSim <- function(rho){ 
+  n = 500
+# Step 1: Generate two independent standard normal variables
+x <- rnorm(n)
+z <- rnorm(n)
+
+# Step 2: Create y as a linear combination of x and z
+y <- rho * x + sqrt(1 - rho^2) * z
+
+dat = data.frame(x = x, y = y, dummy = as.factor(1))
+
+outPlot <- dat %>% ggplot(aes(x = x, y = y, color = dummy)) + 
+  geom_point(size = 2) + brightCol + 
+  myTheme + 
+  geom_smooth(method = 'lm', se = F, 
+              color = 'red', linetype = 'dashed', linewidth = 2) + 
+  labs(x = NULL, y = NULL) + 
+  theme(legend.position = 'none',
+        axis.text.x = element_blank(), 
+        axis.text.y = element_blank()) + 
+  ggtitle(paste0('Rho = ', rho))
+
+return(outPlot)
+}
+
+for(rho in seq(0,1,.1)){
+  print(corSim(rho))
+}
 
 
 
 ```
+

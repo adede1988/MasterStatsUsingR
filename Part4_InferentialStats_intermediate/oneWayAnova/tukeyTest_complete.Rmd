@@ -1,0 +1,104 @@
+---
+Title: 'Tukey Test in Action'
+Section: 'One-way ANOVA'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## Set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+
+
+```
+
+## advertising data
+#https://www.kaggle.com/datasets/chebotinaa/fast-food-marketing-campaign-ab-test
+
+```{r data}
+df <- read.csv(paste0(gitHubPath, 'data\\WA_Marketing-Campaign.csv'))
+df$Promotion <- as.factor(df$Promotion)
+
+#average over weeks within store
+df<- df %>% group_by(LocationID) %>%
+  summarize(SalesInThousands = mean(SalesInThousands),
+    across(everything(), ~ first(.), .names = "{.col}"))
+
+df %>% ggplot(aes(y = SalesInThousands, color = Promotion)) + 
+    geom_boxplot(linewidth = 2)+ 
+  myTheme + brightCol + brightFil+
+        theme(axis.text.x = element_blank())
+
+```
+
+## Do a tukey tests to compare promotions
+
+```{r tukey}
+
+test = anova(lm(SalesInThousands ~ Promotion, data = df))
+test
+
+#FORMULA: Q = abs(mean1 - mean2) / [(MSerror / n1 + MSerror / n2) / 2]
+#get all the necessary values: 
+MSerror = test$`Mean Sq`[2]
+sumVals = df %>% group_by(Promotion) %>%
+  summarize(n = n(), 
+            Mean = mean(SalesInThousands)) 
+dferror = nrow(df) - 3
+
+#promotion 1 v. 2
+qVal = abs(sumVals$Mean[1] - sumVals$Mean[2]) / 
+        sqrt(((MSerror/sumVals$n[1] + MSerror/sumVals$n[2]))/2)
+pval = 1 - ptukey(qVal, 3, dferror)
+
+cat('the adjusted p-value without dividing by 2 for the difference is: ', round(pval, 6))
+
+TukeyHSD(aov(lm(SalesInThousands ~ Promotion, data = df)))
+
+```
+
+## Reproducing the confidence intervals on a Tukey test
+
+```{r conf int}
+
+#the confidence intervals in the TukeyHSD output represent the 95% confidence
+#interval for the difference between means, can you reproduce it? 
+
+#remember that confidence intervals are the middle 1-alpha proportion of the 
+#distribution, so we just need:
+#critical value for the 95th percentile
+#a standard error to multiply by 
+
+#think critically: why not .975 like we've used for 2-tailed intervals before?
+critQ = qtukey(.95, 3, dferror)
+#standard error is just the denominator from the tukey equation: 
+se =  sqrt(((MSerror/sumVals$n[1] + MSerror/sumVals$n[2]))/2)
+topBound = sumVals$Mean[1] - sumVals$Mean[2] + critQ*se
+lowBound = sumVals$Mean[1] - sumVals$Mean[2] - critQ*se
+
+cat('diff: ', round(sumVals$Mean[1] - sumVals$Mean[2], 3),
+    '\n lwr: ', round(lowBound, 3), 
+    '\n upr: ', round(topBound, 3), 
+    '\n p adj: ', round(pval, 6))
+
+TukeyHSD(aov(lm(SalesInThousands ~ Promotion, data = df)))
+
+```
+
+

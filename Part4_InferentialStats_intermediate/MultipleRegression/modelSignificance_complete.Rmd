@@ -1,0 +1,100 @@
+---
+title: 'Adding Extra Predictors'
+Section: 'Multiple Linear Regression'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+
+
+```
+
+## human EEG data 
+
+```{r EEG}
+
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+df = df[df$group == 'CON' | df$group == "AD",]
+
+df <- df %>% filter(age<(18*12))
+
+delta.lm = lm(log(pow_delta_O,10) ~ age+group+sex , data = df)
+
+summary(delta.lm)
+
+```
+
+## Doing a significance test on a regression
+
+```{r sig test}
+
+#Step 1: is delta power predicted by a combination of
+#age, sex, and autism diagnosis? 
+
+#step 2: Null: There is no linear relationship between predictors and delta power
+#        Alternative: predictors predicts delta power
+
+#step 3: let's skip calculating a critical F value
+#instead, we'll calculate a p-value from our observed F value
+dfreg = 3 #number of predictors (age, sex, autism diagnosis) 
+dferr = length(df$age) - dfreg - 1
+
+
+#step 4: calcualte F ratio for the regression
+
+#SS values 
+SSerr = sum(delta.lm$residuals^2)
+yMean = mean(log(df$pow_delta_O,10))
+SStotal = sum((log(df$pow_delta_O,10) - yMean)^2)
+SSreg = SStotal - SSerr
+
+#get F ratio: 
+Fratio = (SSreg / dfreg) / (SSerr / dferr)
+
+#step 5: compare F ratio observed to critical value
+#INSTEAD, let's calculate the p-value now: 
+pVal = 1 - pf(Fratio, dfreg, dferr)
+#AND step 6: provide interpretation to answer the question
+if(pVal < .05){
+  cat("F-statistic:", round(Fratio,2), 
+               "on", dfreg, 'and', dferr, 'DF, p-value: ', round(pVal, 5),
+            '\n the predictors predict delta power.')
+} else{
+  cat("F-statistic:", round(Fratio,2), 
+               "on", dfreg, 'and', dferr, 'DF, p-value: ', round(pVal, 5),
+               ".\n No evidence that predictors predicts delta power")
+}
+
+#compare to builtin output: 
+summary(delta.lm)
+
+
+
+```
+
+
+
+

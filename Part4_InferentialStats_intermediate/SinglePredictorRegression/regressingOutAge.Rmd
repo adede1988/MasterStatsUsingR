@@ -24,6 +24,7 @@ gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
 library(tidyverse) # data manipulation and visualization
 source(paste0(gitHubPath, 'courseTheme.R'))
 library(pracma)
+library(car)
 
 ```
 
@@ -43,9 +44,26 @@ t.test(log(df$pow_delta_O[df$group == 'AD'],10),
 
 df <- df %>% filter(age<(18*12))
 
-ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = group)) + 
   geom_point(size = 2) + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+  myTheme + brightFil + brightCol 
+
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = sex)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol 
+
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = sex, shape = group, size = group)) + 
+   guides(shape = guide_legend(override.aes = list(color = c("red", "red")))) +
+  geom_abline(slope = -.0069321, intercept = 1.9510599+.1629250, 
+              color = '#6EE11F', linetype = 'dashed', size = 1.5) + 
+  geom_abline(slope = -.0069321, intercept = 1.9510599, 
+              color = '#20CDF2', linetype = 'dashed', size = 1.5) +
+  geom_abline(slope = -.0069321, intercept = 1.9510599+.1629250 - .0644906, 
+              color = '#6EE11F',  size = 1.5) + 
+  geom_abline(slope = -.0069321, intercept = 1.9510599 - .0644906, 
+              color = '#20CDF2',  size = 1.5) +
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol 
 
 t.test(log(df$pow_delta_O[df$group == 'AD'],10), 
        log(df$pow_delta_O[df$group == 'CON'],10))
@@ -59,13 +77,11 @@ t.test(log(df$pow_delta_O[df$group == 'AD'],10),
 
 
 
-
-
 t.test(log(df$pow_delta_O[df$group == 'AD'],10), 
        log(df$pow_delta_O[df$group == 'CON'],10))
 
-age.lm = lm(log(pow_delta_O,10) ~ age+sex+group , data = df)
-aovTab = Anova(age.lm, type = 3)
+age.lm = lm(log(pow_delta_O,10) ~ age+group+sex , data = df)
+aovTab = Anova(age.lm)
 
 
 ei = which(row.names(aovTab) == 'Residuals')
@@ -74,7 +90,7 @@ print(paste0('eta squared: ', aovTab$`Sum Sq`[ri] /
             (aovTab$`Sum Sq`[ri] + aovTab$`Sum Sq`[ei])))
 
 
-age.lm = lm(log(pow_delta_O,10) ~ age+sex , data = df)
+age.lm = lm(log(pow_delta_O,10) ~ age , data = df)
 df$delta_O_residuals = age.lm$residuals
 t.test(df$delta_O_residuals[df$group == 'AD'], 
        df$delta_O_residuals[df$group == 'CON'])
@@ -90,7 +106,12 @@ n_CON = length(df$delta_O_residuals[df$group == 'CON'])
 
 Spooled = sqrt( ( (SS_AD + SS_CON) / (n_AD+n_CON-2) )) 
 
-(meanAD - meanCON) / Spooled
+(meanAD - meanCON) / Spooled #cohen's d
+
+
+ggplot(df, aes(x = age, y = delta_O_residuals, color = group)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
 
 #So, there's an interesting point here: a huge d in the residualized space 
 #and a tiny eta squared in the overall space. What this says is that the 
@@ -107,84 +128,28 @@ ggplot(df, aes(x = group, y = delta_O_residuals, color = group)) +
   geom_boxplot() +
   myTheme + brightFil + brightCol
 
-```
 
-## Let's make some predictions
+#determine the effect size without regressing out age first
+ggplot(df, aes(x = log(pow_delta_O,10), color = group)) +
+  geom_freqpoly(size = 2) +
+  myTheme + brightFil + brightCol 
 
-```{r predictions}
-
-#what do we predict for a 4-year-old
-pred4 = 48*b+a
-
-print(paste0('A 4-year-old will most likely have a log(deltaPow) of: ',
-             round(pred4,2)))
-
-
-```
-
-## A limitation of regression: how does this do out into adulthood? 
-
-```{r predictions adult}
-
-df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
-
-df$dummy = as.factor(1) 
-df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
-
-ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
-  geom_point(size = 2) + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
-  geom_abline(slope = b, intercept = a, color = 'red', size = 2) 
-
-
-```
-
-## What if we did our regression with adults and kids all included from the start?
-
-```{r regression adult}
-
-#let's pull out our key variables: 
-age = df$age
-pow = log(df$pow_delta_O,10)
-
-#key formulas: 
-#y' = bx + a
-#b = r*(SDx/SDy)
-#a = MEANy - b*MEANx
-
-#get key values: 
-ageMean = mean(age)
-powMean = mean(pow)
-
-ageSD = sd(age)
-powSD = sd(pow)
-
-r = cor(age, pow)
-
-#plug into formulas:
-bnew = r*(powSD / ageSD)
-anew = powMean - bnew*ageMean
-
-ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
-  geom_point(size = 2) + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
-  geom_abline(slope = b, intercept = a, linetype = 'dashed', 
-              color = 'red', size = 2) +
-  geom_abline(slope = bnew, intercept = anew, color = 'red', size = 2) 
-
-
+ggplot(df, aes(x = group, y = log(pow_delta_O,10), color = group)) +
+  geom_boxplot() +
+  myTheme + brightFil + brightCol
 
 meanAD = mean(log(df$pow_delta_O[df$group == 'AD'],10))
 meanCON = mean(log(df$pow_delta_O[df$group == 'CON'],10))
 
 SS_AD = sum((log(df$pow_delta_O[df$group == 'AD'],10) - meanAD)^2)
-SS_CON = sum((log(df$pow_delta_O[df$group == 'CON'],10) - meanCON)^2)
+SS_CON = sum((log(df$pow_delta_O[df$group == 'AD'],10) - meanCON)^2)
 
-n_AD = length(log(df$pow_delta_O[df$group == 'AD'],10))
-n_CON = length(log(df$pow_delta_O[df$group == 'CON'],10))
 
 Spooled = sqrt( ( (SS_AD + SS_CON) / (n_AD+n_CON-2) )) 
 
-(meanAD - meanCON) / Spooled
+(meanAD - meanCON) / Spooled #cohen's d
+
+
 
 ```
+

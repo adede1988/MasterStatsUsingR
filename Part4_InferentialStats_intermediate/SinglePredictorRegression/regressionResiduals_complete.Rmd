@@ -1,0 +1,87 @@
+---
+title: 'Examine the Residuals'
+Section: 'Single Predictor Linear Regression'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## human EEG data 
+
+```{r EEG}
+
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+#dummy for plotting
+df$dummy = as.factor(1) 
+#outlier threshold
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+#filter data to look only at children up to 18 years old
+df <- df %>% filter(age<(18*12))
+
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  geom_smooth(method = 'lm', color = 'red', se = F)
+
+
+```
+
+## human EEG by age regression
+
+```{r regression builtin}
+
+#use R's builtin function to fit the regression:
+pow.age = lm(log(pow_delta_O, 10) ~ age, data = df)
+
+summary(pow.age)
+
+```
+
+## Examining residuals 
+
+```{r plotting residuals}
+
+#What distribution shape describes the residuals? 
+ggplot(data.frame('residuals' = pow.age$residuals, 
+                  'dummy' = as.factor(1)), 
+       aes(x = residuals, fill = dummy)) + 
+  geom_histogram() + brightFil + myTheme + 
+  theme(legend.position = 'none')
+
+#do the residuals vary systematically as a function of age? 
+ggplot(data.frame('residuals' = pow.age$residuals, 
+                  'age' = df$age, 
+                  'dummy' = as.factor(1)),
+      aes(x = age, y = residuals, color = dummy))+
+  geom_point(size = 2) + brightCol + myTheme + 
+  theme(legend.position = 'none') + 
+  geom_hline(yintercept = 0, color = 'red')
+
+#based on looking at these graphs, 
+#does the regression generally predict all points similarly well? 
+
+
+```
+

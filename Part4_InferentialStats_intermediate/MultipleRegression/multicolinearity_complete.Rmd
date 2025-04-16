@@ -1,0 +1,123 @@
+---
+title: 'Adding Extra Predictors'
+Section: 'Multiple Linear Regression'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+
+
+```
+
+## simulattion function for data with variable correlation between predictors
+
+```{r simulating}
+
+# Simulate data with increasing correlation between x1 and x2
+simulate_model <- function(rho) {
+  n <- 50
+ 
+  x1 <- rnorm(n)
+  x2 <- rho * x1 + sqrt(1 - rho^2) * rnorm(n)  # makes cor ≈ rho
+
+  y <- 1 + 2 * x1 + 3 * x2 + rnorm(n, sd = 5)
+  
+  model <- lm(y ~ x1 + x2)
+  X <- model.matrix(model)
+  #this is the critical (XTX)-1 matrix: 
+  #The diagonal entries in this matrix are sensitive to the correlations
+  #between predictor variables
+  XtX_inv_diag <- diag(solve(t(X) %*% X))
+  #Let's extract the standard errors from the model: 
+  se <- summary(model)$coefficients[, "Std. Error"]
+  #let's calculate se by hand too: 
+  SSerror = sum(model$residuals^2)
+  MSerror = SSerror / (n-2-1)
+  
+  seHand = sqrt(MSerror * XtX_inv_diag)
+  
+  tVals = coef(model) / se
+  coefVals = coef(model)
+  
+  return(list(
+    rho = rho,
+    XtX_inv_diag = XtX_inv_diag[2:3],  # x1 and x2 (ignore intercept)
+    se = se[2:3],
+    seHand = seHand[2:3],
+    tVals = tVals[2:3],
+    coefVals = coefVals[2:3]
+  ))
+}
+
+
+
+```
+
+## Simulate data with different rho values and see how it affects outcomes
+
+```{r vary rho}
+
+
+set.seed(102)
+# Try with varying correlations
+rhos <- seq(0, 0.99, by = 0.05)
+#make a data frame to store results 
+results <- data.frame('rho' = rhos, 
+                      'XtXinf_x1' = rep(0, length(rhos)),
+                      'XtXinf_x2' = rep(0, length(rhos)),
+                      'SE_x1' = rep(0, length(rhos)), 
+                      'SE_x2' = rep(0, length(rhos)),
+                      't_x1' = rep(0, length(rhos)), 
+                      't_x2' = rep(0, length(rhos)),
+                      'coef_x1' = rep(0, length(rhos)), 
+                      'coef_x2' = rep(0, length(rhos)))
+
+#do the correlation and store results 
+for(ii in 1:length(rhos)){
+  tmp <- simulate_model(rhos[ii])
+  results$XtXinf_x1[ii] = tmp$XtX_inv_diag[1]
+  results$XtXinf_x2[ii] = tmp$XtX_inv_diag[2]
+  results$SE_x1[ii] = tmp$se[1]
+  results$SE_x2[ii] = tmp$se[2]
+  results$t_x1[ii] = tmp$tVals[1]
+  results$t_x2[ii] = tmp$tVals[2]
+  results$coef_x1[ii] = tmp$coefVals[1]
+  results$coef_x2[ii] = tmp$coefVals[2]
+}
+
+#plot the results! 
+df_long <- pivot_longer(results, cols = -c('rho',
+                             names(results)[grepl('x1', names(results))]), 
+                        names_to = "type", values_to = "value")
+
+ggplot(df_long, aes(x = rho, y = value, color = type)) +
+  geom_line(size = 1.2) +
+  theme_minimal() +
+  labs(
+    title = "Effect of Predictor Correlation on SE and (XᵀX)⁻¹ Diagonal",
+    x = "Correlation between x1 and x2",
+    y = "Value",
+    color = "Quantity"
+  )
+
+```
+

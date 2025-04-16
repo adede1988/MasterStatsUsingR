@@ -1,0 +1,117 @@
+---
+title: 'Calculating R2'
+Section: 'Single Predictor Linear Regression'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## human EEG data 
+
+```{r EEG}
+
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+#dummy for plotting
+df$dummy = as.factor(1) 
+#outlier threshold
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+#filter data to look only at children up to 18 years old
+df <- df %>% filter(age<(18*12))
+
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
+
+```
+
+## human EEG by age regression
+
+```{r regression builtin}
+
+#use R's builtin function to fit the regression:
+pow.age = lm(log(pow_delta_O, 10) ~ age, data = df)
+
+summary(pow.age)
+
+```
+
+## calculating R2
+
+```{r r2 by hand}
+
+#pull out the coefficients and make predictions
+intercept = coefficients(pow.age)[[1]]
+slope = coefficients(pow.age)[[2]]
+yPrime = slope * df$age + intercept 
+
+#calculate the SStotal, SSerror, and SSregression values
+yMean = mean(log(df$pow_delta_O,10))
+SStotal = sum((log(df$pow_delta_O,10) - yMean)^2)
+SSerror = sum((log(df$pow_delta_O,10) - yPrime)^2)
+SSreg = SStotal - SSerror
+
+#get R2 through proportion method
+R2_prop = SSreg / SStotal
+
+#get R2 by squaring the correlation 
+R2_cor = cor(df$age, log(df$pow_delta_O,10))^2
+
+#look again at what we had in the lm output: 
+summary(pow.age)
+
+
+```
+
+## Using builtin functions to calculate some values
+
+```{r builtins}
+
+#predictions can also be made with R functions
+yPrime2 = predict(pow.age, data.frame(age = df$age))
+yPrime3 = log(df$pow_delta_O,10) - pow.age$residuals
+
+#could also calculate SSerror using residuals directly: 
+SSerror2 = sum(pow.age$residuals^2)
+
+
+```
+
+## how would R2 change if you had fit the model through to old age?
+
+```{r add adult data}
+
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+pow.age_adults = lm(log(pow_delta_O, 10) ~ age, data = df)
+
+summary(pow.age_adults)
+
+
+```
+

@@ -1,0 +1,107 @@
+---
+title: 'Partial Eta Squared'
+Section: 'Multiple Linear Regression'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## Set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(car)
+
+
+```
+
+## Human EEG data 
+
+```{r EEG}
+
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+df = df[df$group == 'CON' | df$group == "AD",]
+
+df <- df %>% filter(age<(18*12))
+
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = group)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol 
+
+
+```
+
+## Looking at ANOVA outputs 
+
+```{r anova}
+
+
+delta.lm = lm(log(pow_delta_O,10) ~ age+group+sex , data = df)
+
+#look at the analysis of variance output for the model: 
+anova(delta.lm)
+Anova(delta.lm, type = 3)
+aovTab = Anova(delta.lm, type = 3)
+#Sums of squares values let us partition the variance!
+#how much of the variance does a single predictor account for? 
+ei = which(row.names(aovTab) == 'Residuals')
+ri = which(row.names(aovTab) == 'group')
+etaSquared =  aovTab$`Sum Sq`[ri] /
+            (aovTab$`Sum Sq`[ri] + aovTab$`Sum Sq`[ei])
+
+
+```
+
+## t-test between autism and neurotypical 
+
+```{r t test}
+
+
+t.test(log(df$pow_delta_O[df$group == 'AD'],10), 
+       log(df$pow_delta_O[df$group == 'CON'],10))
+
+df %>% ggplot(aes(x = group, y = log(pow_delta_O, 10), 
+                  color = group)) + 
+  geom_boxplot() + brightCol + myTheme
+
+#let's calculate the cohen's d effect size measure: 
+n_AD = sum(df$group == 'AD')
+n_CON = sum(df$group == 'CON')
+
+meanAD = mean(log(df$pow_delta_O[df$group == 'AD'],10))
+meanCON = mean(log(df$pow_delta_O[df$group == 'CON'],10))
+
+SS_AD = sum((log(df$pow_delta_O[df$group == 'AD'],10) - meanAD)^2)
+SS_CON = sum((log(df$pow_delta_O[df$group == 'AD'],10) - meanCON)^2)
+
+
+Spooled = sqrt( ( (SS_AD + SS_CON) / (n_AD+n_CON-2) )) 
+
+cohenD = (meanAD - meanCON) / Spooled #cohen's d
+
+#print out the comparison: 
+cat('Autism diagnosis has a partial eta squared of: ',
+       round(etaSquared, 4), '.', 
+       "\nComparing between groups yields cohen's d of: ",
+       round(cohenD, 4), sep = '')
+
+
+```

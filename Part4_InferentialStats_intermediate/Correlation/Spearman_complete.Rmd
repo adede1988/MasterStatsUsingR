@@ -63,6 +63,7 @@ spearCor = function(x, y){
 
 ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
   geom_point(size = 2) + 
+  #formula argument not needed (Default)
   geom_smooth(method = "lm", formula = y ~ poly(x, 1), 
               color = "green", se = FALSE) +
   myTheme + brightFil + brightCol + theme(legend.position = 'none') +
@@ -94,7 +95,7 @@ for(ii in 1:length(ageCut)){
                              ageVals[ageVals<ageCut[ii]])
 }
 
-resLong = pivot_longer(results, cols = c('personCor', 'spearCor'), 
+resLong = pivot_longer(results, cols = c('pearsonCor', 'spearCor'), 
                        names_to = 'corType', 
                        values_to = 'cor')
 
@@ -102,6 +103,52 @@ ggplot(resLong, aes(x = cutOff, y = cor, color = corType)) +
   geom_line(linewidth = 2) +
   myTheme + brightCol + 
   xlab("cut off age (months)")
+
+```
+
+## Where did this effect come from? 
+
+```{r unpack age cut offs}
+#let's plot the scatter plot of the data at a couple different points: 
+#when age is 250 months, both pearson and spearman yield strong correlations:
+
+df %>% filter(age<250) %>%
+  ggplot(aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
+  geom_point(size = 2) + 
+  #formula argument not needed (Default)
+  geom_smooth(method = "lm", formula = y ~ poly(x, 1), 
+              color = "green", se = FALSE) +
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
+  xlab("age (months)")
+
+df %>% filter(age<250) %>%
+ggplot(aes(x = rank(age), y = rank(log(pow_delta_O,10)), color = dummy)) +
+  geom_point(size = 2) + 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 1), 
+              color = "green", se = FALSE) +
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
+  xlab("rank( age (months) )")
+
+
+#when age is 400 months though, the story is different: 
+df %>% filter(age<400) %>%
+  ggplot(aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
+  geom_point(size = 2) + 
+  #formula argument not needed (Default)
+  geom_smooth(method = "lm", formula = y ~ poly(x, 1), 
+              color = "green", se = FALSE) +
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
+  xlab("age (months)")
+
+df %>% filter(age<400) %>%
+ggplot(aes(x = rank(age), y = rank(log(pow_delta_O,10)), color = dummy)) +
+  geom_point(size = 2) + 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 1), 
+              color = "green", se = FALSE) +
+  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
+  xlab("rank( age (months) )")
+
+
 
 ```
 

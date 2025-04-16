@@ -1,0 +1,233 @@
+---
+title: 'Dealing with Multiple Continuous Predictors'
+Section: 'Multiple Linear Regression'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## Set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(car)
+# Load package
+library(corrplot)
+
+```
+
+## Import tidy data on obesity risk factors across the US and look at full model
+
+```{r import}
+
+df = read.csv(paste0(gitHubPath, '\\data\\obesityData_sum.csv'))
+df = df %>% filter(Income != "Data not reported")
+
+IncomeLevels = c(1,2,3,4,5, 6)
+longNames = c("Less than $15,000", "$15,000 - $24,999",
+              "$25,000 - $34,999", "$35,000 - $49,999", 
+              "$50,000 - $74,999", "$75,000 or greater")
+IncomeLevels <- setNames(IncomeLevels, longNames)
+df$Income = IncomeLevels[df$Income]
+ 
+
+dfCut = df %>% select(-YearStart, -X, -LocationDesc, -Overweight)
+formula <- reformulate(c('Income', names(dfCut)[4:10]), response = "obesity")
+model_full = lm(formula, dfCut)
+summary(model_full)
+
+
+```
+
+## Finding the best possible single predictor
+
+```{r find best}
+#make vector to store values in 
+rsqVals = rep(0, length(names(dfCut))-2)
+predNames = names(dfCut)[c(2,4:10)]
+names(rsqVals) = predNames
+#loop over predictors and pull Rsq values 
+for(varName in predNames){
+  formula <- reformulate(varName, response = "obesity")
+  curLM = lm(formula, dfCut)
+  curLM = summary(curLM)
+  #extract the p value: 
+  pval = 1-pf(curLM$fstatistic[1], curLM$fstatistic[2], curLM$fstatistic[3])
+  if(pval < .05){ #only consider significant fits
+     rsqVals[varName] = curLM$r.squared
+  }
+}
+
+ii = which(max(rsqVals)==rsqVals)
+bestVar = predNames[ii]
+predNames = predNames[-ii]
+formula <- reformulate(bestVar, response = "obesity")
+outputLM = lm(formula, dfCut)
+outputVars = c(bestVar)
+
+```
+
+## Can we find a second significant variable 
+
+```{r find second}
+#repeat for second variable to add to model: 
+etaVals = rep(0, length(predNames))
+names(etaVals) = predNames
+#loop over predictors and pull Rsq values 
+for(varName in predNames){
+  
+  formula <- reformulate(c(outputVars, varName), response = "obesity")
+  curLM = lm(formula, dfCut)
+  comparisonTab = anova(outputLM, curLM)
+  print(comparisonTab)
+  pval = comparisonTab$`Pr(>F)`[2]
+  if(pval<.05){
+    aovTab = anova(curLM)
+    ei = which(row.names(aovTab) == 'Residuals')
+    ri = which(row.names(aovTab) == varName)
+    etaVals[varName] = aovTab$`Sum Sq`[ri] /
+            (aovTab$`Sum Sq`[ri] + aovTab$`Sum Sq`[ei])
+  }
+  
+}
+
+
+#get the best predictor and add it into the model
+ii = which(max(etaVals)==etaVals)
+bestVar = predNames[ii]
+predNames = predNames[-ii]
+outputVars = c(outputVars, bestVar)
+formula <- reformulate(outputVars, response = "obesity")
+outputLM = lm(formula, dfCut)
+
+
+```
+
+## Search for a third variable to add to the model
+
+```{r third}
+
+#repeat for second variable to add to model: 
+etaVals = rep(0, length(predNames))
+names(etaVals) = predNames
+#loop over predictors and pull Rsq values 
+for(varName in predNames){
+  
+  formula <- reformulate(c(outputVars, varName), response = "obesity")
+  curLM = lm(formula, dfCut)
+  comparisonTab = anova(outputLM, curLM)
+  print(comparisonTab)
+  pval = comparisonTab$`Pr(>F)`[2]
+  if(pval<.05){
+    aovTab = anova(curLM)
+    ei = which(row.names(aovTab) == 'Residuals')
+    ri = which(row.names(aovTab) == varName)
+    etaVals[varName] = aovTab$`Sum Sq`[ri] /
+            (aovTab$`Sum Sq`[ri] + aovTab$`Sum Sq`[ei])
+  }
+  
+}
+
+
+#get the best predictor and add it into the model
+ii = which(max(etaVals)==etaVals)
+bestVar = predNames[ii]
+predNames = predNames[-ii]
+outputVars = c(outputVars, bestVar)
+formula <- reformulate(outputVars, response = "obesity")
+outputLM = lm(formula, dfCut)
+
+
+```
+
+## Search for a fourth variable to add in, and just keep going! 
+
+```{r fourth}
+check = T
+
+while(check){
+  #repeat to add to model: 
+  etaVals = rep(0, length(predNames))
+  names(etaVals) = predNames
+  #loop over predictors and pull Rsq values 
+  for(varName in predNames){
+    
+    formula <- reformulate(c(outputVars, varName), response = "obesity")
+    curLM = lm(formula, dfCut)
+    comparisonTab = anova(outputLM, curLM)
+    
+    pval = comparisonTab$`Pr(>F)`[2]
+    if(pval<.05){
+      aovTab = anova(curLM)
+      ei = which(row.names(aovTab) == 'Residuals')
+      ri = which(row.names(aovTab) == varName)
+      etaVals[varName] = aovTab$`Sum Sq`[ri] /
+              (aovTab$`Sum Sq`[ri] + aovTab$`Sum Sq`[ei])
+    }
+    
+  }
+  
+  if(max(etaVals>0)){
+    #get the best predictor and add it into the model
+    ii = which(max(etaVals)==etaVals)
+    bestVar = predNames[ii]
+    predNames = predNames[-ii]
+    outputVars = c(outputVars, bestVar)
+    formula <- reformulate(outputVars, response = "obesity")
+    outputLM = lm(formula, dfCut)
+  } else {
+    check = F
+  }
+}
+
+```
+
+## Interrogate the final model
+
+```{r summary}
+
+ouputSum = summary(outputLM)
+summary(outputLM)
+#prune off non significant predictors: 
+pvals = summary(outputLM)$coefficients[, "Pr(>|t|)"]
+pvals = pvals[-1]
+outputVars = outputVars[pvals < .05]
+formula <- reformulate(outputVars, response = "obesity")
+outputLM = lm(formula, dfCut)
+
+summary(outputLM)
+
+dfCut$predicted <- predict(outputLM)
+
+ggplot(dfCut, aes(x = predicted, y = obesity)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+  labs(x = "Predicted", y = "Observed", title = "Model Fit") +
+  theme_minimal()
+
+round(cor(dfCut[c("mus_car", "muscle", "carLong", "fruit", "veg", "Income")]), 2)
+      
+
+
+
+library(effects)
+
+plot(allEffects(outputLM))
+
+
+```
+

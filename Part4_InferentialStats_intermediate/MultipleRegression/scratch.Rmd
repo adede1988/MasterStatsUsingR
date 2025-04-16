@@ -1,0 +1,200 @@
+---
+title: 'Adding Extra Predictors'
+Section: 'Multiple Linear Regression'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+
+
+```
+
+## human EEG data 
+
+```{r EEG}
+
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+df = df[df$group == 'CON' | df$group == "AD",]
+
+df <- df %>% filter(age<(18*12))
+
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = group)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol 
+
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = sex)) + 
+  geom_point(size = 2) + 
+  myTheme + brightFil + brightCol 
+
+
+
+t.test(log(df$pow_delta_O[df$group == 'AD'],10), 
+       log(df$pow_delta_O[df$group == 'CON'],10))
+
+
+```
+
+## predicting delta power with Age, sex, and autism diagnosis
+
+```{r age}
+
+
+age.lm = lm(log(pow_delta_O,10) ~ age+group+sex , data = df)
+
+summary(age.lm)
+
+coef(age.lm)
+
+
+
+```
+
+## plotting the full model
+
+```{r plotting}
+
+b <- coef(age.lm)
+
+# Named access
+b0 <- b["(Intercept)"]
+b_age <- b["age"]
+b_group <- b["groupCON"]
+b_sex <- b["sexM"]
+
+# Build intercepts for each combination
+intercepts <- list(
+  "F_AD"  = b0,
+  "F_CON" = b0 + b_group,
+  "M_AD"  = b0 + b_sex,
+  "M_CON" = b0 + b_sex + b_group
+)
+
+colors <- c("F" = "#20CDF2", "M" = "#6EE11F")
+
+ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = sex, 
+               shape = group, size = group)) + 
+  # Dashed lines: dashed = autism, solid = control
+  geom_abline(slope = b_age, intercept = intercepts$M_AD,  
+              color = colors["M"], linetype = "dashed", size = 1.5) +
+  geom_abline(slope = b_age, intercept = intercepts$F_AD,  
+              color = colors["F"], linetype = "dashed", size = 1.5) +
+  geom_abline(slope = b_age, intercept = intercepts$M_CON,  
+              color = colors["M"], size = 1.5) +
+  geom_abline(slope = b_age, intercept = intercepts$F_CON,  
+              color = colors["F"], size = 1.5) +
+  guides(shape = guide_legend(override.aes = list(color = c("red", "red")))) +
+  geom_point(size = 2) +
+  myTheme + brightFil + brightCol
+
+```
+
+## making predictions 
+
+```{r predictions}
+
+summary(age.lm)
+
+#what would be the predicted log(delta) for a 200 month old boy with autism? 
+b[[1]] + 200 * b[[2]] + b[[4]]
+
+
+#we can also use R's builtin predict function to streamline making predictions
+simDat = data.frame(age = runif(10, 1, 250), 
+                    sex = sample(c(0,1), 10, T), 
+                    group = sample(c(0,1), 10, T))
+#convert to character labels for sex and group: 
+sexVals = c('F', 'M')
+simDat$sex = sexVals[simDat$sex+1]
+groupVals = c('AD', 'CON')
+simDat$group = groupVals[simDat$group+1]
+#do the prediction: 
+predict(age.lm, simDat)
+
+```
+
+## plotting our predictions: 
+
+```{r pred plot}
+#let's put these predictions into the data frame and plot them: 
+simDat$pow_delta_O = 10^predict(age.lm, simDat)
+
+cutdf = df %>% select(age, sex, group, pow_delta_O)
+cutdf$source = 'observed'
+simDat$source = 'simulated'
+
+cutdf = rbind(cutdf, simDat)
+
+ggplot(cutdf, aes(x = age, y = log(pow_delta_O,10), color = sex, 
+               shape = group, size = group)) + 
+  # Dashed lines: dashed = autism, solid = control
+  geom_abline(slope = b_age, intercept = intercepts$M_AD,  
+              color = colors["M"], linetype = "dashed", size = 1.5) +
+  geom_abline(slope = b_age, intercept = intercepts$F_AD,  
+              color = colors["F"], linetype = "dashed", size = 1.5) +
+  geom_abline(slope = b_age, intercept = intercepts$M_CON,  
+              color = colors["M"], size = 1.5) +
+  geom_abline(slope = b_age, intercept = intercepts$F_CON,  
+              color = colors["F"], size = 1.5) +
+  guides(shape = guide_legend(override.aes = list(color = c("red", "red")))) +
+  geom_point(size = 4) +
+  myTheme + brightFil + brightCol + 
+  facet_grid(~source)
+
+
+```
+
+## make a plot with minimal data points for example
+
+```{r minimal}
+cutdf = df %>% select(age, sex, group, pow_delta_O)
+ageSimp.lm = lm(log(pow_delta_O, 10) ~ age, data = cutdf)
+
+bsimp = coef(ageSimp.lm)
+set.seed(14)
+randDF <- cutdf[sample(seq(1, length(cutdf$age),1), 10), ]
+ggplot(randDF, aes(x = age, y = log(pow_delta_O,10), color = sex, 
+               shape = group, size = group)) + 
+  geom_point(size = 4) +
+  # Dashed lines: dashed = autism, solid = control
+  geom_abline(slope = b_age, intercept = intercepts$M_AD,  
+              color = colors["M"], linetype = "dashed", size = 1.5) +
+  geom_abline(slope = b_age, intercept = intercepts$F_AD,  
+              color = colors["F"], linetype = "dashed", size = 1.5) +
+  geom_abline(slope = b_age, intercept = intercepts$M_CON,  
+              color = colors["M"], size = 1.5) +
+  geom_abline(slope = b_age, intercept = intercepts$F_CON,  
+              color = colors["F"], size = 1.5) +
+  geom_abline(slope = bsimp[[2]], intercept = bsimp[[1]],
+              color = 'red', size = 2, linetype = 'dotted') +
+  geom_abline(slope = 0, intercept = mean(log(cutdf$pow_delta_O,10)),
+              color = 'purple', size = 2) +
+  guides(shape = guide_legend(override.aes = list(color = c("red", "red")))) +
+  
+  myTheme + brightFil + brightCol
+
+```
+
+

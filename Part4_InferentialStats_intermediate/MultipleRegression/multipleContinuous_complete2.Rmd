@@ -1,0 +1,302 @@
+---
+title: 'Dealing with Multiple Continuous Predictors'
+Section: 'Multiple Linear Regression'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## Set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(car)
+# Load package
+library(corrplot)
+
+```
+
+## Import tidy data on cardiac risk factors across the US and look at full model
+
+```{r import}
+
+df = read.csv(paste0(gitHubPath, '\\data\\cardioData_sum.csv'))
+
+ 
+
+dfCut = df %>% select(-YearStart, -X, -LocationDesc)
+
+predNames <- names(dfCut) %>%
+  setdiff(c("LocationAbbr", "cardioDeath"))
+formula <- reformulate(predNames, response = "cardioDeath")
+model_full = lm(formula, dfCut)
+summary(model_full)
+
+
+```
+
+## Finding the best possible single predictor
+
+```{r find best}
+#make vector to store values in 
+rsqVals = rep(0, length(names(dfCut))-2)
+names(rsqVals) = predNames
+#loop over predictors and pull Rsq values 
+for(varName in predNames){
+  formula <- reformulate(varName, response = "cardioDeath")
+  curLM = lm(formula, dfCut)
+  curLM = summary(curLM)
+  #extract the p value: 
+  pval = 1-pf(curLM$fstatistic[1], curLM$fstatistic[2], curLM$fstatistic[3])
+  if(pval < .05){ #only consider significant fits
+     rsqVals[varName] = curLM$r.squared
+  }
+}
+
+ii = which(max(rsqVals)==rsqVals)
+bestVar = predNames[ii]
+predNames = predNames[-ii]
+formula <- reformulate(bestVar, response = "cardioDeath")
+outputLM = lm(formula, dfCut)
+outputVars = c(bestVar)
+
+
+outputLM$cardioDeath = dfCut$cardioDeath
+
+sumDat = data.frame(cardioDeath = dfCut$cardioDeath, 
+                    residuals = outputLM$residuals, 
+                    fitted = outputLM$fitted.values,
+                    bestPred = dfCut[bestVar], 
+                    dummy = as.factor(1))
+coefVals = coef(outputLM)
+sumDat %>% ggplot(aes(x = !!sym(bestVar), y = cardioDeath, color = dummy)) + 
+  geom_point() + 
+  geom_abline(slope = coefVals[2], intercept = coefVals[1],  
+              color = 'red', linetype = "dashed", size = 1.5) + 
+  brightCol + myTheme + theme(legend.position = 'none')
+
+
+sumDat %>% ggplot(aes(x = cardioDeath, y = residuals, color = dummy)) + 
+  geom_point() + 
+  geom_abline(slope = 0, intercept = 0,  
+              color = 'red', linetype = "dashed", size = 1.5)+ 
+  brightCol + myTheme + theme(legend.position = 'none')
+
+sumDat %>% ggplot(aes(x = residuals, color = dummy, fill = dummy)) + 
+  geom_histogram() + brightFil + 
+  brightCol + myTheme + theme(legend.position = 'none')
+   
+oneVarModel = outputLM
+
+```
+
+## Can we find a second significant variable? 
+
+```{r find second}
+#repeat for second variable to add to model: 
+etaVals = rep(0, length(predNames))
+names(etaVals) = predNames
+#loop over predictors and pull Rsq values 
+for(varName in predNames){
+  
+  formula <- reformulate(c(outputVars, varName), response = "cardioDeath")
+  curLM = lm(formula, dfCut)
+  comparisonTab = anova(outputLM, curLM)
+  # print(comparisonTab)
+  pval = comparisonTab$`Pr(>F)`[2]
+  if(pval<.05){
+    aovTab = anova(curLM)
+    ei = which(row.names(aovTab) == 'Residuals')
+    ri = which(row.names(aovTab) == varName)
+    etaVals[varName] = aovTab$`Sum Sq`[ri] /
+            (aovTab$`Sum Sq`[ri] + aovTab$`Sum Sq`[ei])
+  }
+  
+}
+
+print(etaVals)
+
+#get the best predictor and add it into the model
+ii = which(max(etaVals)==etaVals)
+bestVar = predNames[ii]
+predNames = predNames[-ii]
+outputVars = c(outputVars, bestVar)
+formula <- reformulate(outputVars, response = "cardioDeath")
+outputLM = lm(formula, dfCut)
+summary(outputLM)
+
+sumDat = data.frame(cardioDeath = dfCut$cardioDeath, 
+                    twoPredResi = outputLM$residuals, 
+                    onePredResi = oneVarModel$residuals,
+                    fitted = outputLM$fitted.values,
+                    bestPred = dfCut[bestVar], 
+                    dummy = as.factor(1))
+
+plotDat = sumDat %>% pivot_longer(cols = c('cardioDeath', 'fitted'), 
+                                  names_to = 'source', 
+                                  values_to = 'cardioDeaths')
+plotDat %>% ggplot(aes(x = !!sym(bestVar), y = cardioDeaths, color = source)) + 
+  geom_point() + 
+  brightCol + myTheme 
+
+plotDat = sumDat %>% pivot_longer(cols = c('onePredResi', 'twoPredResi'), 
+                                  names_to = 'model', 
+                                  values_to = 'resVals')
+plotDat %>% ggplot(aes(x = cardioDeath, y = resVals, color = model)) + 
+  geom_point() + 
+  geom_abline(slope = 0, intercept = 0,  
+              color = 'red', linetype = "dashed", size = 1.5)+ 
+  brightCol + myTheme 
+
+plotDat %>% ggplot(aes(x = resVals, color = model, fill = model)) + 
+  geom_histogram() + brightFil + 
+  brightCol + myTheme + 
+  facet_grid(model~.)
+
+twoVarModel = outputLM
+
+```
+
+## Search for a third variable to add to the model
+
+```{r third}
+
+#repeat for second variable to add to model: 
+etaVals = rep(0, length(predNames))
+names(etaVals) = predNames
+#loop over predictors and pull Rsq values 
+for(varName in predNames){
+  
+  formula <- reformulate(c(outputVars, varName), response = "cardioDeath")
+  curLM = lm(formula, dfCut)
+  comparisonTab = anova(outputLM, curLM)
+  # print(comparisonTab)
+  pval = comparisonTab$`Pr(>F)`[2]
+  if(pval<.05){
+    aovTab = anova(curLM)
+    ei = which(row.names(aovTab) == 'Residuals')
+    ri = which(row.names(aovTab) == varName)
+    etaVals[varName] = aovTab$`Sum Sq`[ri] /
+            (aovTab$`Sum Sq`[ri] + aovTab$`Sum Sq`[ei])
+  }
+  
+}
+
+print(etaVals)
+#get the best predictor and add it into the model
+ii = which(max(etaVals)==etaVals)
+bestVar = predNames[ii]
+predNames = predNames[-ii]
+outputVars = c(outputVars, bestVar)
+formula <- reformulate(outputVars, response = "cardioDeath")
+outputLM = lm(formula, dfCut)
+summary(outputLM)
+
+sumDat = data.frame(cardioDeath = dfCut$cardioDeath, 
+                    threePredResi = outputLM$residuals,
+                    twoPredResi = twoVarModel$residuals, 
+                    onePredResi = oneVarModel$residuals,
+                    fitted = outputLM$fitted.values,
+                    bestPred = dfCut[bestVar], 
+                    dummy = as.factor(1))
+
+
+sumDat %>% ggplot(aes(x = !!sym(bestVar), y = cardioDeath, color = dummy)) + 
+  geom_point() + 
+  geom_point(aes(x = !!sym(bestVar), y = fitted),  
+              color = 'red') + 
+  brightCol + myTheme + theme(legend.position = 'none')
+
+plotDat = sumDat %>% pivot_longer(cols = c('onePredResi', 'twoPredResi', 
+                                           'threePredResi'), 
+                                  names_to = 'model', 
+                                  values_to = 'resVals')
+
+plotDat$model <- factor(plotDat$model, 
+                        levels = c("onePredResi", "twoPredResi", "threePredResi"))
+
+plotDat %>% ggplot(aes(x = cardioDeath, y = resVals, color = model)) + 
+  geom_point() + 
+  geom_abline(slope = 0, intercept = 0,  
+              color = 'red', linetype = "dashed", size = 1.5)+ 
+  brightCol + myTheme 
+
+plotDat %>% ggplot(aes(x = resVals, color = model, fill = model)) + 
+  geom_histogram() + brightFil + 
+  brightCol + myTheme + 
+  facet_grid(model~.)
+
+threePredModel = outputLM
+
+
+```
+
+## Search for a fourth variable to add in, and just keep going! 
+
+```{r fourth}
+check = T
+
+while(check){
+  #repeat to add to model: 
+  etaVals = rep(0, length(predNames))
+  names(etaVals) = predNames
+  #loop over predictors and pull Rsq values 
+  for(varName in predNames){
+    
+    formula <- reformulate(c(outputVars, varName), response = "cardioDeath")
+    curLM = lm(formula, dfCut)
+    comparisonTab = anova(outputLM, curLM)
+    print(comparisonTab)
+    pval = comparisonTab$`Pr(>F)`[2]
+    if(pval<.05){
+      aovTab = anova(curLM)
+      ei = which(row.names(aovTab) == 'Residuals')
+      ri = which(row.names(aovTab) == varName)
+      etaVals[varName] = aovTab$`Sum Sq`[ri] /
+              (aovTab$`Sum Sq`[ri] + aovTab$`Sum Sq`[ei])
+    }
+    
+  }
+  
+  if(max(etaVals>0)){
+    #get the best predictor and add it into the model
+    ii = which(max(etaVals)==etaVals)
+    bestVar = predNames[ii]
+    predNames = predNames[-ii]
+    outputVars = c(outputVars, bestVar)
+    formula <- reformulate(outputVars, response = "cardioDeath")
+    outputLM = lm(formula, dfCut)
+  } else {
+    check = F
+  }
+}
+
+```
+
+## Interrogate the final model
+
+```{r summary}
+
+ouputSum = summary(outputLM)
+summary(outputLM)
+
+
+
+
+
+```
+

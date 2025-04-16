@@ -1,0 +1,105 @@
+---
+title: 'Partial Eta Squared'
+Section: 'Multiple Linear Regression'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## Set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+
+
+```
+
+## Human EEG data 
+
+```{r EEG}
+
+df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
+
+df = df[df$group == 'CON' | df$group == "AD",]
+
+df <- df %>% filter(age<(18*12))
+
+
+
+```
+
+## Looking at ANOVA outputs 
+
+```{r anova}
+
+
+delta.lm = lm(log(pow_delta_O,10) ~ age+group+sex , data = df)
+
+summary(delta.lm)
+
+#look at the analysis of variance output for the model: 
+anova(delta.lm)
+aovTab = anova(delta.lm)
+#Sums of squares values let us partition the variance!
+#how much of the variance does a single predictor account for? 
+ei = which(row.names(aovTab) == 'Residuals')
+ri = which(row.names(aovTab) == 'group')
+print(paste0('eta squared: ', aovTab$`Sum Sq`[ri] /
+            (aovTab$`Sum Sq`[ri] + aovTab$`Sum Sq`[ei])))
+
+
+```
+
+## Does order matter? 
+
+```{r order}
+
+#put group into the model first: 
+delta.lm = lm(log(pow_delta_O,10) ~ group+age+sex , data = df)
+
+summary(delta.lm)
+
+#look at the analysis of variance output for the model: 
+anova(delta.lm)
+aovTab = anova(delta.lm)
+#Sums of squares values let us partition the variance!
+#how much of the variance does a single predictor account for? 
+ei = which(row.names(aovTab) == 'Residuals')
+ri = which(row.names(aovTab) == 'group')
+print(paste0('eta squared: ', aovTab$`Sum Sq`[ri] /
+            (aovTab$`Sum Sq`[ri] + aovTab$`Sum Sq`[ei])))
+
+#put group into the model last: 
+delta.lm = lm(log(pow_delta_O,10) ~ sex+age+group , data = df)
+
+summary(delta.lm)
+
+#look at the analysis of variance output for the model: 
+anova(delta.lm)
+aovTab = anova(delta.lm)
+#Sums of squares values let us partition the variance!
+#how much of the variance does a single predictor account for? 
+ei = which(row.names(aovTab) == 'Residuals')
+ri = which(row.names(aovTab) == 'group')
+print(paste0('eta squared: ', aovTab$`Sum Sq`[ri] /
+            (aovTab$`Sum Sq`[ri] + aovTab$`Sum Sq`[ei])))
+
+
+```
