@@ -1,0 +1,62 @@
+---
+title: 'Using R like a calculator'
+author: "Adam Dede"
+date: "2024-03-19"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+
+
+```
+
+# Try using operations that are not part of base R
+
+```{r non base}
+
+df = data.frame(x = c(1,0), 
+           y = c(3,4)) 
+df
+df %>% filter(x == 1)
+
+
+
+
+```
+
+# We need some Tidyverse functions!
+
+
+```{r install tidyverse}
+
+install.packages("tidyverse")
+library(tidyverse)
+
+
+
+
+```
+
+# Now the same code from before works just fine
+
+```{r redo}
+df = data.frame(x = c(1,0), 
+           y = c(3,4)) 
+df
+df %>% filter(x == 1)
+
+
+```
+

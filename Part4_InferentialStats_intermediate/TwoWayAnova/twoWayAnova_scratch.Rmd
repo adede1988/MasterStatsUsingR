@@ -130,9 +130,111 @@ ggplot(df, aes(x = as.numeric(Promotion), y = SalesInThousands, color = Promotio
 
 ```
 
-## two-way ANOVA
+## Doing a two-way ANOVA
 
 ```{r two way}
+
+#step 1: 
+#how do sales change with different combinations of market size and promotion?
+
+#step 2: There are now multiple sets of null and alternative hypotheses to test
+#is there a main effect of market size? Null: no; Alt: yes
+#is there a main effect of promotion? Null: no; Alt: yes
+#is there an interaction between factors? Null: no; Alt: yes
+
+#step 3: calcualte the F ratios
+
+GM = mean(df$SalesInThousands)
+#calculate all the different sums of squares: 
+#initialize at zero 
+SSbetMarSize = 0
+A = length(unique(df$MarketSize)) #how many levels of market size are there? 
+dfbetMarSize = A - 1
+marSizeLevels = unique(df$MarketSize)
+#loop over market sizes: 
+for(ss in 1:A){
+  ##SS per group = n*(groupMean - GM)^2
+  tmp = df %>% filter(MarketSize == marSizeLevels[ss])
+  n = nrow(tmp)
+  SSbetMarSize = SSbetMarSize + n*(mean(tmp$SalesInThousands) - GM)^2
+}
+
+SSbetProm = 0
+B = length(unique(df$Promotion)) #how many levels of market size are there? 
+dfbetProm = B - 1
+promLevels = unique(df$Promotion)
+#loop over market sizes: 
+for(pp in 1:B){
+  ##SS per group = n*(groupMean - GM)^2
+  tmp = df %>% filter(Promotion == promLevels[pp])
+  n = nrow(tmp)
+  SSbetProm = SSbetProm + n*(mean(tmp$SalesInThousands) - GM)^2
+}
+
+#for the interaction and the within SS values, we'll need to nest two loops!
+#SSinter = nab*(meanab - meana - meanb + GM)^2
+#needs to loop over levels of factor A and B
+SSinter = 0
+SSwithin = 0
+dfinter = (A-1)*(B-1)
+dfwithin = nrow(df) - A*B
+#loop over market sizes: 
+for(ss in 1:A){
+  for(pp in 1:B){
+    meana = mean(df$SalesInThousands[df$MarketSize == marSizeLevels[ss]])
+    meanb = mean(df$SalesInThousands[df$Promotion==promLevels[pp]])
+    ##SS per group = n*(groupMean - GM)^2
+    tmp = df %>% filter(MarketSize == marSizeLevels[ss],
+                        Promotion == promLevels[pp])
+    n = nrow(tmp)
+    SSinter = SSinter + n*(mean(tmp$SalesInThousands) - 
+                                 meana - meanb + GM)^2
+    SSwithin = SSwithin + sum((tmp$SalesInThousands - 
+                                mean(tmp$SalesInThousands))^2)
+  }
+}
+
+#convert to mean squared values: 
+MSbetMarSize = SSbetMarSize / dfbetMarSize
+MSbetProm = SSbetProm / dfbetProm
+MSinter = SSinter / dfinter
+MSwithin = SSwithin / dfwithin 
+
+#calculate F-ratios: 
+FbetMarSize = MSbetMarSize / MSwithin 
+FbetProm = MSbetProm / MSwithin 
+Finter = MSinter / MSwithin 
+
+#steps 4: get p values: 
+
+pbetMarSize = 1 - pf(FbetMarSize, dfbetMarSize, dfwithin)
+pbetProm = 1 - pf(FbetProm, dfbetProm, dfwithin)
+pinter = 1 - pf(Finter, dfinter, dfwithin)
+
+#step 5: answer the question with respect to the null and alt hypotheses: 
+resPrint <- function(effectName, df, SS, MS, Fval, pval){
+  cat(effectName, '; Df: ', df, '; SS: ', round(SS, 1), 
+      '; MS: ', round(MS, 1), '; F: ', round(Fval, 3), 
+      '; p(>F): ', pval, sep = '')
+}
+
+resPrint('Promotion', dfbetProm, SSbetProm, MSbetProm, FbetProm, pbetProm)
+resPrint('MarketSize', dfbetMarSize, SSbetMarSize, MSbetMarSize, FbetMarSize, 
+         pbetMarSize)
+resPrint('Interaction', dfinter, SSinter, MSinter, Finter, pinter)
+
+
+test = lm(SalesInThousands ~ Promotion * MarketSize, data = df)
+
+anova(test)
+
+#The values are a little different? 
+
+```
+
+## two-way ANOVA
+
+```{r two way2}
 
 test = lm(SalesInThousands ~ Promotion * MarketSize, data = df)
 
@@ -148,6 +250,69 @@ df %>% ggplot(aes(x = as.numeric(Promotion),
   myTheme + brightCol + brightFil+
         theme(axis.text.x = element_blank()) + 
   facet_grid(.~MarketSize)
+
+
+results = data.frame(step1 = 0)
+#explained variance 
+SStotal = sum((df$SalesInThousands - GM)^2)
+test = lm(df$SalesInThousands ~ df$Promotion, data = df)
+tab = anova(test)
+results$step1 = tab$`Sum Sq`[1] / sum(tab$`Sum Sq`)
+results$Promo = SSbetProm / SStotal
+
+test = lm(test$residuals ~ df$MarketSize)
+tab = anova(test)
+results$step2 = tab$`Sum Sq`[1] / SStotal + results$step1
+results$P_MS = (SSbetProm + SSbetMarSize) / SStotal
+
+test = lm(test$residuals ~ df$MarketSize:df$Promotion)
+tab = anova(test)
+results$step3 = tab$`Sum Sq`[1] / SStotal + results$step2
+results$ALL = (SSbetProm + SSbetMarSize + SSinter) / SStotal
+
+results = results %>% pivot_longer(cols = names(.), 
+                                   names_to = 'source',
+                                   values_to = 'explained_variance')
+
+results =results %>%
+  mutate(source = fct_relevel(source, "step1", 'Promo', 'step2', 'P_MS', 'step3', 'ALL'))
+
+
+library(kableExtra)
+library(BSDA)
+results %>% 
+  kbl(align = 'c', digits = 4) %>% 
+  kable_classic(full_width = F, 
+                font_size = 20)
+
+library(car)
+Anova(lm(SalesInThousands ~ Promotion * MarketSize, data = df), type = 3)
+anova(lm(SalesInThousands ~ Promotion * MarketSize, data = df))
+anova(lm(SalesInThousands ~ MarketSize + Promotion:MarketSize + Promotion, data = df))
+anova(lm(SalesInThousands ~ Promotion:MarketSize , data = df))
+
+
+test = lm(SalesInThousands ~ MarketSize + MarketSize:Promotion, data = df)
+df$residuals = test$residuals
+
+df %>% group_by(Promotion) %>%
+  summarize(meanVal = mean(residuals))
+
+anova(lm(residuals ~ Promotion, data = df))
+
+
+df %>% ggplot(aes(y = residuals, color = Promotion)) + 
+    geom_boxplot(linewidth = 2)+ 
+  myTheme + brightCol + brightFil+
+        theme(axis.text.x = element_blank())
+
+df %>% ggplot(aes(y = SalesInThousands, color = Promotion)) + 
+    geom_boxplot(linewidth = 2)+ 
+  myTheme + brightCol + brightFil+
+        theme(axis.text.x = element_blank())
+
+results %>% ggplot(aes(x = source, y = explained_variance)) + 
+  geom_bar(stat = "identity", position = "dodge")
 
 ```
 

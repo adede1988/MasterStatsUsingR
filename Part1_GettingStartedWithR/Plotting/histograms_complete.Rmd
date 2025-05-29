@@ -187,3 +187,35 @@ df <- df %>% drop_na()
 write.csv(df, paste0(myGitHubPath, 'data\\plasticWaste.csv'))
 
 ```
+# Data Visualisation: Histograms 
+
+Create histograms to display the distributions of all variables in the data
+
+```{r histograms}
+
+df %>% ggplot(aes(x = mismanagedTotal))+
+  geom_histogram() +
+theme_classic()
+
+df %>% ggplot(aes(x = coastalPop))+
+  geom_histogram() +
+theme_classic()
+
+df %>% ggplot(aes(x = totalPop))+
+  geom_histogram() +
+theme_classic()
+
+df %>% ggplot(aes(x = mismanagedPerCap))+
+  geom_histogram() +
+theme_classic()
+
+df %>% ggplot(aes(x = gdpPerCap))+
+  geom_histogram() +
+theme_classic()
+
+df %>% ggplot(aes(x = totWastePerCap))+
+  geom_histogram() +
+theme_classic()
+
+
+```

@@ -1,5 +1,5 @@
 ---
-Title: 'Functions'
+Title: 'Helper Scripts'
 Section: 'Basic R Coding'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
@@ -22,71 +22,6 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 library(tidyverse)
 
-
-
-```
-
-## let's say you want to do a calculation for multiple inputs
-
-```{r changing inputs}
-x = c(1,1,2,4,1,2,3,2,1,1,1,2,34,4,1)
-y = c(2,3,1,1,2,4,5,1,1,1,2,3,1,1,1,1,2,3,1,1,4,2,1,1,1)
-#what are the indices of two 1s in a row? 
-
-runs <- NULL
-for(ii in 1:(length(x)-1)){
-  if(all(x[ii:(ii+1)] == 1)){
-    runs <- c(runs, ii)
-  }
-}
-
-
-runs2 <- NULL
-for(ii in 1:(length(y)-1)){
-  if(all(y[ii:(ii+1)] == 1)){
-    runs2 <- c(runs2, ii)
-  }
-}
-
-
-```
-## repeating code is slow, hard to read, and error prone, use a function! 
-```{r writing a function}
-helloWorld <- function(){
-  print('hello world!')
-}
-
-findRuns <- function(x){
-  runs <- NULL
-  for(ii in 1:(length(x)-1)){
-    if(all(x[ii:(ii+1)] == 1)){
-      runs <- c(runs, ii)
-    }
-  }
-  return(runs)
-}
-
-findRuns(x)
-findRuns(y)
-
-
-```
-
-## make your functions flexible! 
-```{r soft coding}
-#length k = 2 
-findRuns <- function(x, k = 2){
-  runs <- NULL
-  for(ii in 1:(length(x)-(k-1))){
-    if(all(x[ii:(ii+(k-1))] == 1)){
-      runs <- c(runs, ii)
-    }
-  }
-  return(runs)
-}
-
-findRuns(x, 3)
-findRuns(y, 3)
 
 
 ```
