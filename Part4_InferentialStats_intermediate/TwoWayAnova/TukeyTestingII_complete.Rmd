@@ -1,0 +1,98 @@
+---
+Title: 'Tukey Testing II'
+Section: 'Two-Way ANOVA'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(kableExtra)
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+
+
+```
+
+## advertising data
+#https://www.kaggle.com/datasets/chebotinaa/fast-food-marketing-campaign-ab-test
+
+```{r data}
+df <- read.csv(paste0(gitHubPath, 'data\\WA_Marketing-Campaign.csv'))
+df$Promotion <- as.factor(df$Promotion)
+
+#average over weeks within store
+df<- df %>% group_by(LocationID) %>%
+  summarize(SalesInThousands = mean(SalesInThousands),
+    across(everything(), ~ first(.), .names = "{.col}"))
+
+df %>% ggplot(aes(y = SalesInThousands, color = Promotion)) + 
+    geom_boxplot(linewidth = 2)+ 
+  myTheme + brightCol + brightFil+
+        theme(axis.text.x = element_blank())+
+  facet_grid(.~MarketSize)
+
+
+```
+
+## Doing a two-way ANOVA
+
+```{r two way}
+
+test = lm(SalesInThousands ~ Promotion * MarketSize, data = df)
+
+anova(test)
+
+
+```
+
+## Use Tukey Honestly Significant Difference test to evaluate (TukeyHSD)
+
+```{r tukey}
+
+TukeyHSD(aov(test))
+
+tukeyRes = TukeyHSD(aov(test))
+#let's figure out the structure: 
+tukeyInteractions = tukeyRes$`Promotion:MarketSize`
+#pvals: 
+tukeyInteractions[,4]
+
+tukeyInteractions = tukeyInteractions[tukeyInteractions[,4]<.05,]
+#do the same for the promotion and market size effects: 
+tukeyPromo = tukeyRes$Promotion
+tukeyPromo = tukeyPromo[tukeyPromo[,4]<.05,]
+tukeyMarSiz = tukeyRes$MarketSize
+tukeyMarSiz = tukeyMarSiz[tukeyMarSiz[,4]<.05,]
+
+#look at all the significant effects: 
+tukeySig = rbind(tukeyInteractions, tukeyPromo, tukeyMarSiz)
+
+
+tukeySig %>% 
+  kbl(align = 'c', digits = 2) %>% 
+  kable_classic(full_width = F, 
+                font_size = 20)
+
+df %>% ggplot(aes(y = SalesInThousands, color = Promotion)) + 
+    geom_boxplot(linewidth = 2)+ 
+  myTheme + brightCol + brightFil+
+        theme(axis.text.x = element_blank())+
+  facet_grid(.~MarketSize)
+
+```

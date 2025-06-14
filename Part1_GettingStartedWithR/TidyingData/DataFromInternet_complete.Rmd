@@ -1,0 +1,50 @@
+---
+title: 'Data From Internet'
+Section: 'Tidying Data'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+Data can be found here: 
+https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-05-21
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+myGitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+# Load packages
+
+library(tidyverse) 
+library(janitor) #helps to rename titles
+library(tidytuesdayR) #package for loading tidy tuesday datasets 
+```
+
+## Load Data in and use janitor to make names R appropriate
+
+```{r load data}
+
+# Load the data 
+#coastal vs mismanaged waste
+cw <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/coastal-population-vs-mismanaged-plastic.csv")
+
+
+# inspect the data 
+head(cw)
+names(cw)
+
+
+
+```
