@@ -1,7 +1,9 @@
 ---
 title: 'lists and the double square bracket'
-author: "Adam Dede"
-date: "2024-03-19"
+Section: 'Basic R Coding'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
 output:
   html_document:
     toc: yes
@@ -26,7 +28,7 @@ library(tidyverse)
 ## the double square bracket explained
 
 ```{r double bracket}
-x <- list(name='adam', age = 35, colGrad = T)
+  
 x['name']
 x[1]
 

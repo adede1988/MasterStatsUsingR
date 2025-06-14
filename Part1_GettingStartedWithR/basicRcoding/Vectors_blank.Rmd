@@ -31,13 +31,16 @@ library(tidyverse)
 ```{r vector indexing}
 
 w = c(11,12,13,14,15)
-w[1]
-w[3]
-w[2:5]
-w[c(T,T,F,T,F)]
+#numeric indexing
 
-w[-2]
-w[2]
+
+#colon indexing
+
+
+#boolean indexing
+
+#negative indexing
+
 
 
 ```
@@ -46,11 +49,11 @@ w[2]
 
 length(w)
 mode(w)
-w = c(w[1], F, w[2:length(w)])
+w = 
 mode(w)
 
 y = c('a', 'b', 'c')
-y = c(1, y)
+y = 
 
 
 ```
@@ -58,7 +61,7 @@ y = c(1, y)
 ## adding to the start or end of a vector
 ```{r start and end}
 
-w = c(w, 1)
+w = 
 
 
 
@@ -66,40 +69,36 @@ w = c(w, 1)
 
 ## recycling to populate a vector
 ```{r recycling}
-x = c(1,2,3)
-y = c(4,5,6,7)
+x = 
+y = 
 
 x + y
 
 x = vector('numeric', 10)
-x[1:10] = c(1,2)
+
 
 
 ```
 ## using the colon operator
 ```{r colons}
 
-5:11
-11:5
+
+
+
+#order of operations 
 n=10
-
-5:n-1
-
-5:(n-1)
-
 
 ```
 ## some other useful ways to make vectors
 ```{r generate vecs}
 seq(from = 1, to = 10, by = 2)
-seq(1, 10, .2)
-seq(1, 10)
+
 
 rep(c(1,12), 3)
 
 # 3 6 9 3 6 9 3 6 9 3 6 9
 
-rep(seq(3,9,3), 4)
+
 
 
 ```

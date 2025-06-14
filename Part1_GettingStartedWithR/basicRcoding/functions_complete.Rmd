@@ -1,7 +1,9 @@
 ---
 title: 'functions'
-author: "Adam Dede"
-date: "2024-05-12"
+Section: 'Basic R Coding'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
 output:
   html_document:
     toc: yes
@@ -19,7 +21,8 @@ editor_options:
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 library(tidyverse)
-
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
 
 
 ```
@@ -91,7 +94,8 @@ findRuns(y, 3)
 
 ## can you write a function to simulate covid cases? 
 ```{r breaking out of the loop}
-covidDat <- read.csv('C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\data\\owid-covid-data.csv')
+covidDat <- read.csv(file.path(gitHubPath, "data", 
+                               "owid-covid-data.csv"))
 covUSA <- covidDat %>% filter(iso_code == 'USA')
 
 covUSA$growthRate = NA
@@ -106,6 +110,8 @@ plot(as.Date(covUSA$date), covUSA$growthRate)
 #growth = multiplicative growth rate: casesToday * growth = cases tomorrow
 #time = number of time steps to run the simulation 
 #startVal = how many cases are observed on day 1
+
+#output will be the cases per day as a vector
 
 caseSim <- function(growth, time = 365, startVal = 1){
   output = rep(NA, time)
@@ -135,8 +141,10 @@ plot(as.Date(covUSA$date), covUSA$total_cases)
 plot(as.Date(covUSA$date), caseSimVar(covUSA$growthRate, 
                                       length(covUSA$date), 1))
 
-randOrderGrowth = sample(covUSA$growthRate, length(covUSA$growthRate), 
+randOrderGrowth = sample(covUSA$growthRate, 
+                         length(covUSA$growthRate), 
                          replace = F)
+
 randOrderGrowth[is.na(randOrderGrowth)] <- 1.0
 plot(as.Date(covUSA$date), caseSimVar(randOrderGrowth, 
                                       length(covUSA$date), 1))

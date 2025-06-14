@@ -1,7 +1,9 @@
 ---
 title: 'advanced matrix indexing'
-author: "Adam Dede"
-date: "2024-03-19"
+Section: 'Basic R Coding'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
 output:
   html_document:
     toc: yes
@@ -25,26 +27,42 @@ library(tidyverse)
 ```
 ## more indexing tricks 
 ```{r more matrix indexing tricks}
-
+z = matrix(c(1,2,3,4,5,6), nrow = 2, byrow = T)
+#using colons and negatives: 
 
 
 ```
 ## using the dim function on matrices to help index
 ```{r dim}
-
+dim(z)
 
 
 ```
 ## matrix indexing understanding check
 ```{r index challenge}
+m <- matrix(c(1:10), nrow = 2)
+#3,4,5,6: 
 
+#6,8,10
+
+m <- matrix(c(1:10), nrow = 2, byrow = T)
+
+#3,4,5,6: 
+
+#6,8,10
 
 
 ```
 
 ## arrays indexing challenge
 ```{r arrays}
+a = array(c(1:18), dim = c(2,3,3))
 
+#10, 12
+
+#13, 15, 14, 16
+
+#6, 12, 18
 
 ```
 

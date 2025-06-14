@@ -1,7 +1,9 @@
 ---
 title: 'for loops'
-author: "Adam Dede"
-date: "2024-05-12"
+Section: 'Basic R Coding'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
 output:
   html_document:
     toc: yes
@@ -27,13 +29,15 @@ library(tidyverse)
 ## Doing a calculation for every observation in a set of data
 
 ```{r repeating a calculation}
-
+x = c(1,2,3,5)
+#can you count the number of odd numbers in this vector? 
+oddCount = 0
 
 
 ```
 ## repeating code is slow, hard to read, and error prone, use a loop! 
 ```{r the for loop}
-
+oddCount = 0
 
 
 
@@ -41,7 +45,8 @@ library(tidyverse)
 
 ## R lets you make this even simpler by avoiding indexing
 ```{r direct iteration}
-
+oddCount = 0
+#can you count the odd values by looping the values directly? 
 
 
 
@@ -49,25 +54,28 @@ library(tidyverse)
 
 ## what if we don't always want to loop every value? 
 ```{r breaking out of the loop}
-
- 
+x = c(3,6,1,6,1)
+ #can we use a for loop to find the first 1
 
 
 ```
 ## find runs of 1s with length equal to 2
 ```{r runs of 1s}
-
-
+x = c(1,1,2,4,1,2,3,2,1,1,1,2,34,4,1)
+#what are the indices of two 1s in a row
 
 
 
 ```
 ## simplify with the all function
 ```{r all any}
+x = c(1,1,2,4,1,2,3,2,1,1,1,2,34,4,1)
+#what are the indices of two 1s in a row? 
 
 
 
-
-
+#can you write a for loop that finds 
+# indices where consecutive values
+# are 1 and 2 OR 2 and 1? 
 
 ```

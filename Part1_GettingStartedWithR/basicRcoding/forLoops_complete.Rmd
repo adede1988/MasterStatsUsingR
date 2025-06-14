@@ -1,7 +1,9 @@
 ---
 title: 'for loops'
-author: "Adam Dede"
-date: "2024-05-12"
+Section: 'Basic R Coding'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
 output:
   html_document:
     toc: yes
@@ -59,6 +61,8 @@ oddCount
 ```{r direct iteration}
 
 oddCount = 0
+#can you count the odd values by looping the values directly? 
+
 for(n in x){
   if(n %% 2 == 1) oddCount <- oddCount + 1 
 }

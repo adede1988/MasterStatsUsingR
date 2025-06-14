@@ -75,7 +75,7 @@ n = c(-1,0,1) / 0
 x = 'u'
 #you can also explicitly force data into a
 #certain mode. 
-as.logical(x) #0-> FALSE anything else -> TRUE
+as.logical(x) 
 as.character(x)
 as.complex(x)
 as.numeric(x)

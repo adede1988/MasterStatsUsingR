@@ -1,7 +1,9 @@
 ---
 title: 'data.frames'
-author: "Adam Dede"
-date: "2024-03-19"
+Section: 'Basic R Coding'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
 output:
   html_document:
     toc: yes
@@ -19,6 +21,8 @@ editor_options:
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 library(tidyverse)
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
 
 
 
@@ -86,7 +90,9 @@ allDat2[[varName]][1]
 
 ## data frames are the most common way of storing data in R
 ```{r reading in a csv}
-covidDat <- read.csv('C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\data\\owid-covid-data.csv')
+covidDat <- read.csv(file.path(gitHubPath, "data", 
+                               "owid-covid-data.csv"))
+
 
 covDatUSA <- covidDat %>% 
   filter(iso_code == 'USA' ) 

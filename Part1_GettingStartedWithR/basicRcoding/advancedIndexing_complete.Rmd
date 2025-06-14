@@ -1,7 +1,9 @@
 ---
 title: 'advanced matrix indexing'
-author: "Adam Dede"
-date: "2024-03-19"
+Section: 'Basic R Coding'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
 output:
   html_document:
     toc: yes
@@ -26,7 +28,7 @@ library(tidyverse)
 ## more indexing tricks 
 ```{r more matrix indexing tricks}
 z = matrix(c(1,2,3,4,5,6), nrow = 2, byrow = T)
-
+#using colons and negatives: 
 z[,2:3]
 z[,-2]
 

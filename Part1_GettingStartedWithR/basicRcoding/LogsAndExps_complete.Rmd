@@ -1,7 +1,9 @@
 ---
 title: 'logs and exponents'
-author: "Adam Dede"
-date: "2024-03-19"
+Section: 'Basic R Coding'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
 output:
   html_document:
     toc: yes
@@ -19,7 +21,8 @@ editor_options:
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 library(tidyverse)
-
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
 
 
 ```
@@ -42,9 +45,9 @@ y = exp(x)
 ```
 
 ## Quick plot to help build intuition 
-```{r add scatter plot rend}
+```{r add scatter plot}
 
- #combine into a single data frame
+ #plotting can help visual understanding! 
 plot(x, y)
 
 
@@ -100,7 +103,8 @@ exp(-1)
 #data obtained from: https://covid.ourworldindata.org/data/owid-covid-data.csv
 #data downloaded on: 17/11/2021
 
-covidDat <- read.csv('C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\data\\owid-covid-data.csv')
+covidDat <- read.csv(file.path(gitHubPath, "data", 
+                               "owid-covid-data.csv"))
 covUSA <- covidDat %>% filter(iso_code == 'USA')
 
 #make a plot
@@ -121,7 +125,8 @@ plot(as.Date(covUSA$date), log(covUSA$total_cases, base = 10))
 #use vectorization math like we did before, but now, we want to ask, what's the relationship between each day and the day before?
 covUSA$growthRate = NA
 L = length(covUSA$growthRate)
-covUSA$growthRate[2:L] = covUSA$total_cases[2:L] / covUSA$total_cases[1:L-1]
+covUSA$growthRate[2:L] = covUSA$total_cases[2:L] / 
+                         covUSA$total_cases[1:(L-1)]
 
 
 plot(as.Date(covUSA$date), covUSA$growthRate)
@@ -137,8 +142,8 @@ log(1e6, base=10)
 
 
 #can you generate a similar set of plots for the running death count? 
-#can you generate a similar set of plots for another country? Take a look in 
-#the covidDat variable to find the iso_code you need for your target country
+#can you generate a similar set of plots for another country? 
+
 
 ```
 

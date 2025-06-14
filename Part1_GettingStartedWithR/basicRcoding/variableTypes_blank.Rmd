@@ -30,13 +30,13 @@ library(tidyverse)
 ```{r modes}
 
 #numeric (can be doubles or integers)
-w = c(11,12,13,14,15)
+w = 
 #character 
-x = 'u'
+x = 
 #boolean / logical
-y = c(T,F,T)
+y = 
 #complex
-z = c(3+2i, 5+1i, -1+0i)
+z = 
 #you can check what mode your data are
 mode(z)
 mode(y)
@@ -51,21 +51,20 @@ mode(w)
 
 ```{r targeted screening}
 
-is.numeric(z)
-is.complex(y)
-is.character(x)
-is.logical(y)
-class(x)
+
+
 
 ```
 
-# there are also special error modes, do you remember them? 
+# there are also special error variables, do you remember them? 
 
 ```{r error modes}
 #special values -Inf, Inf, NA, and NaN?
 n = c(-1,0,1) / 0
 #type your code here to check for special 
 #values in n :)
+
+#what mode are these? 
 
 
 ```
@@ -75,7 +74,7 @@ n = c(-1,0,1) / 0
 x = 'u'
 #you can also explicitly force data into a
 #certain mode. 
-as.logical(x) #0-> FALSE anything else -> TRUE
+as.logical(x) 
 as.character(x)
 as.complex(x)
 as.numeric(x)
