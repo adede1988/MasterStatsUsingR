@@ -1,5 +1,5 @@
 ---
-title: 'Data From Internet'
+title: 'Renaming'
 Section: 'Tidying Data'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
@@ -24,12 +24,13 @@ https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-05-21
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-
 gitHubPath <- file.path(path.expand("~"), "GitHub", 
                         "MasterStatsUsingR")
 # Load packages
 
 library(tidyverse) 
+library(janitor) #helps to rename titles
+
 
 ```
 
@@ -39,13 +40,20 @@ library(tidyverse)
 
 # Load the data 
 #coastal vs mismanaged waste
-cw <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/coastal-population-vs-mismanaged-plastic.csv")
+cw <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/coastal-population-vs-mismanaged-plastic.csv")
 
-
-# inspect the data 
-head(cw)
 names(cw)
 
 
 
 ```
+
+## rename variables with hard coding to make them easier to work with
+
+```{r make easier names}
+#sometimes it's necessary to just hard code it! 
+names(cw)
+
+  
+```
+

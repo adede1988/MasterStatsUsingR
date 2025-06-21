@@ -1,5 +1,5 @@
 ---
-title: 'Data From Internet'
+title: 'Pivoting data frames'
 Section: 'Tidying Data'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
@@ -30,22 +30,45 @@ gitHubPath <- file.path(path.expand("~"), "GitHub",
 # Load packages
 
 library(tidyverse) 
-
 ```
 
-## Load Data in and use janitor to make names R appropriate
+## Load Data in about cardiovascular disease 
 
 ```{r load data}
 
 # Load the data 
 #coastal vs mismanaged waste
-cw <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/coastal-population-vs-mismanaged-plastic.csv")
+cardioDat <- read_csv(file.path(gitHubPath, 'data',
+                         'pivotExample.csv'))
 
+names(cardioDat)
+cardioDat = cardioDat[,-1]
+names(cardioDat)
 
-# inspect the data 
-head(cw)
-names(cw)
+```
+
+## pivot wider to put questions in their own columns
+
+```{r pivot wider}
+
+cardioWide = cardioDat %>% 
+              pivot_wider()
+
+#oops, we need to specify the ID columns 
+# that identify a unique row in our output: 
+
+  
+```
+
+## What about pivoting the other way? 
+
+```{r load in the cw data}
+
+probDat = read.csv(file.path(gitHubPath, 'data', 'pivotExample2.csv'))
+probDat = probDat[,-1]
+
 
 
 
 ```
+

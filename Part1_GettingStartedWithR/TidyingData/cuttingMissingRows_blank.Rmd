@@ -1,5 +1,5 @@
 ---
-title: 'Group By and Summarize'
+title: 'Cutting Missing Rows'
 Section: 'Tidying Data'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
@@ -24,11 +24,11 @@ https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-05-21
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
+
 # Load packages
 
 library(tidyverse) 
 library(janitor) #helps to rename titles
-
 ```
 
 ## Load Data in and use janitor to make names R appropriate
@@ -62,35 +62,32 @@ names(cw)
 
 ## Group data by year and check # observations for each year
 
-```{r group by year}
+```{r summarizing}
 
-#using base R: 
-#can you write code to create a new summary data.frame?
-#The goal is to have the columns year, count, naCount
-#That is, for each year, how many observations are there
-#and how many of those observations are na
-
-#key functions: unique, sum, length, is.na
-
-allYears = unique(cw$year)
-results = data.frame(year = allYears, 
-                     count = allYears,
-                     naCount = allYears)
-
-for(ii in 1:length(year)){
-  curDat = cw[cw$year == allYears[ii],]
-  results$count[ii] = length(curDat$year)
-  results$naCount[ii] = sum(is.na(curDat$mismanagedTotal))
-}
-
-results$goodVals = results$n - results$naCount
 
 #The tidyverse provides a simpler way to do it: 
 results2 <- cw %>%
   group_by(year) %>%
   summarize(naCount = sum(is.na(mismanagedTotal)),
-            n = n()) %>% 
-  mutate(goodVals = n - naCount)
+            count = n()) 
+
+results2$goodCount = results2$count - results2$naCount
+
+
+
+
+```
+
+## Looks like only one year has any data! 
+
+```{r cutting down to only one year}
+
+
+
+#check if there was really only one observation per country for 
+#the good year?
+
+
 
 
 

@@ -39,7 +39,6 @@ df = read.csv(file.path(gitHubPath, "data",
                                "restingEEG.csv"))
 
 
-hist(df$pow_delta_O[df$pow_delta_O < 250])
 ```
 
 ## sp 500 daily change 
@@ -51,25 +50,12 @@ df = read.csv(file.path(gitHubPath, "data",
                                "SP500HistoricalData.csv"))
 
 names(df)
-#let's simplify the name of column 6
-names(df)[6] <- 'Change'
-
-mode(df$Change)
-# Initialize an empty numeric vector to store the cleaned values
-cleaned_values <- numeric(length(df$Change))
-
-# Loop through each element in df$Change
-for (ii in 1:length(df$Change)) {
-  # Remove the percent sign and convert to numeric
-  cleaned_values[ii] <- as.numeric(
-          strsplit(df$Change[ii], '%')[[1]])
-}
-
-# Assign the cleaned values back to the dataframe
-df$Change <- cleaned_values
 
 
-hist(df$Change)
+
+
+
+
 
 ```
 

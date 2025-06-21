@@ -1,5 +1,5 @@
 ---
-title: 'Renaming and Pivoting'
+title: 'A Whole Import and Tidying pipeline!'
 Section: 'Importing Data Into R'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
@@ -77,50 +77,35 @@ unique(df$Question[df$Topic == "Cardiovascular Disease"])
 #or predict or be associated with heart disease mortality? 
 
 #start with the target Question we already picked: 
-goodVars = c("Diseases of the heart mortality among all people, underlying cause")
+goodVars = c()
 
 unique(df$Topic)
 
 #check sleep questions: 
-unique(df$Question[df$Topic == "Sleep"])
-goodVars = c(goodVars, unique(df$Question[df$Topic == 
-                                            "Sleep"])[2])
+
 
 #check mental health questions: 
-unique(df$Question[df$Topic == "Mental Health"])
-goodVars = c(goodVars, unique(df$Question[df$Topic == 
-                                "Mental Health"])[c(1,2,3)])
+
 
 #check tobacco questions: 
-unique(df$Question[df$Topic == "Tobacco"])
-goodVars = c(goodVars, unique(df$Question[df$Topic == 
-                                        "Tobacco"])[c(1,7)])
+
 
 #check nutrition, physical activity, and weight questions: 
-unique(df$Question[df$Topic == 
-              "Nutrition, Physical Activity, and Weight Status"])
-goodVars = c(goodVars, 
-                  unique(df$Question[df$Topic == 
-               "Nutrition, Physical Activity, and Weight Status"])
-                                              [c(1,3,6,9)])
+
 
 #check alcohol questions: 
-unique(df$Question[df$Topic == "Alcohol"])
-goodVars = c(goodVars, unique(df$Question[df$Topic == "Alcohol"])[c(2,7)])
+
 
 #check oral health questions: 
-unique(df$Question[df$Topic == "Oral Health"])
-goodVars = c(goodVars, unique(df$Question[df$Topic == 
-                                            "Oral Health"])[c(1,2,6,7)])
+
 
 #check social questions: 
-unique(df$Question[df$Topic == "Social Determinants of Health"])
-goodVars = c(goodVars, 
-             unique(df$Question[df$Topic == 
-           "Social Determinants of Health"])[c(1,2,3,5,6,8,9,10,11,12)])
+
 
 #check cognitive health and caregiving questions: 
-unique(df$Question[df$Topic == "Cognitive Health and Caregiving"])
+
+
+
 goodVars
 
 
@@ -135,14 +120,7 @@ goodVars
 #long versions of questions
 longNames <- goodVars
 
-shortNames = c("cardioDeath", "shortSleep", "depression",
-               "mentalDistress", "badDays", "smoking", 
-               "smokeBan", "obesity", "noActivity", "noVeg",
-               "noFruit", "BingeDrink", "alcohol", "allTeeth", 
-               "noTeeth", "dentist", "lostTeeth", "doctor",
-               "noInsure", "unemployment", "poverty",
-               "noInternet", "highSchool", "noFood", "noRent",
-               "noSocial", "noTransport")
+shortNames = c()
 
 # Check that lengths match
 if(length(longNames) == length(shortNames)){
@@ -157,12 +135,11 @@ name_map <- shortNames
 names(name_map) = longNames
 
 # Add the short version to the df
-df <- df %>% filter(Question  %in% longNames) %>%
-  mutate(Question_short = name_map[Question])
+df <- df %>% 
 
 ```
 
-## Let's knock out any easy filtering and selecting we can
+## Simple filtering and selecting goals
 
 ```{r filter and select}
 
@@ -183,7 +160,7 @@ df <- df %>% select(YearStart, LocationAbbr,
 
 ```{r pivot wider}
 
-#pivot Wider
+#pivot Wider 
 df_wide <- df %>%
   pivot_wider(
     id_cols = c(YearStart, LocationAbbr, 
@@ -199,9 +176,7 @@ df_wide <- df %>%
 ```{r simplify}
 #average over years within each state to get one estimate: 
 df_summary <- df_wide %>%
-  group_by(LocationAbbr, LocationDesc) %>%
-  summarise(
-    across(where(is.numeric), function(.x) mean(.x, na.rm = TRUE) ))
+ 
 
 
 ```

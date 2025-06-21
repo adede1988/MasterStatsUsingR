@@ -24,12 +24,13 @@ https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-05-21
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-myGitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
 # Load packages
 
 library(tidyverse) 
 library(janitor) #helps to rename titles
-library(tidytuesdayR) #package for loading tidy tuesday datasets 
+
 ```
 
 ## Load Data in and use janitor to make names R appropriate

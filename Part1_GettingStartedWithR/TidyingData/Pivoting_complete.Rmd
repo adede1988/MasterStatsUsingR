@@ -1,0 +1,82 @@
+---
+title: 'Pivoting data frames'
+Section: 'Tidying Data'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+Data can be found here: 
+https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-05-21
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+# Load packages
+
+library(tidyverse) 
+```
+
+## Load Data in about cardiovascular disease 
+
+```{r load data}
+
+# Load the data 
+#coastal vs mismanaged waste
+cardioDat <- read_csv(file.path(gitHubPath, 'data',
+                         'pivotExample.csv'))
+
+names(cardioDat)
+cardioDat = cardioDat[,-1]
+names(cardioDat)
+
+```
+
+## pivot wider to put questions in their own columns
+
+```{r pivot wider}
+
+cardioWide = cardioDat %>% 
+              pivot_wider(names_from = Question_short, 
+                          values_from = DataValue)
+
+#oops, we need to specify the ID columns 
+# that identify a unique row in our output: 
+cardioWide = cardioDat %>% 
+              pivot_wider(id_cols = 
+                                c(YearStart, LocationAbbr, LocationDesc), 
+                          names_from = Question_short, 
+                          values_from = DataValue)
+  
+```
+
+## What about pivoting the other way? 
+
+```{r load in the cw data}
+
+probDat = read.csv(file.path(gitHubPath, 'data', 'pivotExample2.csv'))
+probDat = probDat[,-1]
+
+probDat_long = probDat %>% pivot_longer(
+  cols = c(ProbOfConsecutiveFlips, ActualData),
+  names_to = 'dataSource', 
+  values_to = 'probability')
+
+
+```
+

@@ -1,5 +1,5 @@
 ---
-title: 'Renaming'
+title: 'Cutting Missing Rows'
 Section: 'Tidying Data'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
@@ -24,12 +24,11 @@ https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-05-21
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-myGitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
 # Load packages
 
 library(tidyverse) 
 library(janitor) #helps to rename titles
-library(tidytuesdayR) #package for loading tidy tuesday datasets 
 ```
 
 ## Load Data in and use janitor to make names R appropriate
@@ -38,13 +37,13 @@ library(tidytuesdayR) #package for loading tidy tuesday datasets
 
 # Load the data 
 #coastal vs mismanaged waste
-cw <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/coastal-population-vs-mismanaged-plastic.csv")
+cw <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/coastal-population-vs-mismanaged-plastic.csv")
 
 
 # inspect the data 
 head(cw)
 names(cw)
-cw <- janitor::clean_names(cw)
+cw <- clean_names(cw)
 names(cw)
 
 
@@ -70,8 +69,8 @@ names(cw)
 results2 <- cw %>%
   group_by(year) %>%
   summarize(naCount = sum(is.na(mismanagedTotal)),
-            n = n()) %>% 
-  mutate(goodVals = n - naCount)
+            count = n()) %>% 
+  mutate(goodCount = count - naCount)
 
 
 

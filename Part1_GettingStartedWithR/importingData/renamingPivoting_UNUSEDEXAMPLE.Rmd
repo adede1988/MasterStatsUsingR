@@ -1,0 +1,99 @@
+---
+title: 'Renaming and Pivoting'
+Section: 'Importing Data Into R'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## Set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(car)
+
+
+```
+
+## Import data on Obesity Risk
+
+```{r import}
+#data source: https://www.kaggle.com/datasets/spittman1248/
+#cdc-data-nutrition-physical-activity-obesity?resource=download
+df = read.csv(paste0(gitHubPath, '\\data\\obesityData.csv'))
+
+```
+
+## Rename the long form questions 
+
+```{r rename}
+
+#long versions of questions
+longNames <- unique(df$Question)
+
+shortNames = c("obesity", "Overweight", "fruit", "veg", "muscle", 
+               "cardio", "mus_car", "carLong", "noAct")
+
+# Check that lengths match
+stopifnot(length(longNames) == length(shortNames))
+
+# Create a named vector: names are long strings, values are short names
+name_map <- setNames(shortNames, longNames)
+
+# Add the short version to the df
+df <- df %>%
+  mutate(Question_short = name_map[Question])
+
+```
+
+## Cut to just the 'Income' values and pivot wider
+
+```{r cut pivot}
+
+df <- df %>% select(YearStart, LocationAbbr, LocationDesc, Question,
+              Data_Value, Question_short, Income) %>%
+  filter(Income != "")
+
+df_wide <- df %>%
+  pivot_wider(
+    id_cols = c(YearStart, LocationAbbr, LocationDesc, Income),
+    names_from = Question_short,
+    values_from = Data_Value
+  ) 
+
+```
+
+## Simplify by averaging over years
+
+```{r simplify}
+
+df_summary <- df_wide %>%
+  group_by(LocationAbbr, LocationDesc, Income) %>%
+  summarise(
+    across(where(is.numeric), ~mean(.x, na.rm = TRUE)),
+    .groups = "drop"
+  ) %>% drop_na()
+
+```
+
+## Save for later
+
+```{r save}
+
+write.csv(df_summary, paste0(gitHubPath, '\\data\\obesityData_sum.csv') )
+
+```
