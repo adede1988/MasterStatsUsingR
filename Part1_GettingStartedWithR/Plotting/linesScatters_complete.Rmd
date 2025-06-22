@@ -1,0 +1,123 @@
+---
+Title: 'Lines and Scatter Plots'
+Section: 'ggplot'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+# Load packages
+library(tidyverse) # data manipulation and visualization
+```
+
+## Plot miles per gallon as a function of engine size in R's builtin mpg dataset
+
+```{r plotting}
+
+head(mpg)
+unique(mpg$drv)
+
+#R's builtin plot function makes a pretty ugly plot: 
+plot(mpg$displ, mpg$hwy)
+
+#ggplot style plot
+ggplot(mpg, aes(x=displ, y = hwy)) +
+  geom_point() 
+#grammar check, which of these did we specify and which were automatic? 
+#data
+#geometric object
+#mapping
+#scale
+#coordinate system
+  
+
+```  
+  
+## Add titles to the plot
+  
+```{r adding titles}  
+
+ggplot(mpg, aes(x=displ, y = hwy)) +
+  geom_point() +
+  ylab('miles per gallon') + 
+  xlab('engine size (L)') +
+  ggtitle("fuel efficiency as a function \n of engine size")
+
+
+```
+
+## Put a plot in a variable to make it easier to edit
+  
+```{r plot in a variable}  
+
+p = ggplot(mpg, aes(x=displ, y = hwy)) +
+  geom_point() +
+  ylab('miles per gallon') + 
+  xlab('engine size (L)') +
+  ggtitle("fuel efficiency as a function \n of engine size")
+
+#let's try editing the scale of the x axis
+p + scale_x_log10()
+
+
+```
+
+## Plot covid data using ggplot
+  
+```{r covid ggplot}  
+
+covidDat <- read.csv(file.path(gitHubPath, "data", 
+                               "owid-covid-data.csv"))
+covUSA <- covidDat %>% filter(iso_code == 'USA')
+
+p = covUSA %>% ggplot( aes(x=as.Date(date), y = total_cases)) +
+  geom_point() +
+  ylab('total covid cases') + 
+  xlab('date') +
+  ggtitle("number of US covid cases")
+
+p + scale_y_log10() +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") 
+# %b = abbreviated month
+# %m = month as number
+# %d = day 
+# %Y = year as 4 digits 
+# %y = year as 2 digits
+
+#grammar check, which of these did we specify and which were automatic? 
+#data
+#geometric object
+#mapping
+#scale
+#coordinate system
+
+
+```
+
+## Changing the coordinate system
+  
+```{r polar plot}  
+
+p + scale_y_log10() +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
+  coord_polar()
+#just so we can say we edited every grammatical element of the graph! 
+
+
+```

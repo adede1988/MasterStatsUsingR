@@ -1,0 +1,89 @@
+---
+Title: 'Lines and Scatter Plots'
+Section: 'ggplot'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+# Load packages
+library(tidyverse) # data manipulation and visualization
+```
+
+## Plot miles per gallon for all cars in the dataset
+
+```{r bar plot}
+
+mpg %>% ggplot(aes(x = hwy))+
+  geom_bar() 
+
+#geom_bar defaults don't really make a "bar plot" 
+mpg %>% ggplot(aes(x = model, y = hwy, 
+                   color = year, fill = year))+
+  geom_bar(stat = 'identity') +
+  theme(axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.5, hjust = 1))
+
+mpg %>% ggplot(aes(x = model, y = hwy, 
+                   color = year, fill = year))+
+  geom_bar(stat = 'identity', position = 'dodge') +
+  theme(axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.5, hjust = 1))
+
+
+```
+
+## make a unique ID for each car
+
+```{r unique cars}
+
+df = mpg
+df$uniqueID = paste(mpg$model,
+                    mpg$displ,
+                    mpg$year, sep = '_')
+df %>% ggplot(aes(x = uniqueID, y = hwy, 
+                   color = year, fill = year))+
+  geom_bar(stat = 'identity', position = 'dodge') +
+  theme(axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.5, hjust = 1))
+
+#okay, but this plot is unreadable! 
+
+
+```
+
+## Summarize before plotting 
+
+```{r sum plot}
+
+plotVals = mpg %>% 
+  group_by(class) %>%  
+  summarize(hwy=mean(hwy)) 
+
+
+plotVals %>% ggplot(aes(x=class, y = hwy, color = class, fill = class))+
+  geom_bar(show.legend = F, stat = 'identity') +
+  ylab('miles per gallon') + 
+  xlab('') +
+  ggtitle("fuel efficiency by types of vehicle")
+
+  
+
+```  
+  
