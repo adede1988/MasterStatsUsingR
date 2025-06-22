@@ -78,6 +78,54 @@ p + scale_x_log10()
 
 ```
 
+## What about a line plot? 
+  
+```{r line plot}  
+
+p + geom_line()
+#what's wrong with this graph? 
+
+ggplot(mpg, aes(x=year, y = hwy, group = model)) +
+  geom_point() +
+  geom_line()+
+  ylab('miles per gallon') + 
+  xlab('year') +
+  ggtitle("fuel efficiency over time")
+#what's wrong with this graph? 
+#plot only Volkswagon Jetta data alone to see
+mpg %>% filter(model == 'jetta') %>%
+ggplot(aes(x=year, y = hwy, group = model)) +
+  geom_point() +
+  geom_line() +
+  ylab('miles per gallon') + 
+  xlab('year') +
+  ggtitle("fuel efficiency over time")
+
+plotDat = mpg %>% group_by(year, model) %>%
+  summarize(hwy = mean(hwy))
+
+ggplot(plotDat, aes(x=year, y = hwy, group = model)) +
+  geom_point() +
+  geom_line()+
+  ylab('miles per gallon') + 
+  xlab('year') +
+  ggtitle("fuel efficiency over time")
+
+# jitter x-axis by +-0.2
+plotDat <- plotDat %>%
+  mutate(jittered_year = year + runif(n(), -0.2, 0.2))  
+
+ggplot(plotDat, aes(x=jittered_year, y = hwy, 
+                    group = model, color = model)) +
+  geom_point() +
+  geom_line()+
+  ylab('miles per gallon') + 
+  xlab('year') +
+  ggtitle("fuel efficiency over time") + 
+  theme(legend.position = ' none')
+
+```
+
 ## Plot covid data using ggplot
   
 ```{r covid ggplot}  

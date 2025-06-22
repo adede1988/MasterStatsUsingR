@@ -1,6 +1,6 @@
 ---
-Title: 'Combining Data from multiple Sources'
-Section: 'Tidyverse'
+Title: 'Histograms'
+Section: 'ggplot'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
 Course_URL: "..." 
@@ -12,210 +12,74 @@ editor_options:
   chunk_output_type: console
 ---
 
-#### Examining the relationship between waste management and GDP
-
-Data can be found here: 
-https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-05-21
-
-
 ## set environment
 
 ```{r message = FALSE, warning = FALSE}
 
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
-myGitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
 # Load packages
 library(tidyverse) # data manipulation and visualization
-library(janitor) #helps to rename titles
-library(tidytuesdayR) #package for loading tidy tuesday datasets 
 ```
 
-## Load Data in three CSVs and use janitor to make names R appropriate
+## Look at the distribution of miles per gallon overall
 
-```{r load data}
+```{r histogram}
 
-# Load the data 
-#coastal vs mismanaged waste
-cw <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/coastal-population-vs-mismanaged-plastic.csv")
+#R's builtin hist function
+hist(mpg$hwy)
 
-#mismanaged waste vs gdp
-mg <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/per-capita-mismanaged-plastic-waste-vs-gdp-per-capita.csv")
+#ggplot histogram 
+ggplot(mpg, aes(x=hwy)) +
+  geom_histogram() 
+#grammar check, which of these did we specify and which were automatic? 
+#data
+#geometric object
+#mapping
+#scale
+#coordinate system
+  
 
-#total waste vs. gdp
-wg <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/per-capita-plastic-waste-vs-gdp-per-capita.csv")
+```  
+  
+## What if we want a histogram of change over time? 
+  
+```{r hist of change}  
 
-# inspect the data 
-head(cw)
-head(mg)
-head(wg)
-names(cw)
-cw <- janitor::clean_names(cw)
-names(cw)
-names(mg)
-mg <- janitor::clean_names(mg)
-names(mg)
-names(wg)
-wg <- janitor::clean_names(wg)
-names(wg)
+plotDat = mpg %>% group_by(year, model) %>%
+  summarize(hwy = mean(hwy))
 
+ggplot(plotDat, aes(x=year, y = hwy, group = model)) +
+  geom_point() +
+  geom_line()+
+  ylab('miles per gallon') + 
+  xlab('year') +
+  ggtitle("fuel efficiency over time")
 
+#can you figure out how to mutate the information in plotDat to 
+#create a new changeScore time for each model of car across years?
 
-```
+#this doesn't work: 
+changeDat = plotDat %>% group_by(model) %>% 
+            mutate(changeScore = hwy[1] - hwy[2])
 
-## Hard code easier to deal with names for all files
+#pivot wider!
+changeDat = plotDat %>% pivot_wider(id_cols = model, 
+                        names_from = year, 
+                        values_from = hwy) 
 
-```{r hardcode rename}
+#numeric column names are bad! 
+changeDat$changeScore = changeDat[['2008']] - changeDat[['1999']]
 
-names(cw)
-colnames(cw) <- c('country', 'countryCode', 'year', 'mismanagedTotal',
-                  'coastalPop', 'totalPop')
-names(cw)
-names(mg)
-colnames(mg) <- c('country', 'countryCode', 'year', 'mismanagedPerCap',
-                  'GDPperCap', 'totalPop')
-names(mg)
-names(wg)
-colnames(wg) <- c('country', 'countryCode', 'year', 'totWastePerCap',
-                  'gdpPerCap2', 'totalPop')
-names(wg)
-
-
-```
-
-## IS the year 2010 going to be a good year to analyze for all files? 
-
-```{r examine valid data}
-
-# summarize how many good observations there are for each variable of interest
-
-#key variable in coast_vs_waste is the mismanaged plastic
-dataCount_cw <- cw %>%
-  select(year, mismanagedTotal) %>%
-  group_by(year) %>%
-  summarize(naCount = sum(is.na(mismanagedTotal)),
-            n = n()) %>% 
-  mutate(goodVals = n - naCount)
-
-#key variable in mismanaged_vs_gdp is per capita mismanaged plastic
-dataCount_mg <- mg %>%
-  select(year, mismanagedPerCap) %>%
-  group_by(year) %>%
-  summarize(naCount = sum(is.na(mismanagedPerCap)),
-    n = n()) %>% 
-  mutate(goodVals = n - naCount)
-
-#key variable in waste_vs_gdp is total per capital plastic waste
-dataCount_wg <- wg %>%
-  select(year, totWastePerCap) %>%
-  group_by(year) %>%
-  summarize(naCount = sum(is.na(totWastePerCap)), 
-    n = n()) %>% 
-  mutate(goodVals = n - naCount)
-
-
-dataCount_cw %>% ggplot(aes(x = year-.5, y = goodVals)) +
-  geom_point(color = 'green') + 
-  geom_point(data = dataCount_mg, aes(x = year, y = goodVals), color = 'red')+
-  geom_point(data = dataCount_wg, aes(x = year+.5, y = goodVals), 
-             color = 'black') +
-  xlim(c(2000, 2015))
+changeDat %>% ggplot(aes(x = changeScore)) + 
+  geom_histogram() + 
+  xlab('mpg in 2008 - mpg in 1999')
 
 
 ```
 
-## Filtering down to only the year 2010 and getting rid of NA values 
 
-```{r get rid of NA and select year}
-#down select to remove missing and check that we only have one year
-cw = cw %>% filter(!is.na(mismanagedTotal))
-mg <- mg %>% filter(!is.na(mismanagedPerCap))
-wg <- wg %>% filter(!is.na(totWastePerCap))
-
-#check that there's only one year for each country in each file: 
-countryCounts = cw %>%
-  group_by(country) %>%
-  summarize(n = n())
-
-max(countryCounts$n)
-
-countryCounts = mg %>%
-  group_by(country) %>%
-  summarize(n = n())
-
-max(countryCounts$n)
-
-countryCounts = wg %>%
-  group_by(country) %>%
-  summarize(n = n())
-
-max(countryCounts$n)
-
-```
-
-## Merge the three data frames together into one large dataframe!
-
-```{r merge}
-names(cw)
-names(mg)
-df <- merge(cw, mg, by = "countryCode", suffixes = c("_df1", "_df2"))
-names(df)
-df <- df %>%
-  select(-ends_with("_df2"))
-names(df)
-new_column_names <- gsub("_df1$", "", names(df))
-names(df) <- new_column_names
-names(df)
-
-df <- merge(df, wg, by = "countryCode", suffixes = c("_df1", "_df2"))
-df <- df %>%
-  select(-ends_with("_df2"))
-new_column_names <- gsub("_df1$", "", names(df))
-names(df) <- new_column_names
-```
-
-## Remove incomplete rows! 
-
-```{r remove incomplete}
-
-df <- df %>% drop_na()
-
-```
-
-## save our cleaned data frame for later use! 
-```{r save the clean .csv}
-write.csv(df, paste0(myGitHubPath, 'data\\plasticWaste.csv'))
-
-```
-# Data Visualisation: Histograms 
-
-Create histograms to display the distributions of all variables in the data
-
-```{r histograms}
-
-df %>% ggplot(aes(x = mismanagedTotal))+
-  geom_histogram() +
-theme_classic()
-
-df %>% ggplot(aes(x = coastalPop))+
-  geom_histogram() +
-theme_classic()
-
-df %>% ggplot(aes(x = totalPop))+
-  geom_histogram() +
-theme_classic()
-
-df %>% ggplot(aes(x = mismanagedPerCap))+
-  geom_histogram() +
-theme_classic()
-
-df %>% ggplot(aes(x = gdpPerCap))+
-  geom_histogram() +
-theme_classic()
-
-df %>% ggplot(aes(x = totWastePerCap))+
-  geom_histogram() +
-theme_classic()
-
-
-```
