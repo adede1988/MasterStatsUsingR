@@ -63,12 +63,12 @@ ggplot(df, aes(x = Change, y = logChange, color = dummy)) +
 #but we know there are negative change values. 
 #The stock market doesn't ALWAYS go up! 
 
-df$logChange = log(df$Change + abs(min(df$Change))+.01)
+df$logChange = 
 
-constantValAdjustment = abs(min(df$Change))+.01
+constantValAdjustment = 
 
-ggplot(df, aes(x = Change + constantValAdjustment, 
-               y = logChange, color = dummy)) + 
+ggplot(df, aes(x = , 
+               y = , color = dummy)) + 
   geom_point(size = 2) + myTheme + brightCol + 
   theme(legend.position = 'none')
 
@@ -85,9 +85,9 @@ ggplot(df, aes(x = logChange, color = dummy, fill = dummy)) +
 
 ```{r descriptives for sp500}
 
+#model the log transformed data with a normal distribution: 
 x <- df$logChange
-analyticDists <- data.frame('norm' = dnorm(x, mean(x), sd(x)),
-                            'logChange' = x)
+analyticDists <- data.frame(
 
 
 analyticDists <- analyticDists %>% pivot_longer(
@@ -118,13 +118,14 @@ df %>% ggplot(aes(x = logChange, color = dist)) +
 
 #how can we think about the density values we have relative to raw SP500 changes?
 #reverse the math! 
-analyticDists$rawChange = exp(analyticDists$logChange) -
-                            constantValAdjustment
+analyticDists$rawChange = 
 
 
 df %>% ggplot(aes(x = Change, color = dist)) + 
-  geom_freqpoly(aes(y = ..density..), linewidth = 2, bins = 50) +
-  geom_line(data = analyticDists, aes(x = rawChange, y = density), linewidth = 2) + 
+  geom_freqpoly(aes(y = after_stat(density)), 
+                linewidth = 2, bins = 50) +
+  geom_line(data = analyticDists, 
+            aes(x = rawChange, y = density), linewidth = 2) + 
   brightCol +  myTheme + 
   ggtitle("SP 500 Change compare to log normal") 
 

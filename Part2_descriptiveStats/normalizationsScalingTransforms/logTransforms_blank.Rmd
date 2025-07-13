@@ -51,9 +51,10 @@ ggplot(df, aes(x = pow_delta_O, color = dummy, fill = dummy)) +
 
 ```{r take log transform}
 
-df$logPow_delta_O = log(df$pow_delta_O)
+df$logPow_delta_O = 
 
-ggplot(df, aes(x = logPow_delta_O, color = dummy, fill = dummy)) + 
+ggplot(df, aes(x =       , 
+               color = dummy, fill = dummy)) + 
   geom_histogram() + 
   myTheme + brightFil + brightCol + theme(legend.position = 'none')
 
@@ -68,26 +69,17 @@ ggplot(df, aes(x = logPow_delta_O, color = dummy, fill = dummy)) +
 
 
 x <- df$logPow_delta_O
-analyticDists <- data.frame('norm' = dnorm(x, 
-                                     mean = mean(x), 
-                                     sd = sd(x)), 
+analyticDists <- data.frame('norm' = dnorm(x,), 
                             'xVal' = x)
 
 
 analyticDists <- analyticDists %>% 
-              pivot_longer(cols = names(analyticDists)[-2], 
-                           values_to = 'density', 
-                           names_to = 'dist')
+              pivot_longer(
 
 
 
 df$dist = "empirical data"
-df %>% ggplot(aes(x = logPow_delta_O, color = dist)) + 
-  geom_freqpoly(aes(y = ..density..), linewidth = 2, bins = 50) +
-  geom_line(data = analyticDists, 
-            aes(x = xVal, y = density), linewidth = 2) + 
-  brightCol +  myTheme + 
-  ggtitle("EEG data") 
+df %>% ggplot(
 
 ```
 
@@ -97,13 +89,7 @@ df %>% ggplot(aes(x = logPow_delta_O, color = dist)) +
 
 ```{r exp back}
 
-df %>% ggplot(aes(x = exp(logPow_delta_O), color = dist)) + 
-  geom_freqpoly(aes(y = ..density..), linewidth = 2, bins = 50) +
-  geom_line(data = analyticDists, aes(x = exp(xVal), 
-                                      y = density / df$pow_delta_O), 
-            linewidth = 2) + 
-  brightCol +  myTheme + 
-  ggtitle("EEG data") 
+df %>% ggplot(
 
 
 ```
@@ -113,16 +99,11 @@ df %>% ggplot(aes(x = exp(logPow_delta_O), color = dist)) +
 ```{r equivalence}
 
 ## log normal values found relative to the raw data: 
-lnormVals_raw = dlnorm(df$pow_delta_O, 
-                       mean(log(df$pow_delta_O)), 
-                       sd(log(df$pow_delta_O)))
+lnormVals_raw = dlnorm(
 
 ## normal values found relative to the log transformed data: 
 
-normVals_log = dnorm(log(df$pow_delta_O), 
-                     mean(log(df$pow_delta_O)), 
-                     sd(log(df$pow_delta_O))) / 
-                     df$pow_delta_O
+normVals_log = dnorm(
 
 plot(normVals_log, lnormVals_raw)
 

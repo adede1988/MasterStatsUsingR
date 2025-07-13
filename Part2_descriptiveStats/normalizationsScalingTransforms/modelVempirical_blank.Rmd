@@ -57,10 +57,7 @@ ggplot(df, aes(x = Change, color = dummy, fill = dummy)) +
 
 ```{r model gain of 1}
 
-M = mean(df$Change)
-S = sd(df$Change)
 
-1 - pnorm(1, M, S)
 
 
 ```
@@ -69,7 +66,7 @@ S = sd(df$Change)
 
 ```{r empirical gain of 1}
 
-sum(df$Change > 1) / length(df$Change)
+
 
 
 ```

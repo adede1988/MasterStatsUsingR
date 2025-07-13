@@ -1,0 +1,121 @@
+---
+Title: 'Lines and Scatter Plots'
+Section: 'ggplot'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+# Load packages
+library(tidyverse) # data manipulation and visualization
+```
+
+## Plot miles per gallon as a function of engine size in R's builtin mpg dataset
+
+```{r plotting}
+
+head(mpg)
+unique(mpg$drv)
+
+#R's builtin plot function makes a pretty ugly plot: 
+plot(mpg$displ, mpg$hwy)
+
+#ggplot style plot
+ggplot(
+#grammar check, which of these did we specify and which were automatic? 
+#data
+#geometric object
+#mapping
+#scale
+#coordinate system
+  
+
+```  
+  
+## Add titles to the plot
+  
+```{r adding titles}  
+
+
+
+```
+
+## Put a plot in a variable to make it easier to edit
+  
+```{r plot in a variable}  
+
+p = 
+
+p + 
+
+
+
+```
+
+## What about a line plot? 
+  
+```{r line plot}  
+
+p +
+#what's wrong with this graph? 
+
+
+
+#what's wrong with this plot? 
+#plot only Volkswagon Jetta data alone to see
+
+
+#let's summarize with an average over all values of a model in a year
+plotDat = mpg %>% 
+
+
+
+```
+
+## Plot covid data using ggplot
+  
+```{r covid ggplot}  
+
+covidDat <- read.csv(file.path(gitHubPath, "data", 
+                       "owid-covid-data.csv"))
+
+covUSA <- covidDat %>% filter(iso_code == 'USA')
+
+
+
+
+#grammar check, which of these did we specify and which were automatic? 
+#data
+#geometric object
+#mapping
+#scale
+#coordinate system
+
+
+```
+
+## Changing the coordinate system
+  
+```{r polar plot}  
+
+p + 
+#just so we can say we edited every element 
+
+
+```

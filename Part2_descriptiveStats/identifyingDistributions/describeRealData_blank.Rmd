@@ -1,0 +1,148 @@
+---
+title: 'Describing Real Data'
+Section: 'Deterimining Distributions'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+
+library(tidyverse) # data manipulation and visualization
+source(file.path(gitHubPath, 'courseTheme.R'))
+library(kableExtra)
+library(pracma)
+
+```
+
+## human EEG data 
+
+```{r EEG}
+#load in the restingEEG dataset. There are a lot of variables in this dataset
+#for this analysis let's just focus on the delta power in the occipital region 
+#of the head. 
+#Key variable name: pow_delta_O
+df = read.csv(file.path(gitHubPath, 'data',
+                  'restingEEG.csv'))
+
+
+
+
+ggplot(
+
+```
+
+## human EEG description
+
+```{r descriptives for EEG}
+
+EEGsum <- df %>% summarize(
+
+
+
+```
+
+## my emails per day 
+
+```{r emails}
+
+df = read.csv(file.path(gitHubPath, 'data',
+                  'emailTimes.csv'))
+
+#how many emails each day? 
+df <- df %>% group_by(
+
+ggplot(
+
+```
+
+## emails description
+
+```{r descriptives for emails}
+
+emailSum <- df %>% summarize(
+
+
+
+```
+
+## sp 500 daily change 
+
+```{r sp 500}
+df = read.csv(file.path(gitHubPath, 'data',
+                  'SP500HistoricalData.csv'))
+#better name: 
+
+
+#clean up the character changes values to make numeric
+
+
+df$dummy = as.factor(1) #help with plotting! 
+
+ggplot(
+
+```
+
+## sp 500 description
+
+```{r descriptives for sp500}
+
+sp500Sum <- df %>% summarize(
+
+
+
+```
+
+## human memory performance
+
+```{r human memory}
+df = read.csv(file.path(gitHubPath, 'data',
+                  'MemoryData.csv'))
+#key variable is: TargALL_UVSD_d
+#get rid of people with negative memory! 
+df <- df %>% filter(
+
+
+df %>% ggplot(
+
+
+```
+
+## human memory description
+
+```{r descriptives for human mem}
+
+memSum <- df %>% summarize(
+
+
+
+```
+
+## let's look at all of our descriptive stats at once
+
+```{r combine descriptive stats}
+
+descriptives <- #combine all 
+  
+  #round values
+descriptives %>% 
+
+roundedDes %>%
+
+
+```

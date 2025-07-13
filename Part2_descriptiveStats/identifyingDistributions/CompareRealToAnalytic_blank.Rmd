@@ -1,0 +1,198 @@
+---
+title: 'Comparing to Analytic'
+Section: 'Determining Distribution'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+
+library(tidyverse) # data manipulation and visualization
+source(file.path(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## human EEG data 
+
+```{r EEG}
+
+#Key variable name: pow_delta_O
+df = read.csv(file.path(gitHubPath, 'data',
+                          'restingEEG.csv'))
+
+df$dummy = as.factor(1) 
+
+df = df %>% filter(pow_delta_O < 250)
+
+ggplot(df, aes(x = pow_delta_O, color = dummy, fill = dummy)) +
+  geom_histogram() + myTheme + brightCol  + brightFil +
+  theme(legend.position = 'none')
+
+
+```
+
+## human EEG description
+
+```{r descriptives for EEG}
+
+EEGsum <- df %>% summarize(setName = 'deltaPow', 
+                           meanVal = mean(pow_delta_O), 
+                           sdVal = sd(pow_delta_O), 
+                           logMeanVal = mean(log(pow_delta_O)), 
+                           logSdVal = sd(log(pow_delta_O)), 
+                           medianVal = median(pow_delta_O))
+                               
+
+
+
+```
+
+## human EEG against analytic distributions 
+
+```{r analytic comparison for EEG}
+#how many observations would we expect at different 
+#EEG values? 
+x <- df$pow_delta_O
+analyticDists <- data.frame(
+                            'xVal' = x)
+                            
+  
+
+
+
+```
+
+## make it into a function for ease of use
+
+```{r functionitize}
+
+plotAgainstDists <- function(df, ){
+
+  x <- df[[]]
+
+ 
+
+}
+
+
+```
+
+## my emails per day 
+
+```{r email}
+
+df = read.csv(file.path(gitHubPath, 'data',
+                      'emailTimes.csv'))
+
+
+df <- df %>% group_by(DayOfWeek, Month, DayOfMonth, Year) %>% 
+  summarize(count = n(), .groups = 'drop')
+
+
+
+
+
+```
+## emails description
+
+```{r descriptives for emails}
+
+emailSum <- df %>% summarize(
+
+
+
+```
+
+## email frequency against analytic distributions 
+
+```{r analytic comparison for email frequency}
+
+plotAgainstDists(df, "count",  emailSum, 'email')
+
+
+```
+
+## sp 500 daily change 
+
+```{r sp 500}
+
+df = read.csv(file.path(gitHubPath, 'data', 
+                        'SP500HistoricalData.csv'))
+names(df)[6] <- 'Change'
+
+df$Change = unlist(lapply(df$Change, function(x) 
+                as.numeric(strsplit(x, '%')[[1]])))
+
+
+
+```
+
+## sp 500 description
+
+```{r descriptives for sp500}
+
+sp500Sum <- df %>% summarize(
+
+
+
+
+```
+
+## sp 500 changes against analytic distributions 
+
+```{r analytic comparison for sp500}
+
+
+plotAgainstDists(df, "Change", sp500Sum, 'sp500')
+
+
+```
+
+## human memory performance
+
+```{r human memory}
+df = read.csv(file.path(gitHubPath, 'data',
+              'MemoryData.csv'))
+
+df <- df %>% filter(TargALL_UVSD_d >=0)
+
+
+
+
+```
+
+## human memory description
+
+```{r descriptives for human mem}
+
+memSum <- df %>% summarize(
+
+
+
+```
+
+## human memory against analytic distributions 
+
+```{r analytic comparison for human memory}
+
+plotAgainstDists(df, "TargALL_UVSD_d",memSum, "mem data", 20)
+
+
+```

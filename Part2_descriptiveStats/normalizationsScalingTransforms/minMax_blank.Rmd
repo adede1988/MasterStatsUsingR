@@ -50,14 +50,13 @@ df %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) +
 
 ```{r minMax scale}
 
-minVal = min(df$TargALL_UVSD_d)
-maxVal = max(df$TargALL_UVSD_d)
+minVal = 
+maxVal = 
 
-df$scaledMemory = (df$TargALL_UVSD_d - minVal) / 
-                  (maxVal - minVal)
+df$scaledMemory = 
 
 
-df %>% ggplot(aes(x = scaledMemory, color = dummy, fill = dummy)) + 
+df %>% ggplot(aes(x = , color = dummy, fill = dummy)) + 
   geom_histogram(bins = 10) + 
   myTheme + brightCol + brightFil + theme(legend.position = 'none') + 
   xlab('scaled memory') 

@@ -1,7 +1,9 @@
 ---
-title: 'central tendency '
-author: "Adam Dede"
-date: "2024-07-14"
+title: 'Central Tendency'
+Section: 'Simulating Data from Distributions'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
 output:
   html_document:
     toc: yes
@@ -18,12 +20,15 @@ editor_options:
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-courseThemePath = 
-  "C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\courseTheme.R"
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
 
 library(tidyverse) # data manipulation and visualization
-source(courseThemePath)
-library(pracma) #practical numerical math functions (needed for Mode)
+source(file.path(gitHubPath, 'courseTheme.R'))
+library(pracma) #practical numerical math functions 
+#(needed for Mode)
 
 ```
 
@@ -138,7 +143,8 @@ for(ii in 1:L){
   round(curDat, 1) -> curDat
   uniSet = unique(curDat)
   #are there even any repeated values? 
-  if(length(uniSet) == length(curDat)){ #every value unique! 
+  if(length(uniSet) == length(curDat)){ 
+    #every value unique! 
     group_averages$modeVal[ii] = curDat[1]
   } else { #there's going to be a proper mode! 
     lengths = rep(0, length(uniSet))
@@ -154,7 +160,8 @@ for(ii in 1:L){
 
 group_averages
 
-group_averages <- group_averages %>% pivot_longer(cols = c('meanVal', 'modeVal', 'medianVal'), 
+group_averages <- group_averages %>% pivot_longer(cols = 
+                                c('meanVal', 'modeVal', 'medianVal'), 
                                 names_to = 'measure', 
                                 values_to = 'centralTend') 
 
@@ -256,8 +263,8 @@ p + geom_vline(data = builtinAvg,
         axis.ticks.y = element_blank())
 
 #challenge question: If you regenerate the simulated data, 
-#                    what will happen to the mode of the mode 
-#                    of the uniform data? 
+#                    what will happen to the mode of the 
+#                    uniform data? 
 
 
 ```

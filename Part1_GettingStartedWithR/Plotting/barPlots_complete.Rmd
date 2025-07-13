@@ -1,5 +1,5 @@
 ---
-Title: 'Lines and Scatter Plots'
+Title: 'Bar Plots'
 Section: 'ggplot'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"

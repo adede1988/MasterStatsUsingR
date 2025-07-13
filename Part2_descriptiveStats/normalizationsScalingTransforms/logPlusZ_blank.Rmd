@@ -68,15 +68,13 @@ ggplot(df, aes(x = logPow_delta_O, color = dummy, fill = dummy)) +
 
 ```{r add z transform}
 
-M = mean(df$logPow_delta_O)
-S = sd(df$logPow_delta_O)
+M = 
+S = 
 
-df$log_z_Pow_delta_O = (df$logPow_delta_O - M) / S
-
-
+df$log_z_Pow_delta_O = 
 
 
-ggplot(df, aes(x = log_z_Pow_delta_O, 
+ggplot(df, aes(x =  , 
                color = dummy, fill = dummy)) + 
   geom_histogram() + 
   myTheme + brightFil + brightCol + 
@@ -95,18 +93,15 @@ ggplot(df, aes(x = log_z_Pow_delta_O,
 
 #what proportion of people have EEG delta power greater than 50? 
 
-z = (log(50) - M) / S
-1 - pnorm(log(50), M, S)
-1 - pnorm(z)
+z = 
 
 #what EEG delta power values correspond to z scores of +- 1? 
-exp(1*S+M)
-exp(-1*S+M)
+
 
 print(paste0("Z = -1 corresponds to a raw power value of: ", 
-             round(exp(-1*S+M),2),
+                  ,
              ", and Z = +1 corresponds to a raw power value of: ", 
-             round(exp(1*S+M),2)))
+                      ))
 
 #What proportion of the raw data fall between these +-1 z-score? 
 midPercent = sum(df$pow_delta_O>exp(-1*S+M) & 
@@ -124,11 +119,10 @@ print(paste0(round(midPercent,2),
 
 ```{r no log}
 
-M = mean(df$pow_delta_O)
-S = sd(df$pow_delta_O)
+M =
+S = 
 
-midPercent = sum(df$pow_delta_O>(-1*S+M) & 
-                    df$pow_delta_O<(1*S+M)  ) / length(df$X)  
+midPercent = 
 
 print(paste0(round(midPercent,2), 
              " of raw power values are between +- 1 z-score in the ",

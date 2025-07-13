@@ -1,0 +1,174 @@
+---
+title: 'Central Tendency'
+Section: 'Simulating Data from Distributions'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+
+library(tidyverse) # data manipulation and visualization
+source(file.path(gitHubPath, 'courseTheme.R'))
+library(pracma) #practical numerical math functions 
+#(needed for Mode)
+
+```
+
+## simulate data from all four distributions we know
+
+```{r simulate data}
+
+sampSize = 10000
+
+df = data.frame('norm' = rnorm(sampSize, 3, 1),
+                'lnorm' = rlnorm(sampSize,log(3), 1), 
+                'unif' = runif(sampSize,-2, 8),
+                'pois' = rpois(sampSize, lambda = 3))
+
+df <- df %>% 
+
+
+```
+## let's work with just the normal distribution data for now, start with plotting
+```{r plot norm dist}
+
+p <- df %>% 
+
+print(p) 
+```
+## calculate the central tendancy measures for the normal distribution
+
+``` {r norm analysis}
+
+normDat = df$observed[df$dist == 'norm'] 
+
+#what's the mean value? 
+# mean = sum(x) / length(x) 
+
+  
+#what's the median value? 
+#value in the middle: 
+
+  
+#what's the modal value? 
+
+
+#are there even any repeated values? 
+
+
+# Add vertical lines for central tendency measures
+p +
+
+
+```
+
+## calculate the central tendancy measures for the different distributions
+``` {r central tendency measures}
+
+#how many distributions do we have data for? 
+dists = unique(df$dist)
+L = length(dists)
+
+#create a data.frame to put all the central tendancy values into: 
+group_averages = data.frame('dist' = dists, 
+                            'meanVal' = rep(NA,L), 
+                            'modeVal' = rep(NA,L), 
+                            'medianVal' = rep(NA,L))
+
+#Challenge: can you write a for loop to fill out the group_averages data frame? 
+
+for(ii in 1:L){
+  curDat = 
+  #what's the mean value? 
+  # mean = sum(x) / length(x) 
+  group_averages$meanVal[ii] = 
+  
+  #what's the median value? 
+  #value in the middle: 
+ 
+  
+  #what's the modal value? 
+ 
+    
+   
+  
+}
+
+group_averages
+
+group_averages <- group_averages %>% pivot_longer(cols = 
+                                c('meanVal', 'modeVal', 'medianVal'), 
+                                names_to = 'measure', 
+                                values_to = 'centralTend') 
+
+
+```
+
+## calculating the central tendency using builtin functions!
+
+```{r builtin demo}
+# Calculate group central tendencies 
+df  %>%
+
+```
+## plot for the poisson distribution data with central tendency values
+
+```{r pois plot}
+
+p <- df %>%  
+
+
+```
+## can you make plots for the uniform and log normal distributions? 
+
+```{r plot the other distributions}
+
+#lnorm: 
+p <- df %>% 
+
+
+```
+## make all plots in one go? merge the central tendencies with the data to make it happen! 
+
+```{r make all plots}
+## challenge: 
+## 1) Calculate central tendency with builtin functions
+## 2) generate all the freq_poly plots for all distributions at once! 
+## 3) put all the central tendency measures on all of them at once! 
+## hint: ask chatGPT how to use faceting 
+##       to make the plots easy to read
+
+#calcualte central tendency and get ready for plotting
+df  %>%
+#generate a plot p with all the distributions 
+#try asking chatGPT how to facet the plots for neatness! 
+df %>% ggplot(
+
+#add the central tendency lines: 
+p + 
+
+#challenge question: If you regenerate the simulated data, 
+#                    what will happen to the mode of the 
+#                    uniform data? 
+
+
+```
+

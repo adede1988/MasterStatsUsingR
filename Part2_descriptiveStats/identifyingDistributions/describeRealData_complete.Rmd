@@ -1,6 +1,8 @@
 ---
-title: 'describing real data'
-author: "Adam Dede"
+title: 'Describing Real Data'
+Section: 'Deterimining Distributions'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
 output:
   html_document:
     toc: yes
@@ -17,11 +19,13 @@ editor_options:
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
 
 library(tidyverse) # data manipulation and visualization
-source(paste0(gitHubPath, 'courseTheme.R'))
-library(knitr)
+source(file.path(gitHubPath, 'courseTheme.R'))
+library(kableExtra)
 library(pracma)
 
 ```
@@ -33,14 +37,17 @@ library(pracma)
 #for this analysis let's just focus on the delta power in the occipital region 
 #of the head. 
 #Key variable name: pow_delta_O
-df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+df = read.csv(file.path(gitHubPath, 'data',
+                  'restingEEG.csv'))
 
 df$dummy = as.factor(1) 
 df <- df %>% filter(pow_delta_O < 250)
 
-ggplot(df, aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
+ggplot(df, aes(x = pow_delta_O, color = dummy, 
+               fill = dummy)) + 
   geom_histogram() + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+  myTheme + brightFil + brightCol + 
+  theme(legend.position = 'none')
 
 ```
 
@@ -49,14 +56,14 @@ ggplot(df, aes(x = pow_delta_O, color = dummy, fill = dummy)) +
 ```{r descriptives for EEG}
 
 EEGsum <- df %>% summarize(setName = 'deltaPow', 
-                               meanVal = mean(pow_delta_O), 
-                               medianVal = median(pow_delta_O), 
-                               modeVal = Mode(round(pow_delta_O)), 
-                               sdVal = sd(pow_delta_O), 
-                               q25 = quantile(pow_delta_O, .25), 
-                               q75 = quantile(pow_delta_O, .75), 
-                               MADval = sum(abs(pow_delta_O - meanVal)) / 
-                                          (n()-1)) 
+                     meanVal = mean(pow_delta_O), 
+                    medianVal = median(pow_delta_O), 
+                    modeVal = Mode(round(pow_delta_O)), 
+                    sdVal = sd(pow_delta_O), 
+                    q25 = quantile(pow_delta_O, .25), 
+                    q75 = quantile(pow_delta_O, .75), 
+                    MADval = sum(abs(pow_delta_O - meanVal)) /
+                              (n()-1)) 
 
 
 
@@ -66,7 +73,8 @@ EEGsum <- df %>% summarize(setName = 'deltaPow',
 
 ```{r emails}
 
-df = read.csv(paste0(gitHubPath, '\\data\\emailTimes.csv'))
+df = read.csv(file.path(gitHubPath, 'data',
+                  'emailTimes.csv'))
 
 df <- df %>% group_by(DayOfWeek, Month, DayOfMonth, Year) %>% 
   summarize(count = n(), .groups = 'drop')
@@ -84,13 +92,13 @@ ggplot(df, aes(x = count, color = dummy, fill = dummy)) +
 ```{r descriptives for emails}
 
 emailSum <- df %>% summarize(setName = 'emailsPerDay', 
-                               meanVal = mean(count), 
-                               medianVal = median(count), 
-                               modeVal = Mode(round(count)), 
-                               sdVal = sd(count), 
-                               q25 = quantile(count, .25), 
-                               q75 = quantile(count, .75), 
-                               MADval = sum(abs(count - meanVal)) / 
+                         meanVal = mean(count), 
+                         medianVal = median(count), 
+                         modeVal = Mode(round(count)), 
+                         sdVal = sd(count), 
+                         q25 = quantile(count, .25), 
+                         q75 = quantile(count, .75), 
+                         MADval = sum(abs(count - meanVal)) / 
                                           (n()-1)) 
 
 
@@ -100,17 +108,33 @@ emailSum <- df %>% summarize(setName = 'emailsPerDay',
 ## sp 500 daily change 
 
 ```{r sp 500}
+df = read.csv(file.path(gitHubPath, 'data',
+                  'SP500HistoricalData.csv'))
 
-df = read.csv(paste0(gitHubPath, '\\data\\SP500HistoricalData.csv'))
 names(df)[6] <- 'Change'
 
-df$Change = unlist(lapply(df$Change, function(x) as.numeric(strsplit(x, '%')[[1]])))
+cleaned_values <- numeric(length(df$Change))
+
+# Loop through each element in df$Change
+for (ii in 1:length(df$Change)) {
+  # Remove the percent sign and convert to numeric
+  cleaned_values[ii] <- as.numeric(
+          strsplit(df$Change[ii], '%')[[1]])
+}
+
+# Assign the cleaned values back to the dataframe
+df$Change <- cleaned_values
+
+#alternate way to clean the Change values: 
+# df$Change = unlist(lapply(df$Change, 
+            # function(x) as.numeric(strsplit(x, '%')[[1]])))
 
 df$dummy = as.factor(1) 
 
 ggplot(df, aes(x = Change, color = dummy, fill = dummy)) +
   geom_histogram(breaks = seq(-2, 2, .1)) + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  myTheme + brightFil + brightCol + 
+  theme(legend.position = 'none') + 
   xlab('Daily Change (%)')
 
 ```
@@ -120,14 +144,14 @@ ggplot(df, aes(x = Change, color = dummy, fill = dummy)) +
 ```{r descriptives for sp500}
 
 sp500Sum <- df %>% summarize(setName = 'sp500', 
-                               meanVal = mean(Change), 
-                               medianVal = median(Change), 
-                               modeVal = Mode(round(Change)), 
-                               sdVal = sd(Change), 
-                               q25 = quantile(Change, .25), 
-                               q75 = quantile(Change, .75), 
-                               MADval = sum(abs(Change - meanVal)) / 
-                                          (n()-1)) 
+                         meanVal = mean(Change), 
+                         medianVal = median(Change), 
+                         modeVal = Mode(round(Change)), 
+                         sdVal = sd(Change), 
+                         q25 = quantile(Change, .25), 
+                         q75 = quantile(Change, .75), 
+                         MADval = sum(abs(Change - meanVal)) /
+                                  (n()-1)) 
 
 
 
@@ -136,15 +160,18 @@ sp500Sum <- df %>% summarize(setName = 'sp500',
 ## human memory performance
 
 ```{r human memory}
-df = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
-
+df = read.csv(file.path(gitHubPath, 'data',
+                  'MemoryData.csv'))
+#get rid of people with negative memory! 
 df <- df %>% filter(TargALL_UVSD_d >=0)
 
 #first plot the histogram of country total populations 
 df$dummy = as.factor(1)
-df %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) + 
+df %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, 
+                  fill = dummy)) + 
   geom_histogram(bins = 10) + 
-  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+  myTheme + brightCol + brightFil + 
+  theme(legend.position = 'none')
 
 
 ```
@@ -154,13 +181,13 @@ df %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) +
 ```{r descriptives for human mem}
 
 memSum <- df %>% summarize(setName = 'humMem', 
-                               meanVal = mean(TargALL_UVSD_d), 
-                               medianVal = median(TargALL_UVSD_d), 
-                               modeVal = Mode(round(TargALL_UVSD_d)), 
-                               sdVal = sd(TargALL_UVSD_d), 
-                               q25 = quantile(TargALL_UVSD_d, .25), 
-                               q75 = quantile(TargALL_UVSD_d, .75), 
-                               MADval = sum(abs(TargALL_UVSD_d - meanVal)) / 
+               meanVal = mean(TargALL_UVSD_d), 
+               medianVal = median(TargALL_UVSD_d), 
+               modeVal = Mode(round(TargALL_UVSD_d)), 
+               sdVal = sd(TargALL_UVSD_d), 
+               q25 = quantile(TargALL_UVSD_d, .25), 
+               q75 = quantile(TargALL_UVSD_d, .75), 
+               MADval = sum(abs(TargALL_UVSD_d - meanVal)) / 
                                           (n()-1)) 
 
 
@@ -172,9 +199,13 @@ memSum <- df %>% summarize(setName = 'humMem',
 ```{r combine descriptive stats}
 
 descriptives <- rbind(EEGsum, emailSum, sp500Sum, memSum)
-descriptives %>% mutate_if(is.numeric, function(x) round(x,2)) -> roundedDes
+descriptives %>% mutate_if(is.numeric, 
+                           function(x) round(x,2)) -> 
+  roundedDes
 
-kable(roundedDes)
+roundedDes %>%
+  kable() %>%
+  kable_styling(position = "center")
 
 
 ```

@@ -40,13 +40,15 @@ df = read.csv(file.path(gitHubPath, 'data',
                         'SP500HistoricalData.csv'))
 names(df)[6] <- 'Change'
 
-df$Change = unlist(lapply(df$Change, function(x) as.numeric(strsplit(x, '%')[[1]])))
+df$Change = unlist(lapply(df$Change, 
+                function(x) as.numeric(strsplit(x, '%')[[1]])))
 
 df$dummy = as.factor(1) 
 
 ggplot(df, aes(x = Change, color = dummy, fill = dummy)) +
   geom_histogram(breaks = seq(-2, 2, .1)) + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  myTheme + brightFil + brightCol + 
+  theme(legend.position = 'none') + 
   xlab('Daily Change (%)') 
 
 ```
@@ -55,17 +57,17 @@ ggplot(df, aes(x = Change, color = dummy, fill = dummy)) +
 
 ```{r z score sp500}
 
-df$zscore = (df$Change - mean(df$Change)) / sd(df$Change)
+df$zScore = 
 
 
 #can you figure out how to do the adjustment in the histogram breaks to make
 #the plot look exactly like the previous one? 
-M = mean(df$Change)
-S = sd(df$Change)
 
-ggplot(df, aes(x = zscore, color = dummy, fill = dummy)) +
-  geom_histogram(breaks = seq((-2-M)/S, (2-M)/S, .1/S)) + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+
+ggplot(df, aes(x = zScore, color = dummy, fill = dummy)) +
+  geom_histogram(breaks = ) + 
+  myTheme + brightFil + brightCol + 
+  theme(legend.position = 'none') + 
   xlab('Daily Change (z-score)') 
 
 
@@ -77,52 +79,43 @@ ggplot(df, aes(x = zscore, color = dummy, fill = dummy)) +
 
 #What percentage of the time is the daily change greater than 2%? 
 
-z = (2 - M) / S
 
-1-pnorm(z)
 
-ggplot(df, aes(x = zscore, color = dummy, fill = dummy)) +
+ggplot(df, aes(x = zScore, color = dummy, fill = dummy)) +
   geom_histogram(breaks = seq((-2-M)/S, (2-M)/S, .1/S)) + 
   myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
   xlab('Daily Change (z-score)') +
-  geom_vline(xintercept = z, color = 'red')
+  geom_vline(xintercept = , color = 'red')
 
 #what percentage of the time is the daily change positive? 
 
-z = (0 - M) / S
 
-1-pnorm(z)
 
-ggplot(df, aes(x = zscore, color = dummy, fill = dummy)) +
+ggplot(df, aes(x = zScore, color = dummy, fill = dummy)) +
   geom_histogram(breaks = seq((-2-M)/S, (2-M)/S, .1/S)) + 
   myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
   xlab('Daily Change (z-score)') +
-  geom_vline(xintercept = z, color = 'red')
+  geom_vline(xintercept =  , color = 'red')
 
 #what percentage of the time is the z-score greater than 0? 
 
-z = 0
 
-1-pnorm(z)
 
-ggplot(df, aes(x = zscore, color = dummy, fill = dummy)) +
+ggplot(df, aes(x = zScore, color = dummy, fill = dummy)) +
   geom_histogram(breaks = seq((-2-M)/S, (2-M)/S, .1/S)) + 
   myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
   xlab('Daily Change (z-score)') +
-  geom_vline(xintercept = z, color = 'red')
+  geom_vline(xintercept =   , color = 'red')
 
 #what percentage of the time is the daily change between -1% and +1%
 
-z1 = (1 - M) / S
-z1neg = (-1 - M) / S
 
-pnorm(z1) - pnorm(z1neg)
 
-ggplot(df, aes(x = zscore, color = dummy, fill = dummy)) +
+ggplot(df, aes(x = zScore, color = dummy, fill = dummy)) +
   geom_histogram(breaks = seq((-2-M)/S, (2-M)/S, .1/S)) + 
   myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
   xlab('Daily Change (z-score)') +
-  geom_vline(xintercept = c(z1, z1neg), color = 'red')
+  geom_vline(xintercept = , color = 'red')
 
 
 ```
@@ -133,23 +126,21 @@ ggplot(df, aes(x = zscore, color = dummy, fill = dummy)) +
 
 #where are the +- 1 z-score boundaries in the raw data? 
 
-#1 = (X - M) / S
-#S = (x - M)
-S+M -> X
-M-S -> Xneg
 
 
 ggplot(df, aes(x = Change, color = dummy, fill = dummy)) +
   geom_histogram(breaks = seq(-2, 2, .1)) + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none') + 
+  myTheme + brightFil + brightCol + 
+  theme(legend.position = 'none') + 
   xlab('Daily Change (%)') +
-  geom_vline(xintercept = c(X, Xneg), color = 'red')
+  geom_vline(xintercept =  , color = 'red')
 
 #what percentage of the raw data fall between +- 1 z-score? 
-sum(df$Change>Xneg & df$Change<X) / length(df$Change)
+
+
 
 #what percentage of the normal distribution is between +- 1 z-score? 
-pnorm(1) - pnorm(-1)
+
 
 
 ```
@@ -158,17 +149,17 @@ pnorm(1) - pnorm(-1)
 
 ```{r rarity of events}
 
-pnorm(min(df$Change), M, S)
+#how rare are the extreme days: 
 
-1-pnorm(max(df$Change), M, S)
+
 
 #In 252 trading days, would you expect to observe such rare events by chance? 
 numberLessThanMin = rep(0, 1000)
 numberMoreThanMax = rep(0, 1000)
+#simulate 1000 years of data: 
 for(ii in 1:1000){
-  simSP500 = rnorm(252, M, S)
-  numberLessThanMin[ii] = min(simSP500) < min(df$Change)
-  numberMoreThanMax[ii] = max(simSP500) > max(df$Change)
+  simSP500 = 
+    #did the year have extreme values? 
 }
 
 print(paste0("In 1000 years we expect ", sum(numberLessThanMin), 
@@ -176,13 +167,7 @@ print(paste0("In 1000 years we expect ", sum(numberLessThanMin),
 print(paste0("In 1000 years we expect ", sum(numberMoreThanMax), 
              " years with better days than the best day last year"))
 
-#does this make sense? Was the z-score of the maximum more extreme (more rare)
-#than the maximum? 
 
-#zmin
-(min(df$Change) - M) / S
-#zmax
-(max(df$Change) - M) / S
 
 
 ```

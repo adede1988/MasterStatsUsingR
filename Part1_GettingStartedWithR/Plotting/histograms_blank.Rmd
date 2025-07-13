@@ -1,0 +1,73 @@
+---
+Title: 'Histograms'
+Section: 'ggplot'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+# Load packages
+library(tidyverse) # data manipulation and visualization
+```
+
+## Look at the distribution of miles per gallon overall
+
+```{r histogram}
+
+#R's builtin hist function
+hist(mpg$hwy)
+
+#ggplot histogram 
+ggplot(
+#grammar check, which of these did we specify and which were automatic? 
+#data
+#geometric object
+#mapping
+#scale
+#coordinate system
+  
+
+```  
+  
+## What if we want a histogram of change over time? 
+  
+```{r hist of change}  
+
+plotDat = mpg %>% group_by(year, model) %>%
+  summarize(hwy = mean(hwy))
+
+ggplot(plotDat, aes(x=year, y = hwy, group = model)) +
+  geom_point() +
+  geom_line()+
+  ylab('miles per gallon') + 
+  xlab('year') +
+  ggtitle("fuel efficiency over time")
+
+#can you figure out how to mutate the information in plotDat to 
+#create a new changeScore time for each model of car across years?
+
+
+
+
+changeDat %>% ggplot(
+
+
+```
+
+

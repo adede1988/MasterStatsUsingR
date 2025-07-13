@@ -25,7 +25,7 @@ gitHubPath <- file.path(path.expand("~"), "GitHub",
 
 library(tidyverse) # data manipulation and visualization
 source(file.path(gitHubPath, 'courseTheme.R'))
-library(pracma) #practical numerical math functions (needed for Mode)
+
 
 ```
 
@@ -40,9 +40,9 @@ df = data.frame('norm' = rnorm(sampSize, 3, 1),
                 'unif' = runif(sampSize,-2, 8),
                 'pois' = rpois(sampSize, lambda = 3))
 
-df <- df %>% pivot_longer(cols = c(names(df)), 
-                   values_to = 'value', 
-                   names_to = 'dist')
+df <- df %>% pivot_longer(cols = names(df), 
+                          names_to = 'dist', 
+                          values_to = 'value')
 
 
 ```
@@ -50,7 +50,8 @@ df <- df %>% pivot_longer(cols = c(names(df)),
 ```{r plot norm dist}
 
 p <- df %>% filter(dist == 'norm') %>%
-  ggplot(aes(x = value, group = dist, color = dist, fill = dist)) + 
+  ggplot(aes(x = value, group = dist, color = dist, 
+             fill = dist)) + 
   geom_freqpoly(breaks = seq(-1, 7, .1), linewidth = 3) + 
   myTheme + brightCol + brightFil 
 
@@ -64,23 +65,19 @@ normDat = df$value[df$dist == 'norm']
 
 #what's the mean value? 
 # mean = sum(x) / length(x) 
-sum(normDat) / length(normDat) -> meanVal
   
+
 #what are the squared deviations from the meanVal? 
-(normDat - meanVal)^2 -> squaredDevs
+
   
 #what's the average squared Dev?  
-sum(squaredDevs) / (length(squaredDevs)-1) -> variance
+
 
 #square root it
-sqrt(variance) -> sdVal
 
 
 # Add vertical lines for central tendency measures
-p + geom_vline(xintercept = meanVal, linetype = 'solid', size = 3, color = 'red') + 
-    geom_vline(xintercept = meanVal+sdVal, linetype = 'dotted', size = 3, color = 'red') + 
-    geom_vline(xintercept = meanVal-sdVal, linetype = 'dotted', size = 3, color = 'red')
-
+p + 
 
 ```
 ## calculate the standard deviation for other distributions using the builtin function sd()
@@ -88,30 +85,22 @@ p + geom_vline(xintercept = meanVal, linetype = 'solid', size = 3, color = 'red'
 ``` {r builtin calculations}
 
 #calculate key values: 
-df  %>%
-  group_by(dist) %>%
-  summarise(mean_val = mean(value),
-            sd_val = sd(value),
-            sd1 = sd_val + mean_val, 
-            sdminus1 = meanVal - sd_val) -> builtinAvg 
+builtinAvg = df  %>%
+              group_by(dist) %>%
+              summarise(mean_val = mean(value),
+                        
+                        )
+                        
+                  
 
 #pivot longer to facilitate plotting
 builtinAvg <- builtinAvg %>% 
-              pivot_longer(cols = -c('dist'), 
-                           names_to = 'type', 
-                           values_to = 'stat')
+              pivot_longer(
 
-df %>% ggplot(aes(x = observed, color = dist)) + 
-  geom_freqpoly(breaks = seq(-1.5, 8, 1), linewidth = 2) + 
-  facet_grid(dist~.) + myTheme + brightCol -> p
+p = df %>% ggplot(
+  
 
-p + geom_vline(data = filter(builtinAvg, type != 'sd_val'),
-               aes(xintercept = stat, linetype = type), 
-               size = 3, color = 'red') +
-  scale_linetype_manual(values = c('solid', 'dotted', 'dotted')) + 
-  theme(axis.title.y = element_blank(), 
-        axis.text.y = element_blank(), 
-        axis.ticks.y = element_blank())
+p + 
 
 
 ```

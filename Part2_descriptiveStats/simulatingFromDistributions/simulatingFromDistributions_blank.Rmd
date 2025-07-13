@@ -29,10 +29,10 @@ library(tidyverse)
 ## simualte data from a normal or gaussian distribution
 
 ```{r dataframe}
-set.seed(123)
-dat = rnorm(30, mean = 3, sd = 1)
 
-ggplot(data.frame('norm' = dat), aes(x = norm)) + geom_freqpoly()
+dat = 
+
+ggplot(
 
 
 
@@ -42,9 +42,9 @@ ggplot(data.frame('norm' = dat), aes(x = norm)) + geom_freqpoly()
 #useful for simulating random probabilities 
 
 
-dat = runif(30, min = -2, max = 8)
+dat = 
 
-ggplot(data.frame('uni' = dat), aes(x = uni)) + geom_freqpoly()
+ggplot(
 
 
 
@@ -54,9 +54,9 @@ ggplot(data.frame('uni' = dat), aes(x = uni)) + geom_freqpoly()
 
 ```{r log normal distribution}
 #useful for modeling things like income 
-dat = rlnorm(30,log(3), 1)
+dat = 
 
-ggplot(data.frame('lnorm' = dat), aes(x = lnorm)) + geom_freqpoly()
+ggplot(
 
 
 ```
@@ -64,10 +64,9 @@ ggplot(data.frame('lnorm' = dat), aes(x = lnorm)) + geom_freqpoly()
 ## simulate data from a poisson distribution
 ```{r poisson distribution}
 #useful for modeling events like receiving emails! 
-dat = rpois(30, lambda = 3)
+dat = 
 
-ggplot(data.frame('pois' = dat), aes(x = pois)) + 
-  geom_freqpoly(breaks = seq(-.5, 8.5, 1))
+ggplot(
 
 
 ```
