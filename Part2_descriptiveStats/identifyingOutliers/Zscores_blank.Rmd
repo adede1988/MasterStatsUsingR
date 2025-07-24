@@ -39,14 +39,11 @@ memDat = read.csv(file.path(gitHubPath, 'data',
                                   'MemoryData.csv'))
 
 #add +-3 z score lines to the plot
-M = mean(memDat$TargALL_UVSD_d)
-S = sd(memDat$TargALL_UVSD_d)
 
 memDat$dummy = as.factor(1)
 memDat %>% ggplot(aes(x = TargALL_UVSD_d, 
                       color = dummy, fill = dummy)) + 
   geom_histogram() +  
-  geom_vline(xintercept = c(M-3*S, M+3*S), color = 'magenta') + 
   myTheme + brightCol + brightFil + theme(legend.position = 'none')
 
 ```
@@ -56,16 +53,13 @@ memDat %>% ggplot(aes(x = TargALL_UVSD_d,
 ```{r remove outliers}
 
 #plot the mean and +- 1 SD in the full versus the outlier removed data
-memDat$outlier = memDat$TargALL_UVSD_d < -3*S+M | 
-                  memDat$TargALL_UVSD_d > 3*S+M
-MO =mean(memDat$TargALL_UVSD_d[!memDat$outlier])
-SO = sd(memDat$TargALL_UVSD_d[!memDat$outlier])
+memDat$outlier = 
+MO = 
+SO = 
 
 memDat %>% ggplot(aes(x = TargALL_UVSD_d, 
-                      color = outlier, fill = outlier)) + 
+                      color = , fill = )) + 
   geom_histogram() + 
-  geom_vline(xintercept = c(M-S, M+S), color = 'magenta') +
-  geom_vline(xintercept = c(MO-SO, MO+SO), color = 'green') +
   myTheme + brightCol + brightFil + theme(legend.position = 'none')
 
 ```
@@ -77,22 +71,20 @@ memDat %>% ggplot(aes(x = TargALL_UVSD_d,
 #what is the probability of observing someone 
 #with memory equal to the best 
 #participant both with and without outliers in the calculation? 
-1 - pnorm(max(memDat$TargALL_UVSD_d), M, S)
-1 - pnorm(max(memDat$TargALL_UVSD_d), MO, SO)
+
+
 
 
 #plot all z-scores both before and after getting rid of outliers
-memDat$z_ALL = (memDat$TargALL_UVSD_d - M) / S
-memDat$z_no_outliers = (memDat$TargALL_UVSD_d - MO) / SO
+memDat$z_ALL = 
+memDat$z_no_outliers = 
 
-memDat$idx = c(1:length(memDat$z_ALL))
+memDat$idx = 
 
 plotDat = memDat %>% select(z_ALL, z_no_outliers, idx) %>%
-  pivot_longer(cols = c(z_ALL, z_no_outliers), 
-               names_to = 'ZType', 
-               values_to = 'z')
+  pivot_longer(cols = )
 
-plotDat %>% ggplot(aes(x = idx, y = z, color = ZType)) + 
+plotDat %>% ggplot(aes(x = idx, y = , color = )) + 
   geom_point() + myTheme + brightCol  
 
 
@@ -128,11 +120,11 @@ ggplot(EEGdat, aes(x = pow_delta_O,
 
 ```{r z greater than 3 remove}
 
-M = mean(EEGdat$pow_delta_O)
-S = sd(EEGdat$pow_delta_O)
- 
+M = 
+S = 
 
 
+#first plot the histogram of country total populations 
 
 EEGdat %>% ggplot(aes(x = pow_delta_O, 
                       color = dummy, fill = dummy)) + 
@@ -144,12 +136,10 @@ EEGdat %>% ggplot(aes(x = pow_delta_O,
 #how many values are actually outliers? 
 #What will the graph look like without them?
 
-sum(EEGdat$pow_delta_O > M+3*S)
-
 
 #how does the plot look with these outliers removed? 
-EEGdat %>% filter(pow_delta_O < M+3*S) %>%
-      ggplot(
+EEGdat %>% filter() %>%
+ggplot( , 
        aes(x = pow_delta_O, 
            color = dummy, fill = dummy)) + 
   geom_histogram() + 
@@ -157,8 +147,6 @@ EEGdat %>% filter(pow_delta_O < M+3*S) %>%
   theme(legend.position = 'none')
 
 #What proportion of the data are less than the mean? 
-sum(EEGdat$pow_delta_O < M) / length(EEGdat$X)
-M
 
 
 ```

@@ -38,24 +38,29 @@ library(pracma)
 wasteDat = read.csv(file.path(gitHubPath, 'data', 
                               'plasticWaste.csv'))
 
-#first plot the histogram of country total populations 
+#first plot the histogram of country total mismanaged waste
 wasteDat$dummy = as.factor(1)
 
 
-wasteDat %>% ggplot(aes(x = mismanagedTotal, color = dummy, fill = dummy)) + 
-  geom_histogram() + 
-  myTheme + brightCol + brightFil + theme(legend.position = 'none')
-
-
-wasteDat %>% ggplot(aes(x = totalPop, y = mismanagedTotal, color = dummy, fill = dummy)) + 
-  geom_point() + 
-  myTheme + brightCol + brightFil + theme(legend.position = 'none')
-
-#divide the total waste by the total population 
-wasteDat %>% ggplot(aes(x = mismanagedTotal/totalPop, 
+wasteDat %>% ggplot(aes(x = , 
                         color = dummy, fill = dummy)) + 
   geom_histogram() + 
-  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+  myTheme + brightCol + brightFil + 
+  theme(legend.position = 'none')
+
+
+wasteDat %>% ggplot(aes(, 
+                        color = dummy, fill = dummy)) + 
+  geom_ + 
+  myTheme + brightCol + brightFil + 
+  theme(legend.position = 'none')
+
+#divide the total waste by the total population 
+wasteDat %>% ggplot(aes(x =   , 
+                        color = dummy, fill = dummy)) + 
+  geom_histogram() + 
+  myTheme + brightCol + brightFil + 
+  theme(legend.position = 'none')
 
 
 ```
@@ -73,10 +78,11 @@ EEGdat = read.csv(file.path(gitHubPath, 'data',
 
 EEGdat$dummy = as.factor(1) 
 
+#which variables are from the Occipital region
 vars = names(EEGdat)
-vars = vars[grepl("_O", vars)]
+vars = 
 
-EEGdat$normPow = EEGdat$pow_delta_O / rowSums(EEGdat[,vars])
+EEGdat$normPow = 
 
 ggplot(EEGdat, aes(x = normPow, 
                    color = dummy, fill = dummy)) + 

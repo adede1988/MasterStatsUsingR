@@ -62,16 +62,15 @@ ggplot(EEGdat, aes(x = pow_delta_O,
 
 #now calculate the modified z score 
 #using the median absolute deviation
-medianVal = median(EEGdat$pow_delta_O)
-madVal = mad(EEGdat$pow_delta_O)
-EEGdat$modZ = (EEGdat$pow_delta_O - medianVal) / 
-          madVal
+medianVal = 
+madVal = 
+EEGdat$modZ = 
 
 #how many observations are outliers now? 
-sum(abs(EEGdat$modZ)>3) / length(EEGdat$modZ)
+
 
 #replot it
-EEGdat %>% filter(modZ<3) %>%
+EEGdat %>% filter(%>%
   ggplot(aes(x = pow_delta_O, 
              color = dummy, fill = dummy)) + 
     geom_histogram() + 
@@ -86,9 +85,8 @@ EEGdat %>% filter(modZ<3) %>%
 
 ```{r compare z distributions}
 
-normZ = (EEGdat$pow_delta_O - mean(EEGdat$pow_delta_O)) / 
-        sd(EEGdat$pow_delta_O)
-zscores = data.frame(norm = normZ, mod = EEGdat$modZ)
+EEGdat$normZ = 
+zscores = select(
 
 
 #plot the two types of z-score against each other to see how they relate
@@ -98,7 +96,7 @@ ggplot(zscores, aes(x = norm, y = mod)) +
   xlim(c(-.0252, -.022))
 
 #plot again but this time with different colors for the z-score types: 
-zscores$idx = c(1:length(normZ))
+zscores$idx = 
 zscoresLong <- pivot_longer(zscores, cols = -c(idx), 
                             names_to = 'type', 
                             values_to = 'z')
@@ -128,24 +126,20 @@ wasteDat %>% ggplot(aes(x = totalPop,
 
 #calculate the z scores normal and modified 
 wasteDat$normZ = 
-  (wasteDat$totalPop - mean(wasteDat$totalPop)) / sd(wasteDat$totalPop)
 wasteDat$modZ = 
-  (wasteDat$totalPop - median(wasteDat$totalPop)) / mad(wasteDat$totalPop)
 
 #What proportion of the data are being called outliers with each method?
-sum(abs(wasteDat$modZ)>3) / length(wasteDat$totalPop)
-sum(abs(wasteDat$normZ)>3) / length(wasteDat$totalPop)
 
 #plot the histogram with the outliers removed 
-wasteDat %>% filter(abs(modZ)< 3) %>%
-ggplot(aes(x = totalPop, color = dummy, fill = dummy)) +
+wasteDat %>% filter( %>%
+ggplot(aes(x = , color = dummy, fill = dummy)) +
   geom_histogram()+ 
   myTheme + brightCol + brightFil + 
   theme(legend.position = 'none')
 
 
-wasteDat %>% filter(abs(normZ)< 3) %>%
-ggplot(aes(x = totalPop, color = dummy, fill = dummy)) +
+wasteDat %>% filter( %>%
+ggplot(aes(x = , color = dummy, fill = dummy)) +
   geom_histogram()+ 
   myTheme + brightCol + brightFil + 
   theme(legend.position = 'none')
@@ -153,7 +147,7 @@ ggplot(aes(x = totalPop, color = dummy, fill = dummy)) +
 #what countries are being called outliers? Does this seem like the right method?
 
 # let's do some plotting to look at the two types of z-score
-zscores = select(wasteDat, normZ, modZ)
+zscores = select(
 
 
 #plot the two types of z-score against each other to see how they relate
@@ -161,10 +155,11 @@ ggplot(zscores, aes(x = normZ, y = modZ)) +
   geom_point() 
 
 #plot again but this time with different colors for the z-score types: 
-zscores$idx = c(1:dim(zscores)[1])
+zscores$idx = 
 zscoresLong <- pivot_longer(zscores, cols = -c(idx), 
                             names_to = 'type', 
                             values_to = 'z')
+
 ggplot(zscoresLong, aes(x = idx, y = z, color = type)) + 
   geom_point(size = 2) + myTheme + brightCol + 
   ylim(c(-1,10))
@@ -188,40 +183,36 @@ memDat %>% ggplot(aes(x = TargALL_UVSD_d,
 
 #calculate the z scores normal and modified 
 memDat$normZ = 
-  (memDat$TargALL_UVSD_d - mean(memDat$TargALL_UVSD_d)) / 
-                sd(memDat$TargALL_UVSD_d )
+  
 memDat$modZ = 
-  (memDat$TargALL_UVSD_d - median(memDat$TargALL_UVSD_d)) / 
-                mad(memDat$TargALL_UVSD_d)
 
 #What proportion of the data are being called outliers with each method?
-sum(abs(memDat$modZ)>3) / dim(memDat)[1]
-sum(abs(memDat$normZ)>3) / dim(memDat)[1]
+
 
 #plot the histogram with the outliers removed 
-memDat %>% filter(abs(modZ)<3) %>% 
-ggplot(aes(x = TargALL_UVSD_d, 
+memDat %>% filter( %>% 
+ggplot(aes(x = , 
            color = dummy, fill = dummy)) +
   geom_histogram()+ 
   myTheme + brightCol + brightFil + 
   theme(legend.position = 'none')
 
-memDat %>% filter(abs(normZ)<3) %>% 
-ggplot(aes(x = TargALL_UVSD_d, 
+memDat %>% filter( %>% 
+ggplot(aes(x = , 
            color = dummy, fill = dummy)) +
   geom_histogram()+ 
   myTheme + brightCol + brightFil + 
   theme(legend.position = 'none')
 
 # let's do some plotting to look at the two types of z-score
-zscores = select(memDat, normZ, modZ)
+zscores = select(
 
 #plot the two types of z-score against each other to see how they relate
 ggplot(zscores, aes(x = normZ, y = modZ)) + 
   geom_point()  
 
 #plot again but this time with different colors for the z-score types: 
-zscores$idx = c(1:dim(memDat)[1])
+zscores$idx = 
 zscoresLong <- pivot_longer(zscores, cols = -c(idx), 
                             names_to = 'type', 
                             values_to = 'z')

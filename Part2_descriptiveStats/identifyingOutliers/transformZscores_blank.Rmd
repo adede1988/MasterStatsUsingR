@@ -46,16 +46,15 @@ ggplot(EEGdat, aes(x = pow_delta_O,
   myTheme + brightFil + brightCol +
   theme(legend.position = 'none')
 
-#this is the range of data that we worked with in the previous project: 
-ggplot(EEGdat, aes(x = log(pow_delta_O), 
+
+ggplot(EEGdat, aes(x = , 
                    color = dummy, fill = dummy)) + 
   geom_histogram(bins = 50) + 
   myTheme + brightFil + brightCol +
   theme(legend.position = 'none')
 
-EEGdat$pow_delta_O[EEGdat$pow_delta_O == 0] = .001
 
-EEGdat$logPow = log(EEGdat$pow_delta_O)
+
 
 ```
 
@@ -64,16 +63,17 @@ EEGdat$logPow = log(EEGdat$pow_delta_O)
 ```{r z score}
 
 #now calculate the z-score on the log transformed data
-z = (EEGdat$logPow - mean(EEGdat$logPow)) / 
-          sd(EEGdat$logPow)
+z = 
 
 #how many observations are outliers now? 
-sum(abs(z)>3) / length(z)
+
 
 #replot it
-ggplot(EEGdat[abs(z)<3,], aes(x = pow_delta_O, color = dummy, fill = dummy)) + 
+ggplot(, aes(x = pow_delta_O, 
+             color = dummy, fill = dummy)) + 
   geom_histogram(bins = 100) + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+  myTheme + brightFil + brightCol +
+  theme(legend.position = 'none')
 
 #does this seem like the right method of outlier detection for these data? 
 

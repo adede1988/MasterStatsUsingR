@@ -60,23 +60,15 @@ ggplot(EEGdat, aes(x = pow_delta_O,
 ```{r super extreme values}
 
 ordersOfMag = data.frame('value' = 
-                           logspace(log(1e0,10), log(1e7,10), 8), 
+                           , 
                          'count' = rep(0, 8))
 
 delPow = EEGdat$pow_delta_O
 for(ii in 1:7){
-  ordersOfMag$count[ii] = sum(delPow>ordersOfMag$value[ii] & 
-                              delPow<=ordersOfMag$value[ii+1])
+  ordersOfMag$count[ii] = 
   
 }
-ordersOfMag$dummy = as.factor(1)
 
-ggplot(ordersOfMag, aes(x=value, 
-                        y = count, color = dummy)) + 
-  scale_x_log10() + 
-  geom_point(size = 2) + 
-  geom_line(linewidth = 2) + myTheme +brightCol + 
-  theme(legend.position = 'none')
 
 
 ```
@@ -88,8 +80,8 @@ mean(delPow)
 sd(delPow)
 
 #what are they when we just remove that one extreme point? 
-mean(delPow[-which(max(delPow)==delPow)])
-sd(delPow[-which(max(delPow)==delPow)])
+mean(delPow[-  ])
+sd(delPow[-  ])
 
 
 
@@ -100,31 +92,26 @@ sd(delPow[-which(max(delPow)==delPow)])
 ```{r zscores of the middle 98}
 
 #let's calculate the z-scores based on only the middle 98% of the data
-limVals = quantile(delPow, c(.01, .99))
+limVals = quantile(
 
-midMean = mean(delPow[delPow>limVals[1] &
-                      delPow<limVals[2]])
+midMean = 
 
-midSD = sd(delPow[delPow>limVals[1] &
-                  delPow<limVals[2]])
+midSD = 
 
 midZ = (delPow - midMean) / midSD
 allZ = (delPow - mean(delPow)) / sd(delPow)
 
 zcompare = data.frame(midZ = midZ, allZ = allZ)
 
-ggplot(zcompare, aes(x = midZ, y = allZ)) + geom_point()
-
 ggplot(zcompare, aes(x = midZ, y = allZ)) + 
-  geom_point() + 
-  ylim(c(-.03,-.02)) + 
-  xlim(c(-1,5))
+  geom_point()
+
 
 #what proportion of the data would this method eliminate: 
-sum(abs(midZ)>3) / length(delPow)
+
 
 #What is the cutoff value associated with this z value? 
-max(delPow[midZ<3])
+
 
 
 
@@ -133,13 +120,12 @@ max(delPow[midZ<3])
 
 ```{r outlier removal}
 
-#what should be the range for x values of the plot? 
-max(EEGdat$pow_delta_O[abs(midZ)<3])
 
 
-ggplot(EEGdat[abs(midZ)<3,], aes(x = pow_delta_O, 
+
+ggplot(  , aes(x = pow_delta_O, 
                                  color = dummy, fill = dummy)) + 
-  geom_histogram(breaks = seq(0,250,.5)) + 
+  geom_histogram() + 
   myTheme + brightFil + brightCol + 
   theme(legend.position = 'none')
 
