@@ -45,7 +45,6 @@ df = data.frame('heights' = c(72,74,76,80,78,73,73,71,78,81,75,75,79,77,79))
 
 ```{r z test}
 
-n = length(df$heights)
 
 #step 1: Are NBA players drawn from the same height distribution 
 #        as the overall population?
@@ -59,15 +58,15 @@ S = 4
 
 #step 3: 
 #       ALPHA:
-alpha = .05
+alpha = 
 #       critical z value: 
-critVal = abs(qnorm(alpha/2))
+critVal = 
 
 
-#step 4: 
-m = mean(df$heights)
-n = length(df$heights)
-sampleZ = (m - M) / (S/sqrt(n))
+#step 4 calculate the observed value: 
+m = 
+n = 
+sampleZ = 
 
 #step 5: 
 if (sampleZ>critVal | sampleZ< -critVal){

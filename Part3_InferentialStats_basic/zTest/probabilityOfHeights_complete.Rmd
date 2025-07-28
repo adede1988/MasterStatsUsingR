@@ -1,0 +1,194 @@
+---
+Title: 'Probability of a Sample'
+Section: 'Z-test'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+
+library(tidyverse) # data manipulation and visualization
+source(file.path(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## heights of basketball players 
+
+```{r data}
+#basketball player heights
+df = data.frame('heights' = c(72,74,76,80,78,73,73,71,78,81,75,75,79,77,79))
+
+#overall distribution of heights statistics: 
+M = 70
+S = 4
+
+```
+
+## Visualize players against the overall population 
+
+```{r visualization}
+
+
+dfOverall = data.frame('norm' = dnorm(seq(50,90,1), M, S))
+dfOverall$dist = 'overallPop'
+
+df$dist = 'NBA'
+
+df %>% ggplot(aes(x = heights, color = dist)) + 
+  geom_freqpoly(aes(y = ..density..), 
+                linewidth = 2, breaks = seq(50,90,1)) +
+  geom_line(data = dfOverall, 
+            aes(x = seq(50,90,1), y = norm), linewidth = 2) + 
+  brightCol +  myTheme 
+
+
+```
+
+## what is the probability of each basketball player height?  
+
+```{r individual probs}
+
+#z-score players' heights
+#BUT z-score them relative to the overall distribution! 
+df$zscore = (df$heights - M) / S
+
+#What is the probability of each player's height? 
+df$prob = 1-pnorm(df$zscore)
+
+#it looks like they're all rare, but they're not all THAT rare
+df %>% ggplot(aes(x = prob, color = dist, fill = dist)) + 
+  geom_histogram() + myTheme + brightCol + brightFil
+
+
+
+```
+
+## What is the probability of this whole sample though   
+
+```{r sample probability }
+
+#let's use a little m to denote the sample mean as opposed to the population M
+m = mean(df$heights)
+
+#What is the probability of the mean height of our sample? 
+meanProb = 1-pnorm(m, M, S)
+
+#what if we use the multiplication rule? 
+multiProb = prod(df$prob)
+
+
+
+```
+
+## simulate drawing height samples   
+
+```{r simulate samples}
+samples = 1000
+sampSizes = c(1,2,3,4,5,10,15)
+simResults = data.frame(meanVal =
+                          rep(0,samples*length(sampSizes)),
+                        sampSize = 
+                          rep(0,samples*length(sampSizes)))
+ii = 1
+for(sampSize in sampSizes){
+  print(sampSize)
+  for(samp in 1:samples){
+    simResults$meanVal[ii] = mean(rnorm(sampSize, M,S))
+    simResults$sampSize[ii] = sampSize
+    ii = ii+1
+  }
+}
+#what proportion of sample means 
+#from the overall distribution are greater
+#than the sample mean from our NBA player sample? 
+outSum = simResults %>% group_by(sampSize) %>%
+  summarize(prop = sum(meanVal>m)/samples)
+
+outSum$dummy = as.factor(1)
+outSum %>% ggplot(aes(x = sampSize, y = prop, color = dummy)) + 
+  geom_line(linewidth = 2) + myTheme + brightCol + 
+  theme(legend.position = 'none') + 
+  geom_hline(yintercept = meanProb, color = 'red') + 
+  geom_hline(yintercept = multiProb, color = 'green')
+
+
+```
+
+## looking at the simulation from a different angle: what is the distribution of n=15 sample means?    
+
+```{r simulation 2}
+simResults$dummy = as.factor(1)
+
+
+#when the sample size is 15, we never ever observe a sample MEAN as extreme
+#as our NBA sample
+simResults %>% filter(sampSize == 15) %>% 
+  ggplot(aes(x=meanVal, color = dummy, fill = dummy)) + 
+  geom_histogram() + myTheme + brightCol + brightFil + 
+  geom_vline(xintercept = m, color = 'red', linewidth = 2)
+  
+#if the sample size is only 1 person, 
+#then our NBA sample mean is not so 
+#extreme
+simResults %>% filter(sampSize == 1) %>% 
+  ggplot(aes(x=meanVal, color = dummy, fill = dummy)) + 
+  geom_histogram() + myTheme + brightCol + brightFil + 
+  geom_vline(xintercept = m, color = 'red', linewidth = 2)
+
+
+
+```
+
+## What's happening is that the variability of sample means reduces with sample size!  
+
+```{r simulation 3}
+
+outSum = simResults %>% group_by(sampSize) %>%
+  summarize(prop = sum(meanVal>m)/samples, 
+            sdVal = sd(meanVal), 
+            meanSampleMean = mean(meanVal))
+
+
+outSum$dummy = as.factor(1)
+outSum %>% ggplot(aes(x = sampSize, y = sdVal, color = dummy)) + 
+  geom_line(linewidth = 2) + myTheme + brightCol 
+
+ 
+outSum %>% ggplot(aes(x = sampSize, y = meanSampleMean, color = dummy)) + 
+  geom_line(linewidth = 2) + myTheme + brightCol + ylim(c(50,80))
+
+
+
+```
+
+## So, what is the probability of our sample of NBA players? 
+
+```{r final prob}
+
+#let's use the sd from our n=15 simulation 
+1 - pnorm(m, M, outSum$sdVal[outSum$sampSize==15])
+
+multiProb
+meanProb
+
+
+```
+

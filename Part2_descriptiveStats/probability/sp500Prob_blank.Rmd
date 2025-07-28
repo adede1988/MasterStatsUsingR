@@ -1,0 +1,136 @@
+---
+title: 'SP500 probability'
+Section: 'Probability'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+
+library(tidyverse) # data manipulation and visualization
+source(file.path(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## sp 500 daily change 
+
+```{r sp 500}
+
+df = read.csv(file.path(gitHubPath,
+                        'data','SP500HistoricalData.csv'))
+names(df)[6] <- 'Change'
+
+df$Change = unlist(lapply(df$Change, 
+                          function(x) 
+                            as.numeric(strsplit(x, '%')[[1]])))
+
+df$dummy = as.factor(1) 
+
+ggplot(df, aes(x = Change, color = dummy, fill = dummy)) +
+  geom_histogram(breaks = seq(-2, 2, .1)) + 
+  myTheme + brightFil + brightCol + 
+  theme(legend.position = 'none') + 
+  xlab('Daily Change (%)') +
+  geom_vline(xintercept = 0, color = 'red', linewidth = 1.5)
+
+```
+
+## what is the probability of a positive change multiple days in a row?   
+
+```{r multiple day runs}
+
+#prob of any positive day?
+prob = 
+
+#probability of 2 days in a row with positive change? 
+
+
+#probability of 5 days in a row with positive change? 
+
+
+
+```
+
+## how often did multiple days of 1 percent actually happen?    
+
+```{r multiple day runs empirical}
+
+RC = data.frame(length = seq(1,10,1), 
+        count = rep(0,10), #observed counts in the data
+        simCount = rep(0,10), #based on random simulation of data
+        shuffCount = rep(0,10), #based on shuffling the data
+        multCount = rep(0,10)) #based on multiplication rule
+
+#count how often consecutive positive days happen: 
+
+
+RC$dummy = as.factor(1)
+ggplot(RC, aes(x = length, y = count, color = dummy)) + 
+  geom_line(linewidth = 2) + myTheme + brightCol + 
+  theme(legend.position = 'none') + 
+  ylab('probability')
+
+
+```
+
+## was this as often as would be expected by chance?    
+
+```{r multiple day runs simulated}
+
+
+for(ii in 1:(length(df$Change)-9)){
+  for(runLen in 1:10){
+    RC$simCount[   ]
+  }
+}
+
+
+longVals <- RC %>% pivot_longer(cols = c('count', 'simCount'),
+                          names_to = 'dataType', 
+                          values_to = 'prob')
+
+ggplot(longVals, aes(x = length, y = prob, color = dataType)) + 
+  geom_line(linewidth = 2) + myTheme + brightCol
+
+
+```
+
+## was this as often as would be expected in shuffled data?   
+
+```{r multiple day runs in shuffle}
+
+
+
+
+longVals <- RC %>% pivot_longer(
+
+
+```
+## was this as often as would be expected if we just use multiplication rule?  
+
+```{r multiplication rule calculation}
+
+
+
+longVals <- RC %>% pivot_longer(
+
+
+```

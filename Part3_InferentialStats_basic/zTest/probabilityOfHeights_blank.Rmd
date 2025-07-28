@@ -1,0 +1,179 @@
+---
+Title: 'Probability of a Sample'
+Section: 'Z-test'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+
+library(tidyverse) # data manipulation and visualization
+source(file.path(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## heights of basketball players 
+
+```{r data}
+#basketball player heights
+df = data.frame('heights' = c(72,74,76,80,78,73,73,71,78,81,75,75,79,77,79))
+
+#overall distribution of heights statistics: 
+M = 70
+S = 4
+
+```
+
+## Visualize players against the overall population 
+
+```{r visualization}
+
+
+dfOverall = data.frame('norm' = )
+dfOverall$dist = 'overallPop'
+
+df$dist = 'NBA'
+
+df %>% ggplot(aes(x = , color = )) + 
+  geom_freqpoly(aes(y = ), 
+                linewidth = 2, breaks = seq(50,90,1)) +
+  brightCol +  myTheme 
+
+
+```
+
+## what is the probability of each basketball player height?  
+
+```{r individual probs}
+
+#z-score players' heights
+#BUT z-score them relative to the overall distribution! 
+df$zscore = 
+
+#What is the probability of each player's height? 
+df$prob = 
+
+
+df %>% ggplot(aes(x = prob, color = dist, fill = dist)) + 
+  geom_histogram() + myTheme + brightCol + brightFil
+
+
+
+```
+
+## What is the probability of this whole sample though   
+
+```{r sample probability }
+
+#let's use a little m to denote the sample mean as opposed to the population M
+m = 
+
+#What is the probability of the mean height of our sample? 
+meanProb = 
+
+#what if we use the multiplication rule? 
+multiProb = 
+
+
+
+```
+
+## simulate drawing height samples   
+
+```{r simulate samples}
+samples = 1000
+sampSizes = c(1,2,3,4,5,10,15)
+simResults = data.frame(meanVal =
+                          rep(0,samples*length(sampSizes)),
+                        sampSize = 
+                          rep(0,samples*length(sampSizes)))
+ii = 1
+for(sampSize in sampSizes){
+  
+}
+#what proportion of sample means 
+#from the overall distribution are greater
+#than the sample mean from our NBA player sample? 
+outSum = simResults %>% group_by(sampSize) %>%
+  summarize(
+
+outSum$dummy = as.factor(1)
+outSum %>% ggplot(aes(x = , y = , color = dummy)) + 
+  geom_line(linewidth = 2) + myTheme + brightCol + 
+  theme(legend.position = 'none') 
+
+
+```
+
+## looking at the simulation from a different angle: what is the distribution of n=15 sample means?    
+
+```{r simulation 2}
+simResults$dummy = as.factor(1)
+
+
+#n=15 simulation results: 
+simResults %>% filter( ) %>% 
+  ggplot(  + 
+  geom_histogram() + myTheme + brightCol + brightFil 
+  
+#n=1 simulation results:
+simResults %>% filter() %>% 
+  ggplot(  + 
+  geom_histogram() + myTheme + brightCol + brightFil 
+
+
+
+```
+
+## What's happening is that the variability of sample means reduces with sample size!  
+
+```{r simulation 3}
+
+#how does variability and central tendency change? 
+outSum = simResults %>% group_by(sampSize) %>%
+  summarize( 
+
+
+outSum$dummy = as.factor(1)
+outSum %>% ggplot(aes(x = , y = , color = dummy)) + 
+  geom_line(linewidth = 2) + myTheme + brightCol 
+
+ 
+outSum %>% ggplot(aes(x = , y = , color = dummy)) + 
+  geom_line(linewidth = 2) + myTheme + brightCol 
+
+
+
+```
+
+## So, what is the probability of our sample of NBA players? 
+
+```{r final prob}
+
+#let's use the sd from our n=15 simulation 
+1 - pnorm(
+#the probabilities we calculated before: 
+multiProb
+meanProb
+
+
+```
+

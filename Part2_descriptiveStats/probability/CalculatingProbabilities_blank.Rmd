@@ -44,7 +44,8 @@ df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
 ggplot(df, aes(x = pow_delta_O, 
                color = dummy, fill = dummy)) + 
   geom_histogram() + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+  myTheme + brightFil + brightCol + 
+  theme(legend.position = 'none')
 
 ```
 
@@ -54,22 +55,16 @@ ggplot(df, aes(x = pow_delta_O,
 
 cutOffLow = 15
 cutOffHigh = 50
-N = length(df$X)
+N = 
 
 #what is the probibility of low delta power? 
-sum(df$pow_delta_O<cutOffLow) / N -> lowProb
-#what is the probability of medium delta power
-sum(df$pow_delta_O>cutOffLow &
-    df$pow_delta_O<cutOffHigh) / N-> medProb
-#what is the probability of high delta power
-sum(df$pow_delta_O>cutOffHigh) / N-> highProb
 
-disp(paste0('the probability of low power is:  ',
-            round(lowProb,2),
-               '\nthe probability of med power is:  ',
-            round(medProb,2), 
-               '\nthe probability of high power is: ',
-            round(highProb,2)))
+#what is the probability of medium delta power
+
+#what is the probability of high delta power
+
+
+
 
 
 
@@ -80,33 +75,32 @@ disp(paste0('the probability of low power is:  ',
 
 ```{r random sampling}
 
+#randomly sample from our data
+#make each sample the same size as the original sample
+
 sampN = 100
 
 sampleVals = rep(0,sampN)
 for(ii in 1:sampN){
-  idx = round(rand(1)*N)
-  if(idx == 0){
-    idx = 1
-  }
-  sampleVals[ii] = df$pow_delta_O[idx]
+
+  sampleVals[ii] = 
 }
 
 sampDf <- data.frame( 
-          low = c(sum(sampleVals<cutOffLow), lowProb*sampN),
-          med = c(sum(sampleVals>=cutOffLow & 
-                        sampleVals <cutOffHigh),
-                  medProb*sampN), 
-          high= c(sum(sampleVals>=cutOffHigh),
-                  highProb*sampN),
-          type = c('observed', 'prob')) %>%
+          low = ,
+          med = , 
+          high= ,
+          type = c('observed', 'prob')) 
+
+
+sampDf = sampDf %>%
           pivot_longer(cols = c(low, med, high), 
                        names_to = 'propGroup',
                        values_to = 'value')
 
-sampDf %>% ggplot(aes(x = propGroup, y = value, 
-                      group = type, color = type, 
-                      fill = type))+
-  geom_bar(stat = 'identity', position = 'dodge') + 
+sampDf %>% ggplot(aes(x = propGroup, y = value
+                      ))+
+  geom_bar( ) + 
   myTheme + brightCol + brightFil
 
 
