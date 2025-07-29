@@ -1,0 +1,94 @@
+---
+Title: 'paired sample t-test'
+Section: 't-test'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+
+library(tidyverse) # data manipulation and visualization
+source(file.path(gitHubPath, 'courseTheme.R'))
+library(BSDA)
+library(pracma)
+
+```
+
+## human memory data
+
+```{r data}
+df = read.csv(file.path(gitHubPath, 'data',
+                        'MemoryData.csv'))
+
+df <- df %>% filter(TargALL_UVSD_d >=0)
+
+df$memDif = df$L1cor_UVSD_d - df$L5_UVSD_d
+
+#first plot the histogram of country total populations 
+df$dummy = as.factor(1)
+df %>% ggplot(aes(x = memDif, color = dummy, fill = dummy)) + 
+  geom_histogram(bins = 10) + 
+  xlab('L5 better     Mem Dif      L1 better') +
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+```
+
+## do a t-test 
+
+```{r t test}
+
+
+
+#step 1: Do people exhibit different memory for images from L1 vs L5 trials? 
+
+#step 2: 
+#       NULL: 
+M = 0
+#       ALTERNATE: 
+# not the null 
+
+#step 3: 
+#       ALPHA:
+alpha = .05
+#       critical t value: 
+n = length(df$memDif)
+critVal = 
+
+
+#step 4: 
+
+sampleT = 
+
+#step 5: 
+if (sampleT>critVal | sampleT < -critVal){
+  print('mean value is different from 0!')
+} else { 
+  print('no evidence that the mean value is different from 0!')
+}
+
+#step 6: 
+#What does the result in step 5 mean for answering our original question? 
+
+
+t.test(df$memDif, mu = M)
+
+
+```
+

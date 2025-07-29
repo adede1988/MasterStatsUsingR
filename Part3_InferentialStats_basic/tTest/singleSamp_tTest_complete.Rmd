@@ -1,0 +1,89 @@
+---
+Title: 'Single Sample t-Test'
+Section: 't-Test'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+
+library(BSDA)
+library(tidyverse) # data manipulation and visualization
+source(paste0(gitHubPath, 'courseTheme.R'))
+library(pracma)
+
+```
+
+## human memory data
+
+```{r data}
+df = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
+
+df <- df %>% filter(TargALL_UVSD_d >=0)
+
+#first plot the histogram of country total populations 
+df$dummy = as.factor(1)
+df %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) + 
+  geom_histogram(bins = 10) + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+```
+
+## do a t-test 
+
+```{r t test}
+
+
+
+#step 1: Do people tested using this method exhibit ABOVE chance memory? 
+
+#step 2: 
+#       NULL: 
+M = 0
+#       ALTERNATE: 
+# not the null 
+
+#step 3: 
+#       ALPHA:
+alpha = .05
+#       critical t value: 
+n = length(df$TargALL_UVSD_d)
+critVal = qt(1-alpha,n-1)
+
+
+#step 4: 
+m = mean(df$TargALL_UVSD_d)
+s = sd(df$TargALL_UVSD_d)
+sampleT = (m - M) / (s/sqrt(n))
+
+#step 5: 
+if (sampleT>critVal){
+  print('mean value is greater than critical threshold!')
+} else { 
+  print('mean value is not greater than critical threshold!')
+}
+
+#step 6: 
+#What does the result in step 5 mean for answering our original question? 
+
+
+t.test(df$TargALL_UVSD_d, mu = M)
+
+
+```
+

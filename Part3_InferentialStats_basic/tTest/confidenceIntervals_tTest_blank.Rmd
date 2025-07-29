@@ -1,0 +1,80 @@
+---
+Title: 'Confidence Intervals'
+Section: 't-test'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+
+library(tidyverse) # data manipulation and visualization
+source(file.path(gitHubPath, 'courseTheme.R'))
+library(BSDA)
+library(pracma)
+
+```
+
+## human memory data
+
+```{r data}
+df = read.csv(file.path(gitHubPath, 'data',
+                          'MemoryData.csv'))
+
+df <- df %>% filter(TargALL_UVSD_d >=0)
+
+#first plot the histogram of country total populations 
+df$dummy = as.factor(1)
+df %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) + 
+  geom_histogram(bins = 10) + 
+  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+
+```
+
+## calculate a confidence interval
+
+```{r confidence interval}
+
+
+
+#question: what is the range of values that we can be 95% confident the 
+#population memory score is within? 
+alpha = .05 # 1-alpha = confidence interval range
+
+#       critical t value: 
+n = length(df$TargALL_UVSD_d)
+critVal = 
+
+#calcualte standard error
+
+
+#calculate bounds
+upperBound = 
+lowerBound = 
+
+#print an output: 
+print(paste0('With ', 100*(1-alpha), '% confidence, the population mean is',
+             ' between: ', round(lowerBound,2), ' and ', round(upperBound,2)))
+
+
+t.test(df$TargALL_UVSD_d)
+
+
+```
+

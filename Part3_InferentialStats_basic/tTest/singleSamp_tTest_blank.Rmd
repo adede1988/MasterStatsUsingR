@@ -1,6 +1,6 @@
 ---
-Title: 'single sample t-test'
-Section: 't-test'
+Title: 'Single Sample t-Test'
+Section: 't-Test'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
 Course_URL: "..." 
@@ -20,11 +20,13 @@ editor_options:
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
 
-library(BSDA)
+
 library(tidyverse) # data manipulation and visualization
-source(paste0(gitHubPath, 'courseTheme.R'))
+source(file.path(gitHubPath, 'courseTheme.R'))
+library(BSDA)
 library(pracma)
 
 ```
@@ -32,15 +34,18 @@ library(pracma)
 ## human memory data
 
 ```{r data}
-df = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
+df = read.csv(file.path(gitHubPath, 'data',
+                          'MemoryData.csv'))
 
 df <- df %>% filter(TargALL_UVSD_d >=0)
 
 #first plot the histogram of country total populations 
 df$dummy = as.factor(1)
-df %>% ggplot(aes(x = TargALL_UVSD_d, color = dummy, fill = dummy)) + 
+df %>% ggplot(aes(x = TargALL_UVSD_d, 
+                  color = dummy, fill = dummy)) + 
   geom_histogram(bins = 10) + 
-  myTheme + brightCol + brightFil + theme(legend.position = 'none')
+  myTheme + brightCol + brightFil + 
+  theme(legend.position = 'none')
 
 ```
 
@@ -63,13 +68,12 @@ M = 0
 alpha = .05
 #       critical t value: 
 n = length(df$TargALL_UVSD_d)
-critVal = qt(1-alpha,n-1)
+critVal = qt(
 
 
 #step 4: 
-m = mean(df$TargALL_UVSD_d)
-s = sd(df$TargALL_UVSD_d)
-sampleT = (m - M) / (s/sqrt(n))
+
+sampleT = 
 
 #step 5: 
 if (sampleT>critVal){

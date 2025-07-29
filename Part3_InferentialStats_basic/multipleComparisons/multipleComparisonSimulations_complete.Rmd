@@ -19,10 +19,12 @@ editor_options:
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
 
 library(tidyverse) # data manipulation and visualization
-source(paste0(gitHubPath, 'courseTheme.R'))
+source(file.path(gitHubPath, 'courseTheme.R'))
 library(pracma)
 
 ```
@@ -31,7 +33,7 @@ library(pracma)
 
 ```{r null}
 
-numTests = 10
+numTests = 1000
 results = data.frame(pval = rep(0,numTests),
                      sig = rep(0, numTests),
                      alphaAdjust = .05/numTests,
@@ -47,7 +49,8 @@ for(ii in 1:numTests){
   out = t.test(x, y)
   results$pval[ii] = out$p.value
   results$sig[ii] = as.numeric(out$p.value < .05)
-  results$sigCor[ii] = as.numeric(out$p.value < results$alphaAdjust[1])
+  results$sigCor[ii] = as.numeric(out$p.value <
+                                    results$alphaAdjust[1])
 }
 
 results <- results %>% arrange(pval)
