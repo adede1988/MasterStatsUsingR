@@ -1,0 +1,52 @@
+---
+Title: 'Bar Plots'
+Section: 'ggplot'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+# Load packages
+library(tidyverse) # data manipulation and visualization
+```
+
+## Summarize before plotting 
+
+```{r sum plot}
+
+plotVals = mpg %>% 
+  group_by(class) %>%  
+  summarize(hwy_mean=mean(hwy), 
+            hwy_sd = sd(hwy)) 
+
+
+
+plotVals %>% ggplot(aes(x=class, y = hwy_mean, color = class, fill = class))+
+  geom_bar(show.legend = F, stat = 'identity') +
+  geom_errorbar(aes(ymin = hwy_mean - hwy_sd, 
+                    ymax = hwy_mean + hwy_sd), color = 'black',
+                show.legend = F, width = .2) + 
+  ylab('miles per gallon') + 
+  xlab('') +
+  ggtitle("fuel efficiency by types of vehicle")
+
+  
+
+```  
+  

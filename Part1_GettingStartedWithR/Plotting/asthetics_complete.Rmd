@@ -1,0 +1,153 @@
+---
+Title: 'Bar Plots'
+Section: 'ggplot'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+# Load packages
+library(tidyverse) # data manipulation and visualization
+```
+
+
+## let's work on making a prettier version of the car barplot
+
+```{r sum plot}
+
+plotVals = mpg %>% 
+  group_by(class) %>%  
+  summarize(hwy=mean(hwy)) 
+
+
+p = plotVals %>% ggplot(aes(x=class, y = hwy, color = class, fill = class))+
+  geom_bar(show.legend = F, stat = 'identity') +
+  ylab('miles per gallon') + 
+  xlab('') +
+  ggtitle("fuel efficiency by types of vehicle")
+
+  
+
+```  
+  
+## It's possible to edit the text elements of the plot
+
+```{r text edits}
+
+myText = element_text(size=16, 
+                      color="blue", 
+                      face="bold",
+                      angle=0)
+bigText = element_text(size = 20,
+                       color='green',
+                       face='bold',
+                       angle=0)
+
+p + theme(
+  axis.text.y = myText,
+  axis.text.x = myText,
+  plot.title = bigText
+  )
+
+
+  
+
+
+
+```  
+
+## It's possible to edit background color of a plot 
+
+```{r background}
+
+backCol = element_rect(fill = "#1C1A3B", color = "#1C1A3B" )
+myText90 = element_text(size=16, 
+                      color="#FFEAB1", 
+                      face="bold",
+                      angle=90)
+p + theme(
+  panel.background = backCol, # bg of the panel
+  plot.background = backCol,
+  axis.text.y = myText,
+  axis.text.x = myText,
+  axis.title.y = myText90,
+  plot.title = bigText
+  )
+
+
+
+```  
+
+## It's possible to edit the axes and grid lines
+
+```{r lines}
+
+
+p + theme(
+  panel.background = backCol, # bg of the panel
+  plot.background = backCol,
+  axis.text.y = myText,
+  axis.text.x = myText,
+  axis.title.y = myText90,
+  plot.title = bigText,
+  panel.grid.major = element_blank(), # get rid of major grid
+  panel.grid.minor = element_blank(), # get rid of minor grid
+  axis.line = element_line(colour = "#FFEAB1", 
+                           linewidth = 2, linetype = "solid"),
+  axis.ticks = element_line(colour = "#FFEAB1", 
+                            linewidth = 2, linetype = "solid"),
+  axis.ticks.length=unit(-0.25, "cm") #determine length/direction of ticks
+  )
+
+brightCol = scale_color_manual(values = c('#20CDF2', '#6EE11F', '#415d2e', '#a05824','#d5db52' ))  
+brightFil = scale_fill_manual(values = c('#20CDF2', '#6EE11F', '#415d2e', '#a05824','#d5db52' ))
+
+
+```  
+
+## It's possible to edit the colors manually 
+
+```{r lines}
+
+brightCol = scale_color_manual(values = 
+                                 c('#20CDF2', '#6EE11F', '#415d2e',
+   '#a05824', '#d5db52', '#E24C3A', '#9B4F96', '#F1A14C'))  
+brightFil = scale_fill_manual(values = 
+                                c('#20CDF2', '#6EE11F', '#415d2e',
+   '#a05824', '#d5db52', '#E24C3A', '#9B4F96', '#F1A14C'))
+
+p + theme(
+  panel.background = backCol, # bg of the panel
+  plot.background = backCol,
+  axis.text.y = myText,
+  axis.text.x = myText,
+  axis.title.y = myText90,
+  plot.title = bigText,
+  panel.grid.major = element_blank(), # get rid of major grid
+  panel.grid.minor = element_blank(), # get rid of minor grid
+  axis.line = element_line(colour = "#FFEAB1", 
+                           linewidth = 2, linetype = "solid"),
+  axis.ticks = element_line(colour = "#FFEAB1", 
+                            linewidth = 2, linetype = "solid"),
+  axis.ticks.length=unit(-0.25, "cm") #determine length/direction of ticks
+  ) + brightCol + brightFil
+
+
+
+```  

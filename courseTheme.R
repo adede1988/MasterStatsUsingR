@@ -37,9 +37,9 @@ myTheme = theme(
   axis.text.x = myText,
   plot.title = myTextBig,
   axis.line = element_line(colour = "#FFEAB1", 
-                           size = 2, linetype = "solid"),
+                           linewidth = 2, linetype = "solid"),
   axis.ticks = element_line(colour = "#FFEAB1", 
-                            size = 2, linetype = "solid"),
+                            linewidth = 2, linetype = "solid"),
   axis.ticks.length=unit(-0.25, "cm") #determine length/direction of ticks
 )
 
@@ -75,10 +75,14 @@ myThemeDark = theme(
                             size = 2, linetype = "solid")
 )
 
-brightCol = scale_color_manual(values = c('#20CDF2', '#6EE11F', '#415d2e', '#a05824','#d5db52' ))  
-brightFil = scale_fill_manual(values = c('#20CDF2', '#6EE11F', '#415d2e', '#a05824','#d5db52' ))
-dimCol = scale_color_manual(values = rep('#ABA269',4))
-dimFil = scale_fill_manual(values = rep('#ABA269',4))
+brightCol = scale_color_manual(values = c('#20CDF2', '#6EE11F', '#415d2e',
+                                          '#a05824', '#d5db52', '#E24C3A', 
+                                          '#9B4F96', '#F1A14C'))  
+brightFil = scale_fill_manual(values = c('#20CDF2', '#6EE11F', '#415d2e',
+                                         '#a05824', '#d5db52', '#E24C3A', 
+                                         '#9B4F96', '#F1A14C'))
+dimCol = scale_color_manual(values = rep('#ABA269',8))
+dimFil = scale_fill_manual(values = rep('#ABA269',8))
 
 
 rm(myText, myText90, myTextBig)
