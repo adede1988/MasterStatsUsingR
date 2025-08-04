@@ -1,6 +1,6 @@
 ---
-title: 't-test on split continuous data'
-Section: 'AB testing'
+title: 'Wilcoxon Random Samples'
+Section: 'Wilcoxon Test'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
 Course_URL: "..." 
@@ -35,42 +35,45 @@ library(pracma)
 
 #Key variable name: pow_delta_O
 df = read.csv(file.path(gitHubPath, 'data',
-                    'restingEEG.csv'))
+                  'restingEEG.csv'))
 
 df$dummy = as.factor(1) 
 df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
 
-
-ggplot(df, aes(x = age, y = log(pow_delta_O,10), 
-               color = dummy)) + 
-  geom_point(size = 2) + 
-  myTheme + brightFil + brightCol + 
-  theme(legend.position = 'none') +
-  xlab("age (months)")
-
 df <- df %>% filter(age<(8*12))
-
-ggplot(df, aes(x = age, y = log(pow_delta_O,10), 
-               color = dummy)) + 
-  geom_point(size = 2) + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none')
-
-
-```
-
-## human EEG babies vs. kids
-
-```{r t test split}
 
 df$babyChild = df$age<50
 df$babyChild[df$babyChild] = 'baby'
 df$babyChild[df$babyChild=='FALSE'] = 'child'
 
-ggplot(df, aes(x = log(pow_delta_O,10), color = babyChild)) + 
-  geom_freqpoly(linewidth = 2) + myTheme + brightCol
 
-t.test(log(df$pow_delta_O[df$babyChild=='baby'],10),
-       log(df$pow_delta_O[df$babyChild=='child'],10))
 
 ```
+
+## random sub sample of size 10 per group
+
+```{r random}
+numTests = 1000
+pvals = data.frame(tlog = rep(0,numTests),
+           t = rep(0,numTests),
+           wil = rep(0,numTests))
+for(ii in 1:numTests){
+  
+  
+ 
+  pvals$tlog[ii] = 
+  pvals$t[ii] = 
+  pvals$wil[ii] = 
+}
+
+print(paste(sum(pvals$tlog<.05), 'of ', 
+            numTests,' for Log Transformed t-test'))
+print(paste(sum(pvals$t<.05), 'of ', 
+            numTests,' for t-tests on raw data'))
+print(paste(sum(pvals$wil<.05), 'of ', 
+            numTests,' for Wilcoxon Test'))
+
+
+```
+
 

@@ -44,7 +44,8 @@ df %>% ggplot(aes(x = gdpPerCap)) +
   geom_histogram(breaks = seq(1,131000,5000),
                  color = '#6EE11F', fill = '#6EE11F') + 
   myTheme + 
-  geom_vline(xintercept = devThresh, color = 'purple', linewidth = 2)
+  geom_vline(xintercept = devThresh, 
+             color = 'purple', linewidth = 2)
 
 ```
 
@@ -61,17 +62,14 @@ t.test(df$gdpPerCap, mu = devThresh)
 ```{r signed rank}
 
 #calcualte the difference scores from the development threshold: 
-df$relativeDif = df$gdpPerCap - devThresh
+df$relativeDif = 
 
 #rank their absolute values and store if each dif is negative or positive
-df$abdif = abs(df$relativeDif)
-df$signDif = df$relativeDif / df$abdif
-df <- df %>% arrange(abdif)
-df$rank = seq(1,length(df$abdif))
+
 
 #get the total positive and negative ranks
-posRank = sum(df$rank[df$signDif == 1])
-negRank = sum(df$rank[df$signDif == -1])
+posRank = 
+negRank = 
 
 #get the mean and sd for the approximate distribution of rank sum
 n = length(df$countryLong)
@@ -79,8 +77,8 @@ meanW = n*(n+1) / 4
 sdW = sqrt(n * (n + 1) * (2 * n + 1) / 24)
 
 #z score and find p value
-zpos = (posRank - meanW) / sdW
-zneg = (negRank - meanW) / sdW
+zpos = 
+zneg = 
 print(paste('The approximate 2-tailed p value is: ', 
             round((1-pnorm(zpos))*2,3), 
             ' based on a rank sum of: ', posRank))

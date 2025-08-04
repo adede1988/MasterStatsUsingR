@@ -20,10 +20,11 @@ editor_options:
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
 
 library(tidyverse) # data manipulation and visualization
-source(paste0(gitHubPath, 'courseTheme.R'))
+source(file.path(gitHubPath, 'courseTheme.R'))
 
 
 ```
@@ -32,13 +33,14 @@ source(paste0(gitHubPath, 'courseTheme.R'))
 #https://www.kaggle.com/datasets/chebotinaa/fast-food-marketing-campaign-ab-test
 
 ```{r data}
-df <- read.csv(paste0(gitHubPath, 'data\\WA_Marketing-Campaign.csv'))
+df <- read.csv(file.path(gitHubPath, 'data', 
+                         'WA_Marketing-Campaign.csv'))
 df$Promotion <- as.factor(df$Promotion)
 
 #average over weeks within store
 df<- df %>% group_by(LocationID) %>%
   summarize(SalesInThousands = mean(SalesInThousands),
-    across(everything(), ~ first(.), .names = "{.col}"))
+    across(everything(), ~ first(.)))
 
 ```
 

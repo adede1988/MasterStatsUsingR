@@ -52,19 +52,17 @@ df$residuals = test$residuals
 qVals = seq(.01, 1, .01)
 
 
-qqVals = data.frame('empirical' = quantile(df$residuals, qVals),
-                      'norm'    = qnorm(qVals, 
-                                        mean = mean(df$residuals), 
-                                          sd = sd(df$residuals)),
-                      'qVals'     = qVals)
+qqVals = data.frame('empirical' = ,
+                      'norm'    = ,
+                      'qVals'     = )
   
   
-  ggplot(qqVals, aes(x = norm, y = empirical, color = qVals)) + 
+  ggplot(qqVals, aes(x = , y = , color = )) + 
     geom_point(size = 3) + 
     geom_abline(slope = 1, intercept = 0)
   
   df$dummy = as.factor(1)
-  ggplot(df, aes(x = residuals, fill = dummy))+
+  ggplot(df, aes(x = , fill = dummy))+
     geom_histogram() + brightFil + myTheme + 
   theme(legend.position = 'none')
 

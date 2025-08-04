@@ -20,11 +20,13 @@ editor_options:
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
 
-library(BSDA)
+
 library(tidyverse) # data manipulation and visualization
-source(paste0(gitHubPath, 'courseTheme.R'))
+source(file.path(gitHubPath, 'courseTheme.R'))
+library(BSDA)
 library(pracma)
 library(kableExtra)
 
@@ -34,11 +36,13 @@ library(kableExtra)
 #https://www.kaggle.com/datasets/chebotinaa/fast-food-marketing-campaign-ab-test
 
 ```{r data}
-df <- read.csv(paste0(gitHubPath, 'data\\WA_Marketing-Campaign.csv'))
+df <- read.csv(file.path(gitHubPath, 'data', 
+                         'WA_Marketing-Campaign.csv'))
 df$Promotion = as.factor(df$Promotion)
 
 
-df %>% ggplot(aes(y = SalesInThousands, color = Promotion)) + 
+df %>% ggplot(aes(y = SalesInThousands, 
+                  color = Promotion)) + 
     geom_boxplot(linewidth = 2)+ 
   myTheme + brightCol + brightFil+
         theme(axis.text.x = element_blank())
@@ -106,26 +110,31 @@ length(unique(df$LocationID))
 names(df)
 
 df %>% ggplot(aes(x = week, y = SalesInThousands, 
-                  group = LocationID, color = LocationID)) + 
+                  group = LocationID, 
+                  color = LocationID)) + 
   geom_line(alpha = .5) + 
   myTheme +
   scale_color_gradient2(low = "green", mid = "white", high = "magenta",
                         midpoint = 500)
 
 #is there much variability week to week? 
-df %>% group_by(week) %>% summarize(weeklyMean = mean(SalesInThousands),
-                                    se = sd(SalesInThousands)/sqrt(n()))%>%
+df %>% group_by(week) %>% 
+  summarize(weeklyMean = mean(SalesInThousands),
+            se = sd(SalesInThousands)/sqrt(n())) %>%
   ggplot(aes(x = week, y = weeklyMean, group = 1)) +
-  geom_line(linewidth = 3, color = 'green') +            # Linegraph
-  geom_point(size = 3, color = 'green') +                # Points for means
-  geom_errorbar(aes(ymin = weeklyMean - se,   # Lower bound of error
-                    ymax = weeklyMean + se),  # Upper bound of error
-                width = 0.2, color = 'green') +          # Width of error bars
+  geom_line(linewidth = 3, color = 'green') +    
+  geom_point(size = 3, color = 'green') + 
+  geom_errorbar(aes(ymin = weeklyMean - se,   
+                    ymax = weeklyMean + se),  
+                width = 0.2, color = 'green') +       
   myTheme
 
-df<- df %>% group_by(LocationID) %>%
-  summarize(SalesInThousands = mean(SalesInThousands),
-    across(everything(), ~ first(.), .names = "{.col}"))
+df <- df %>%
+  group_by(LocationID) %>%
+  summarize(
+    SalesInThousands = mean(SalesInThousands),
+    across(-SalesInThousands, ~ first(.))
+  )
 
 #After averaging over weeks, variability is lower: 
 df %>% ggplot(aes(y = SalesInThousands, color = Promotion)) + 
@@ -155,8 +164,8 @@ results$test[1] = paste0('promo', 1, '_v_promo', 2)
 results$pval[1] = out$p.value
 results$n1[1] = sum(df$Promotion == 1)
 results$n2[1] = sum(df$Promotion == 2)
-results$mean1[1] = round(out$estimate[1])
-results$mean2[1] = round(out$estimate[2])
+results$mean1[1] = mean(df$SalesInThousands[df$Promotion == 1])
+results$mean2[1] = mean(df$SalesInThousands[df$Promotion == 2])
 results$sigDif[1] = out$p.value < alphaAdjusted
 
 out = t.test(df$SalesInThousands[df$Promotion == 1], 
@@ -165,8 +174,8 @@ results$test[2] = paste0('promo', 1, '_v_promo', 3)
 results$pval[2] = out$p.value
 results$n1[2] = sum(df$Promotion == 1)
 results$n2[2] = sum(df$Promotion == 3)
-results$mean1[2] = round(out$estimate[1])
-results$mean2[2] = round(out$estimate[2])
+results$mean1[2] = mean(df$SalesInThousands[df$Promotion == 1])
+results$mean2[2] = mean(df$SalesInThousands[df$Promotion == 3])
 results$sigDif[2] = out$p.value < alphaAdjusted
 
 out = t.test(df$SalesInThousands[df$Promotion == 2], 
@@ -175,8 +184,8 @@ results$test[3] = paste0('promo', 2, '_v_promo', 3)
 results$pval[3] = out$p.value
 results$n1[3] = sum(df$Promotion == 2)
 results$n2[3] = sum(df$Promotion == 3)
-results$mean1[3] = round(out$estimate[1])
-results$mean2[3] = round(out$estimate[2])
+results$mean1[3] = mean(df$SalesInThousands[df$Promotion == 2])
+results$mean2[3] = mean(df$SalesInThousands[df$Promotion == 3])
 results$sigDif[3] = out$p.value < alphaAdjusted
 
 results %>% 
