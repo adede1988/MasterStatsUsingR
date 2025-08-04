@@ -1,5 +1,5 @@
 ---
-Title: 'Bar Plots'
+Title: 'Error Bars'
 Section: 'ggplot'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
