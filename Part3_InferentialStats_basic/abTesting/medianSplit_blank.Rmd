@@ -48,12 +48,10 @@ ggplot(df, aes(x = age, y = log(pow_delta_O,10),
   theme(legend.position = 'none') +
   xlab("age (months)")
 
-df <- df %>% filter(age<(8*12))
+#filter to children less tahn 8 and replot: 
+df <- df %>% filter(  )
 
-ggplot(df, aes(x = age, y = log(pow_delta_O,10), 
-               color = dummy)) + 
-  geom_point(size = 2) + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none')
+
 
 
 ```
@@ -62,15 +60,10 @@ ggplot(df, aes(x = age, y = log(pow_delta_O,10),
 
 ```{r t test split}
 
-df$babyChild = df$age<50
-df$babyChild[df$babyChild] = 'baby'
-df$babyChild[df$babyChild=='FALSE'] = 'child'
+df$babyChild = 
 
-ggplot(df, aes(x = log(pow_delta_O,10), color = babyChild)) + 
-  geom_freqpoly(linewidth = 2) + myTheme + brightCol
 
-t.test(log(df$pow_delta_O[df$babyChild=='baby'],10),
-       log(df$pow_delta_O[df$babyChild=='child'],10))
+t.test()
 
 ```
 

@@ -1,0 +1,125 @@
+---
+Title: 'Marketing Data'
+Section: 'AB-testing'
+Author: "Adam Dede"
+Course: "Data to Decisions: Master Statistics with R and tidyverse"
+Course_URL: "..." 
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+## set environment
+
+```{r message = FALSE, warning = FALSE}
+
+# Set rendering parameters
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
+
+library(tidyverse) # data manipulation and visualization
+source(file.path(gitHubPath, 'courseTheme.R'))
+library(BSDA)
+library(pracma)
+library(kableExtra)
+
+```
+
+## advertising data
+#https://www.kaggle.com/datasets/chebotinaa/fast-food-marketing-campaign-ab-test
+
+```{r data}
+df <- read.csv(file.path(gitHubPath, 'data', 
+                         'WA_Marketing-Campaign.csv'))
+df$Promotion = as.factor(df$Promotion)
+
+
+df %>% ggplot(aes(y = SalesInThousands, 
+                  color = Promotion)) + 
+    geom_boxplot(linewidth = 2)+ 
+  myTheme + brightCol + brightFil+
+        theme(axis.text.x = element_blank())
+
+
+```
+
+## do t-tests to compare 
+
+```{r t tests}
+
+alphaAdjusted = .05/3
+
+results = data.frame('test' = c('0','0','0'), 
+                     'pval' = c(0,0,0),
+                     'n1' = c(0,0,0),
+                     'n2' = c(0,0,0),
+                     'mean1' = c(0,0,0),
+                     'mean2' = c(0,0,0),
+                     'sigDif'= c(0,0,0))
+
+
+
+```
+
+## but wait! sample size seems too high
+
+```{r sample size}
+
+length(unique(df$LocationID))
+
+names(df)
+#plot each stores weekly sales: 
+df %>% ggplot(aes(  )) + 
+  geom_line() + 
+  myTheme +
+
+#is there much variability week to week? 
+  #average over all stores and plot the week to week variability
+df %>% group_by(week) %>% 
+  summarize(weeklyMean =  ,
+            se =   ) %>%
+  ggplot(aes(x = week, y = weeklyMean)) +
+  
+  myTheme
+
+#average over weeks within each location 
+#to get one value per location
+df <- df %>%
+  group_by(LocationID) %>%
+  summarize(
+    SalesInThousands = ,
+    #don't drop other columns! )
+  )
+
+#After averaging over weeks, variability is lower: 
+#replot the boxplot
+
+```
+
+## Let's rerun the t-tests with the right sample size now
+
+```{r rerun t}
+
+alphaAdjusted = .05/3
+oldRes = results 
+results = data.frame('test' = c('0','0','0'), 
+                     'pval' = c(0,0,0),
+                     'n1' = c(0,0,0),
+                     'n2' = c(0,0,0),
+                     'mean1' = c(0,0,0),
+                     'mean2' = c(0,0,0),
+                     'sigDif'= c(0,0,0))
+
+
+
+
+
+```
+

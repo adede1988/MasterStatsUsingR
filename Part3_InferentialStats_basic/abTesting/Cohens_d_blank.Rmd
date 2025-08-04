@@ -63,41 +63,19 @@ df %>% ggplot(aes(y = SalesInThousands,
 # d = (mean1 - mean2) / pooledSD
 
 pooled_sd <- function(x1, x2) {
-  n1 <- length(x1)
-  n2 <- length(x2)
-  s1 <- sd(x1)
-  s2 <- sd(x2)
-  
-  sqrt(((n1 - 1) * s1^2 + (n2 - 1) * s2^2) / (n1 + n2 - 2))
+ 
 }
 
 alphaAdjusted = .05/3
 
 
-getSummary <- function(df, idx1, idx2, alphaAdjusted){
-  results = data.frame(test = 'a')
-  out = t.test(df$SalesInThousands[df$Promotion == idx1], 
-         df$SalesInThousands[df$Promotion == idx2])
-  results$test = paste0('promo', idx1, '_v_promo', idx2)
-  results$pval = out$p.value
-  results$n1 = sum(df$Promotion == idx1)
-  results$n2 = sum(df$Promotion == idx2)
-  results$mean1 = round(out$estimate[1])
-  results$mean2 = round(out$estimate[2])
-  results$pooledSD = pooled_sd(
-    df$SalesInThousands[df$Promotion == idx1],
-    df$SalesInThousands[df$Promotion == idx2])
-  results$sigDif = out$p.value < alphaAdjusted
-  #add on for d
-  results$meanDif = results$mean1 - results$mean2
-  results$d = results$meanDif / results$pooledSD
+getSummary <- function(){
+  
 
   return(results)
 }
 
-results = rbind(getSummary(df, 1, 2, alphaAdjusted), 
-                getSummary(df, 1, 3, alphaAdjusted),
-                getSummary(df, 2, 3, alphaAdjusted)) 
+results = 
 
 
 

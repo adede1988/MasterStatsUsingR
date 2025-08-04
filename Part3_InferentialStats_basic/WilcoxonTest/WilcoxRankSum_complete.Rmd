@@ -19,10 +19,12 @@ editor_options:
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
+
 
 library(tidyverse) # data manipulation and visualization
-source(paste0(gitHubPath, 'courseTheme.R'))
+source(file.path(gitHubPath, 'courseTheme.R'))
 library(pracma)
 
 ```
@@ -32,7 +34,8 @@ library(pracma)
 ```{r EEG}
 
 #Key variable name: pow_delta_O
-df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+df = read.csv(file.path(gitHubPath, 'data',
+                  'restingEEG.csv'))
 
 df$dummy = as.factor(1) 
 df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
@@ -59,8 +62,8 @@ set.seed(8)
 child = df$pow_delta_O[df$babyChild == 'child']
 baby = df$pow_delta_O[df$babyChild == 'baby']
 
-child = child[randsample(length(child), 10)]
-baby = baby[randsample(length(baby), 10)]
+child = child[sample(length(child), 10)]
+baby = baby[sample(length(baby), 10)]
 
 tmp = data.frame(pow = c(child,baby),
                  childBaby = c(rep('child', 10),

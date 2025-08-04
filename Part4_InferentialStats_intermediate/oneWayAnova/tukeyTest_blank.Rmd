@@ -58,18 +58,18 @@ test
 
 #FORMULA: Q = abs(mean1 - mean2) / sqrt((MSerror / n1 + MSerror / n2) / 2)
 #get all the necessary values: 
-MSerror = test$`Mean Sq`[2]
+MSerror = 
 sumVals = df %>% group_by(Promotion) %>%
-  summarize(n = n(), 
-            Mean = mean(SalesInThousands)) 
-dferror = nrow(df) - 3
+  summarize(
+    
+  ) 
+dferror = 
 
 #promotion 1 v. 2
-qVal = abs(sumVals$Mean[1] - sumVals$Mean[2]) / 
-        sqrt(((MSerror/sumVals$n[1] + MSerror/sumVals$n[2]))/2)
-pval = 1 - ptukey(qVal, 3, dferror)
+qVal = 
+pval = 1 - ptukey(
 
-cat('the adjusted p-value for the difference is: ', round(pval, 6))
+cat('the adjusted p-value is: ', round(pval, 6))
 
 TukeyHSD(aov(lm(SalesInThousands ~ Promotion, data = df)))
 
@@ -90,11 +90,11 @@ TukeyHSD(aov(lm(SalesInThousands ~ Promotion, data = df)))
 
 #think critically: why not .975 like we've 
 #used for 2-tailed intervals before?
-critQ = qtukey(.95, 3, dferror)
+critQ = 
 #standard error is just the denominator from the tukey equation: 
-se =  sqrt(((MSerror/sumVals$n[1] + MSerror/sumVals$n[2]))/2)
-topBound = sumVals$Mean[1] - sumVals$Mean[2] + critQ*se
-lowBound = sumVals$Mean[1] - sumVals$Mean[2] - critQ*se
+se =  
+topBound = 
+lowBound = 
 
 cat('diff: ', round(sumVals$Mean[1] - sumVals$Mean[2], 3),
     '\n lwr: ', round(lowBound, 3), 

@@ -20,11 +20,12 @@ editor_options:
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
 
-library(BSDA)
+
 library(tidyverse) # data manipulation and visualization
-source(paste0(gitHubPath, 'courseTheme.R'))
+source(file.path(gitHubPath, 'courseTheme.R'))
 library(pracma)
 
 ```
@@ -32,7 +33,8 @@ library(pracma)
 ## human memory data
 
 ```{r data}
-df = read.csv(paste0(gitHubPath, 'data\\MemoryData.csv'))
+df = read.csv(file.path(gitHubPath, 'data',
+                      'MemoryData.csv'))
 
 df <- df %>% filter(TargALL_UVSD_d >=0)
 
