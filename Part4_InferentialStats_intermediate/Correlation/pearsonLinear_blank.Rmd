@@ -46,27 +46,27 @@ df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
 
 ```{r age cut off}
 
-ggplot(df, aes(x = age, y = log(pow_delta_O,10), 
+ggplot(df, aes(x =    , y =   , 
                color = dummy)) + 
   geom_point(size = 2) + 
-  myTheme + brightFil + brightCol + 
+  myTheme + brightCol + 
   theme(legend.position = 'none') +
   xlab("age (months)")
 
 ageCut = seq(12,1000,12)
 
-ageVals = df$age
-powVals = log(df$pow_delta_O)
-results = data.frame(cutOff = ageCut, 
-                     corVal = rep(0, length(ageCut)))
+ageVals =  
+powVals =  
+  
+results = data.frame(  )
 for(ii in 1:length(ageCut)){
-  results$corVal[ii] = cor(powVals[ageVals<ageCut[ii]], 
-                             ageVals[ageVals<ageCut[ii]])
+
+  
 }
 
-ggplot(results, aes(x = cutOff, y = corVal)) +
+ggplot(results, aes(x =  , y =  )) +
   geom_line(color = 'green') +
-  myTheme + brightFil + brightCol +
+  myTheme + brightCol +
   xlab("cut off age (months)")
 
 ```

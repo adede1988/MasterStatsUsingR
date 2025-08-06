@@ -67,23 +67,12 @@ anova(test)
 
 ```{r tukey}
 
-TukeyHSD(aov(test))
 
-tukeyRes = TukeyHSD(aov(test))
 #let's figure out the structure: 
-tukeyInteractions = tukeyRes$`Promotion:MarketSize`
 #pvals: 
-tukeyInteractions[,4]
-
-tukeyInteractions = tukeyInteractions[tukeyInteractions[,4]<.05,]
 #do the same for the promotion and market size effects: 
-tukeyPromo = tukeyRes$Promotion
-tukeyPromo = tukeyPromo[tukeyPromo[,4]<.05,]
-tukeyMarSiz = tukeyRes$MarketSize
-tukeyMarSiz = tukeyMarSiz[tukeyMarSiz[,4]<.05,]
 
 #look at all the significant effects: 
-tukeySig = rbind(tukeyInteractions, tukeyPromo, tukeyMarSiz)
 
 
 tukeySig %>% 
@@ -91,10 +80,5 @@ tukeySig %>%
   kable_classic(full_width = F, 
                 font_size = 20)
 
-df %>% ggplot(aes(y = SalesInThousands, color = Promotion)) + 
-    geom_boxplot(linewidth = 2)+ 
-  myTheme + brightCol + brightFil+
-        theme(axis.text.x = element_blank())+
-  facet_grid(.~MarketSize)
 
 ```

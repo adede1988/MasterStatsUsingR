@@ -1,5 +1,5 @@
 ---
-title: 'Pearson Correlation'
+title: 'Confidence Intervals for Correlation'
 Section: 'Correlation'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
@@ -19,12 +19,12 @@ editor_options:
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-gitHubPath = 'C:/Users/Adam/Documents/GitHub/MasterStatsUsingR/'
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
 
 library(tidyverse) # data manipulation and visualization
-source(paste0(gitHubPath, 'courseTheme.R'))
-library(pracma)
-library(readxl)
+source(file.path(gitHubPath, 'courseTheme.R'))
+
 
 ```
 
@@ -32,9 +32,8 @@ library(readxl)
 
 ```{r}
 
-allMurders = read.csv(file.path(gitHubPath,
-  'data/',
-  'murderDatCombined_iceCream.csv'))
+allMurders = read.csv(file.path(gitHubPath,  'data',
+                'murderDatCombined_iceCream.csv'))
 
 
 
@@ -45,13 +44,13 @@ allMurders = read.csv(file.path(gitHubPath,
 ```{r confidence intervals}
 
 
-cor.test(allMurders$murders, allMurders$Ice_Cream_Sales)
+cor.test(allMurders$murders, allMurders$iceCream)
 
 n = length(allMurders$murders)
 df = n - 2
 
-r = cor(allMurders$murders, allMurders$Ice_Cream_Sales)
-t = r*sqrt(df) / sqrt(1-r^2)
+r = cor(allMurders$murders, allMurders$iceCream)
+
 
 #convert r into z (normal) distribution: 
 z = .5*log((1+r) / (1-r))

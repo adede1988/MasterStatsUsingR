@@ -36,7 +36,8 @@ plotVals = mpg %>%
   summarize(hwy=mean(hwy)) 
 
 
-p = plotVals %>% ggplot(aes(x=class, y = hwy, color = class, fill = class))+
+p = plotVals %>% ggplot(aes(x=class, y = hwy, 
+                            color = class, fill = class))+
   geom_bar(show.legend = F, stat = 'identity') +
   ylab('miles per gallon') + 
   xlab('') +
@@ -115,8 +116,6 @@ p + theme(
   axis.ticks.length=unit(-0.25, "cm") #determine length/direction of ticks
   )
 
-brightCol = scale_color_manual(values = c('#20CDF2', '#6EE11F', '#415d2e', '#a05824','#d5db52' ))  
-brightFil = scale_fill_manual(values = c('#20CDF2', '#6EE11F', '#415d2e', '#a05824','#d5db52' ))
 
 
 ```  

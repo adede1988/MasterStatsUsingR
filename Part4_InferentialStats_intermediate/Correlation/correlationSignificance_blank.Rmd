@@ -50,17 +50,18 @@ allMurders = read.csv(file.path(gitHubPath, 'data',
 #alternative: rho != 0
 
 #Step 3 Decision rule: 
-alpha = .05
-df = length(allMurders$murders) - 2
-critT = qt(1-alpha/2, df)
+alpha = 
+df = 
+critT = 
 
 #step 4 calculate r stat and convert to t: 
 #this time let's use the builtin function for correlation
-r = cor(allMurders$murders, allMurders$iceCream)
-t = r*sqrt(df) / sqrt(1-r^2)
+r = 
+  #t = r*sqrt(n-2) / sqrt(1-r^2)
+t = 
 
 #step 5 compare to decision rule: 
-sig = abs(t) > critT
+sig = 
 
 #step 6 answer the question: 
 if(sig){

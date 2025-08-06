@@ -60,20 +60,17 @@ allMurders$dummy = as.factor(1)
 # Ice Cream and Frozen Dessert
 iceCreamDat = read.csv(file.path(gitHubPath, 'data',
                 'IPN31152N.csv'))
-iceCreamDat$MONTH = month(iceCreamDat$observation_date)
-iceCreamDat$YEAR = year(iceCreamDat$observation_date)
 
-allMurders <- merge(iceCreamDat, allMurders, 
-                   by = c("YEAR", "MONTH"))
-names(allMurders)[4] = 'iceCream'
+
+#merge with murder data 
+
+#rename ice cream production to iceCream
  
 allMurders %>% ggplot(aes(x = iceCream, y = murders, 
                           color = dummy)) + 
   geom_point(size = 3) + myTheme + brightCol + theme(legend.position = 'none') 
 
-write.csv(allMurders, file.path(gitHubPath,
-  'data/',
-  'murderDatCombined_iceCream.csv'))
+
 
 
 ```
@@ -82,16 +79,11 @@ write.csv(allMurders, file.path(gitHubPath,
 
 ```{r pearson}
 #formula: r = (sum((x - meanX)*(y-meanY)) / n-1) / (sdX*sdY)
-meanMur = mean(allMurders$murders)
-meanIce = mean(allMurders$iceCream)
-sdMur = sd(allMurders$murders)
-sdIce = sd(allMurders$iceCream)
-n = length(allMurders$murders)
 
-covMurIce = sum((allMurders$iceCream - meanIce) * 
-                (allMurders$murders - meanMur)) / (n-1)
 
-r = covMurIce / (sdMur * sdIce)
+covMurIce = 
+
+r = 
 
 print(paste('the correlation between ice cream production and murders in NYC is:',
             round(r, 3)))
