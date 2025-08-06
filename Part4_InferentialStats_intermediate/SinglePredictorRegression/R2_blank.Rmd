@@ -62,23 +62,21 @@ summary(pow.age)
 ## calculating R2
 
 ```{r r2 by hand}
+#R2 = SSreg / SStot 
+#SSreg = SStot - SSerr
+#SSerr = sum((y - y')^2)
 
 #pull out the coefficients and make predictions
-intercept = pow.age$coefficients[[1]]
-slope = pow.age$coefficients[[2]]
-yPrime = slope * df$age + intercept 
+
 
 #calculate the SStotal, SSerror, and SSregression values
-yMean = mean(log(df$pow_delta_O,10))
-SStotal = sum((log(df$pow_delta_O,10) - yMean)^2)
-SSerror = sum((log(df$pow_delta_O,10) - yPrime)^2)
-SSreg = SStotal - SSerror
+
 
 #get R2 through proportion method
-R2_prop = SSreg / SStotal
+R2_prop = 
 
 #get R2 by squaring the correlation 
-R2_cor = cor(df$age, log(df$pow_delta_O,10))^2
+R2_cor = 
 
 #look again at what we had in the lm output: 
 summary(pow.age)
