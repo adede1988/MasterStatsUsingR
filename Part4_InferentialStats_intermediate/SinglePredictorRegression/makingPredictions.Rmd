@@ -78,10 +78,14 @@ b = r*(powSD/ageSD)
 a = powMean - b*ageMean
 
 #add trend line to the plot using geom_abline: 
-ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
+ggplot(df, aes(x = age, 
+               y = log(pow_delta_O,10), 
+               color = dummy)) + 
   geom_point(size = 2) + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
-  geom_abline(intercept = a, slope = b, color = 'red', linewidth = 2)
+  myTheme + brightFil + brightCol + 
+  theme(legend.position = 'none') +
+  geom_abline(intercept = a, slope = b, 
+              color = 'red', linewidth = 2)
 
 
 
