@@ -62,20 +62,7 @@ pow = log(df$pow_delta_O,10)
 #b = r*(SDy/SDx)
 #a = MEANy - b*MEANx
 
-#get key values: 
-ageMean = mean(age)
-powMean = mean(pow)
 
-ageSD = sd(age)
-powSD = sd(pow)
-
-r = cor(age, pow)
-
-#plug into formulas:
-#b = r*(SDy/SDx)
-b = r*(powSD/ageSD)
-#a = MEANy - b*MEANx
-a = powMean - b*ageMean
 
 #add trend line to the plot using geom_abline: 
 ggplot(df, aes(x = age, 
@@ -83,12 +70,7 @@ ggplot(df, aes(x = age,
                color = dummy)) + 
   geom_point(size = 2) + 
   myTheme + brightFil + brightCol + 
-  theme(legend.position = 'none') +
-  geom_abline(intercept = a, slope = b, 
-              color = 'red', linewidth = 2) + 
-  geom_smooth(method = 'lm', se = FALSE, 
-              color = 'green', linewidth = 3, 
-              linetype = 'dashed')
+  theme(legend.position = 'none') 
 
 
 
@@ -101,7 +83,7 @@ ggplot(df, aes(x = age,
 
 #what do we predict for a 4-year-old
 #y' = bx + a
-pred4 = b*48 + a
+pred4 = 
 
 print(paste0('A 4-year-old will most likely have a log(deltaPow) of: ',
              round(pred4,2)))
@@ -119,10 +101,7 @@ df = read.csv(file.path(gitHubPath, 'data',
 df$dummy = as.factor(1) 
 df <- df %>% filter(pow_delta_O < 250, pow_delta_O > 0)
 
-ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
-  geom_point(size = 2) + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
-  geom_abline(slope = b, intercept = a, color = 'red', size = 2) 
+#replot: 
 
 
 ```
@@ -131,34 +110,11 @@ ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) +
 
 ```{r regression adult}
 
-#let's pull out our key variables: 
-age = df$age
-pow = log(df$pow_delta_O,10)
 
-#key formulas: 
-#y' = bx + a
-#b = r*(SDx/SDy)
-#a = MEANy - b*MEANx
 
-#get key values: 
-ageMean = mean(age)
-powMean = mean(pow)
 
-ageSD = sd(age)
-powSD = sd(pow)
 
-r = cor(age, pow)
-
-#plug into formulas:
-bnew = r*(powSD / ageSD)
-anew = powMean - bnew*ageMean
-
-ggplot(df, aes(x = age, y = log(pow_delta_O,10), color = dummy)) + 
-  geom_point(size = 2) + 
-  myTheme + brightFil + brightCol + theme(legend.position = 'none') +
-  geom_abline(slope = b, intercept = a, linetype = 'dashed', 
-              color = 'red', size = 2) +
-  geom_abline(slope = bnew, intercept = anew, color = 'red', size = 2) 
+#replot it
 
 
 ```
