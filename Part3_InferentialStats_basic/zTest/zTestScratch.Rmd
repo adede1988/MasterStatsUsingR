@@ -210,3 +210,38 @@ sampDat %>% ggplot(aes(x=sampMean, group = as.factor(n), color = n)) +
 
 
 ```
+
+## t dist graphs 
+
+```{r t graphs}
+
+dfOverall = data.frame('samples' = dt(seq(-3,20,.1), 50),
+                       't' = seq(-3,20,.1))
+
+dfOverall = dfOverall %>% pivot_longer(cols = c('samples'),
+                                       names_to = 'dist', 
+                                       values_to = 'density')
+
+upper_bound = 2.01
+
+m = 3.62
+
+dfOverall %>% ggplot(aes(y = density, x = t, color = dist)) + 
+  geom_line(linewidth = 2) +   
+  brightCol +  myTheme +
+  geom_vline(xintercept = upper_bound, color = 'green', linewidth = 2, linetype = 'dashed') +
+  geom_vline(xintercept = -upper_bound, color = 'green', linewidth = 2, linetype = 'dashed') +
+  geom_ribbon(data = subset(filter(dfOverall, dist == 'samples'), 
+                            t > upper_bound), 
+              aes(y = density, x = t, ymax = density), 
+              ymin = 0,  fill = "purple", alpha = 1,
+              show.legend = FALSE) +
+  geom_ribbon(data = subset(filter(dfOverall, dist == 'samples'), 
+                            t < -upper_bound), 
+              aes(y = density, x = t, ymax = density), 
+              ymin = 0,  fill = "purple", alpha = 1,
+              show.legend = FALSE) +
+  geom_vline(xintercept = m, color = 'red', linewidth = 2)
+  
+
+```

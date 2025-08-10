@@ -24,11 +24,12 @@ https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-05-21
 
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
-myGitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
 # Load packages
-library(tidyverse) # data manipulation and visualization
+
+library(tidyverse) 
 library(janitor) #helps to rename titles
-library(tidytuesdayR) #package for loading tidy tuesday datasets 
 ```
 
 ## Load Data in three CSVs and use janitor to make names R appropriate
@@ -37,26 +38,26 @@ library(tidytuesdayR) #package for loading tidy tuesday datasets
 
 # Load the data 
 #coastal vs mismanaged waste
-cw <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/coastal-population-vs-mismanaged-plastic.csv")
+cw <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/coastal-population-vs-mismanaged-plastic.csv")
 
 #mismanaged waste vs gdp
-mg <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/per-capita-mismanaged-plastic-waste-vs-gdp-per-capita.csv")
+mg <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/per-capita-mismanaged-plastic-waste-vs-gdp-per-capita.csv")
 
 #total waste vs. gdp
-wg <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/per-capita-plastic-waste-vs-gdp-per-capita.csv")
+wg <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/per-capita-plastic-waste-vs-gdp-per-capita.csv")
 
 # inspect the data 
-head(cw)
-head(mg)
-head(wg)
+
 names(cw)
-cw <- janitor::clean_names(cw)
+cw <- clean_names(cw)
 names(cw)
+
 names(mg)
-mg <- janitor::clean_names(mg)
+mg <- clean_names(mg)
 names(mg)
+
 names(wg)
-wg <- janitor::clean_names(wg)
+wg <- clean_names(wg)
 names(wg)
 
 
@@ -71,13 +72,15 @@ names(cw)
 colnames(cw) <- c('country', 'countryCode', 'year', 'mismanagedTotal',
                   'coastalPop', 'totalPop')
 names(cw)
+
+
 names(mg)
-colnames(mg) <- c('country', 'countryCode', 'year', 'mismanagedPerCap',
-                  'GDPperCap', 'totalPop')
+colnames(mg) <- c()
 names(mg)
+
+
 names(wg)
-colnames(wg) <- c('country', 'countryCode', 'year', 'totWastePerCap',
-                  'gdpPerCap2', 'totalPop')
+colnames(wg) <- c()
 names(wg)
 
 
@@ -99,19 +102,9 @@ dataCount_cw <- cw %>%
 
 #key variable in mismanaged_vs_gdp is per capita mismanaged plastic
 dataCount_mg <- mg %>%
-  select(year, mismanagedPerCap) %>%
-  group_by(year) %>%
-  summarize(naCount = sum(is.na(mismanagedPerCap)),
-    n = n()) %>% 
-  mutate(goodVals = n - naCount)
 
 #key variable in waste_vs_gdp is total per capital plastic waste
 dataCount_wg <- wg %>%
-  select(year, totWastePerCap) %>%
-  group_by(year) %>%
-  summarize(naCount = sum(is.na(totWastePerCap)), 
-    n = n()) %>% 
-  mutate(goodVals = n - naCount)
 
 
 dataCount_cw %>% ggplot(aes(x = year-.5, y = goodVals)) +
@@ -129,8 +122,6 @@ dataCount_cw %>% ggplot(aes(x = year-.5, y = goodVals)) +
 ```{r get rid of NA and select year}
 #down select to remove missing and check that we only have one year
 cw = cw %>% filter(!is.na(mismanagedTotal))
-mg <- mg %>% filter(!is.na(mismanagedPerCap))
-wg <- wg %>% filter(!is.na(totWastePerCap))
 
 #check that there's only one year for each country in each file: 
 countryCounts = cw %>%
@@ -139,17 +130,8 @@ countryCounts = cw %>%
 
 max(countryCounts$n)
 
-countryCounts = mg %>%
-  group_by(country) %>%
-  summarize(n = n())
-
-max(countryCounts$n)
 
 countryCounts = wg %>%
-  group_by(country) %>%
-  summarize(n = n())
-
-max(countryCounts$n)
 
 ```
 
@@ -158,20 +140,10 @@ max(countryCounts$n)
 ```{r merge}
 names(cw)
 names(mg)
-df <- merge(cw, mg, by = "countryCode", suffixes = c("_df1", "_df2"))
-names(df)
-df <- df %>%
-  select(-ends_with("_df2"))
-names(df)
-new_column_names <- gsub("_df1$", "", names(df))
-names(df) <- new_column_names
-names(df)
+df <- merge(
 
-df <- merge(df, wg, by = "countryCode", suffixes = c("_df1", "_df2"))
-df <- df %>%
-  select(-ends_with("_df2"))
-new_column_names <- gsub("_df1$", "", names(df))
-names(df) <- new_column_names
+  
+  
 ```
 
 ## Remove incomplete rows! 
@@ -184,6 +156,6 @@ df <- df %>% drop_na()
 
 ## save our cleaned data frame for later use! 
 ```{r save the clean .csv}
-write.csv(df, file.path(myGitHubPath, 'data', 'plasticWaste.csv'))
+write.csv(df, file.path(gitHubPath, 'data', 'plasticWaste.csv'))
 
 ```
