@@ -19,11 +19,11 @@ editor_options:
 # Set rendering parameters
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-gitHubPath = 'C:\\Users\\Adam\\Documents\\GitHub\\MasterStatsUsingR\\'
+gitHubPath <- file.path(path.expand("~"), "GitHub", 
+                        "MasterStatsUsingR")
 
 library(tidyverse) # data manipulation and visualization
-source(paste0(gitHubPath, 'courseTheme.R'))
-library(pracma)
+source(file.path(gitHubPath, 'courseTheme.R'))
 
 ```
 
@@ -31,7 +31,8 @@ library(pracma)
 
 ```{r EEG}
 
-df = read.csv(paste0(gitHubPath, '\\data\\restingEEG.csv'))
+df = read.csv(file.path(gitHubPath, 'data',
+                          'restingEEG.csv'))
 #dummy for plotting
 df$dummy = as.factor(1) 
 #outlier threshold
