@@ -3,7 +3,7 @@ title: 'Wilcoxon Rank Sum'
 Section: 'Wilcoxon Test'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
-Course_URL: "..." 
+Course_URL: "https://www.udemy.com/course/statsr_ad" 
 html_document:
     toc: yes
     toc_float: yes

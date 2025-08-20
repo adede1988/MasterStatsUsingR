@@ -3,7 +3,7 @@ title: 'Cutting Missing Rows'
 Section: 'Tidying Data'
 Author: "Adam Dede"
 Course: "Data to Decisions: Master Statistics with R and tidyverse"
-Course_URL: "..." 
+Course_URL: "https://www.udemy.com/course/statsr_ad" 
 output:
   html_document:
     toc: yes
