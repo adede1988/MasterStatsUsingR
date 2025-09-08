@@ -77,13 +77,13 @@ results = data.frame(year = allYears,
                      count = allYears,
                      naCount = allYears)
 
-for(ii in 1:length(year)){
+for(ii in 1:length(allYears)){
   curDat = cw[cw$year == allYears[ii],]
   results$count[ii] = length(curDat$year)
   results$naCount[ii] = sum(is.na(curDat$mismanagedTotal))
 }
 
-results$goodVals = results$n - results$naCount
+results$goodVals = results$count - results$naCount
 
 #The tidyverse provides a simpler way to do it: 
 results2 <- cw %>%
